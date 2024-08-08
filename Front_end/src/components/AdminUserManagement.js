@@ -1,8 +1,7 @@
 import React from 'react';
-import styles from './AdminUserManagement.module.css'; // 假设有相应的CSS模块
+import styles from './styles/AdminUserManagement.module.css';
 
 const AdminUserManagement = () => {
-    // 模拟处理函数，实际开发中可替换为具体逻辑
     const handleActionClick = (message) => {
         alert(message);
     };

@@ -3,7 +3,7 @@
     font-family: 'Helvetica Neue', Arial, sans-serif;
     background-color: #ffffff;
     color: #333;
-    max-width: 800px;
+    width: 80%;
     margin: 20px auto;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -27,59 +27,57 @@
     background-color: #e2e6ea;
 }
 
-.actionButton {
-    background-color: #0275d8;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 100%;
-    /* Full width within the feature block */
-    transition: background-color 0.3s ease;
+.feature>div:first-child {
+    display: flex;
+    justify-content: space-between;
 }
 
-.actionButton:hover {
-    background-color: #025aa5;
+.feature>div>div>button:first-child {
+    background-color: #eedc15;
+    color: #000;
 }
 
-.addButton {
-    background-color: #0275d8;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    margin-top: 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    display: block;
-    width: auto;
-    text-align: center;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    margin-left: auto;
-    margin-right: auto;
+td>button:first-child {
+    background-color: #eedc15;
+    color: #000;
 }
 
-.addButton:hover {
-    background-color: #025aa5;
-    transform: scale(1.05);
+td>button:last-child {
+    background-color: #cc6c6a;
+    color: #fff;
+}
+
+
+.feature>div>div>button,
+td>button {
+    text-decoration: none;
+    margin: 0 0.5em;
+    font-family: 'NunitoSans', sans-serif;
+    font-weight: bold;
+    font-weight: normal;
+    color: #fff;
+    background-color: #4d48a4;
+    border-color: #4d48a4;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 3px 10px 3px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+.feature>div>div>button:hover {
+    background-color: #f7fc00;
+    color: #000;
+}
+
+.selectedRow {
+    background-color: #e3dfb3 !important;
 }
 
 .container {
     font-family: 'Arial', sans-serif;
     color: #333;
-    margin: 20px;
-}
-
-.actionButton {
-    padding: 10px 20px;
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    margin: 20px auto;
 }
 
 .teamTable {

@@ -5,19 +5,39 @@ body {
     background-color: #fff;
 }
 
+.navbarOutter {
+    height: 115px;
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.rightDiv {
+    display: flex;
+    align-items: center;
+}
+
+.leftDiv {
+    display: flex;
+    align-items: center;
+}
+
+.leftDiv>button {
+    background-color: #4d48a4;
+    color: #fff !important;
+    border: none;
+}
+
 .navbar {
-    background-color: #f4f4f4;
     padding: 10px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* 分布元素 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
-    height: 50px;
-    /* 根据实际徽标大小调整 */
+    margin: auto;
+    height: 100px;
     margin-right: 20px;
 }
 
@@ -33,21 +53,35 @@ body {
 }
 
 .navList li {
-    padding: 10px 15px;
+    padding: 10px 10px;
     color: #333;
     font-size: 16px;
     cursor: pointer;
 }
 
-.navList li:hover {
-    background-color: #e2e2e2;
-    border-radius: 4px;
+.navList li>a,
+.leftDiv>button {
+    text-decoration: none;
+    font-family: 'NunitoSans', sans-serif;
+    font-weight: bold;
+    font-weight: normal;
+    color: #2d383c;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 10px 5px;
+    border-radius: 15px;
+    text-transform: uppercase;
+    transition: all 0.5s;
 }
 
-.navList li a {
-    text-decoration: none;
-    color: inherit;
-    /* 保持链接颜色一致 */
+.navList li:first-child>a {
+    background-color: #f7fc00;
+}
+
+
+
+.navList li>a:hover {
+    background-color: #f7fc00;
 }
 
 .dropdownContent {

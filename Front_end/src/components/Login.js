@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import style from './styles/Login.module.css'
 
 function Login({ setToken }) {
     const [username, setUsername] = useState('');
@@ -19,11 +20,13 @@ function Login({ setToken }) {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
-            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button onClick={login}>Login</button>
+        <div className={style.login_container}>
+            <div className={style.login_form}>
+                <h2>Login</h2>
+                <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <button onClick={login}>Login</button>
+            </div>
         </div>
     );
 }

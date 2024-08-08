@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import styles from './Membermanagement.module.css';
+import styles from './styles/Membermanagement.module.css';
 import Papa from 'papaparse'; // 引入Papa Parse库来解析CSV文件
 
 function TeamMemberList() {
