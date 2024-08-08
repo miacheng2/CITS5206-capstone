@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
 
+const membershipCategories = [
+    'Senior sailing membership',
+    'Senior crew membership',
+    'Junior sailing membership',
+    'Family membership',
+    'Non sailing membership',
+    'Provisional Membership',
+    'Pensioner/Student',
+];
+
 function TeamMemberList() {
     const [members, setMembers] = useState([]);
     const [name, setName] = useState('');
@@ -71,7 +81,12 @@ function TeamMemberList() {
                 <h2>Add Team Member</h2>
                 <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
                 <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <input type="text" placeholder="Membership Category" value={membershipCategory} onChange={(e) => setMembershipCategory(e.target.value)} />
+                <select value={membershipCategory} onChange={(e) => setMembershipCategory(e.target.value)}>
+                    <option value="">Select Membership Category</option>
+                    {membershipCategories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                    ))}
+                </select>
                 <button onClick={addMember}>Add</button>
                 {message && <p style={{ color: 'green' }}>{message}</p>}
                 {error && <p style={{ color: 'red' }}>{error}</p>}
