@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
+import styles from './Membermanagement.module.css';
+import Papa from 'papaparse'; // 引入Papa Parse库来解析CSV文件
 
 function TeamMemberList() {
     const [members, setMembers] = useState([]);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [membershipCategory, setMembershipCategory] = useState('');
+    const [currentMember, setCurrentMember] = useState({ id: null, name: '', email: '', membershipCategory: '' });
+    const [editMode, setEditMode] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
@@ -13,68 +14,114 @@ function TeamMemberList() {
         fetchMembers();
     }, []);
 
-    const fetchMembers = () => {
-        api.get('team-members/')
-            .then(response => {
-                setMembers(response.data);
-            })
-            .catch(error => {
-                console.error("There was an error fetching the team members!", error);
-            });
+    const fetchMembers = async () => {
+        try {
+            const response = await api.get('team-members/');
+            setMembers(response.data);
+        } catch (error) {
+            console.error("Error fetching the team members:", error);
+            setError('Failed to fetch team members');
+        }
     };
 
-    const addMember = () => {
-        setMessage('');
-        setError('');
-        api.post('team-members/', {
-            name,
-            email,
-            membership_category: membershipCategory
-        })
-        .then(response => {
-            setMembers([...members, response.data]);
-            setName('');
-            setEmail('');
-            setMembershipCategory('');
-            setMessage('Team member added successfully');
-        })
-        .catch(error => {
-            console.error('Error:', error.response ? error.response.data : error.message);
-            setError('There was an error adding the team member');
-        });
+    const handleMemberChange = (event) => {
+        const { name, value } = event.target;
+        setCurrentMember(prevMember => ({
+            ...prevMember,
+            [name]: value
+        }));
     };
 
-    const deleteMember = (id) => {
-        api.delete(`team-members/${id}/`)
-        .then(response => {
+    const createOrUpdateMember = async () => {
+        if (editMode) {
+            try {
+                const response = await api.put(`team-members/${currentMember.id}/`, currentMember);
+                const updatedMembers = members.map(member => member.id === currentMember.id ? response.data : member);
+                setMembers(updatedMembers);
+                setMessage('Member updated successfully');
+            } catch (error) {
+                console.error('Error updating member:', error);
+                setError('Failed to update member');
+            }
+        } else {
+            try {
+                const response = await api.post('team-members/', currentMember);
+                setMembers([...members, response.data]);
+                setMessage('Member created successfully');
+            } catch (error) {
+                console.error('Error creating member:', error);
+                setError('Failed to create member');
+            }
+        }
+        resetForm();
+    };
+
+    const deleteMember = async (id) => {
+        try {
+            await api.delete(`team-members/${id}/`);
             setMembers(members.filter(member => member.id !== id));
-            setMessage('Team member deleted successfully');
-        })
-        .catch(error => {
-            console.error('Error:', error.response ? error.response.data : error.message);
-            setError('There was an error deleting the team member');
+            setMessage('Member deleted successfully');
+        } catch (error) {
+            console.error('Error deleting member:', error);
+            setError('Failed to delete member');
+        }
+    };
+
+    const editMember = (member) => {
+        setEditMode(true);
+        setCurrentMember({ ...member });
+    };
+
+    const viewMember = (member) => {
+        alert(`Name: ${member.name}\nEmail: ${member.email}\nCategory: ${member.membershipCategory}`);
+    };
+
+    const resetForm = () => {
+        setCurrentMember({ id: null, name: '', email: '', membershipCategory: '' });
+        setEditMode(false);
+        setError('');
+        setMessage('');
+    };
+
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        Papa.parse(file, {
+            header: true,
+            complete: function (results) {
+                results.data.forEach(member => {
+                    api.post('team-members/', member).then(response => {
+                        setMembers(prevMembers => [...prevMembers, response.data]);
+                    }).catch(error => {
+                        console.error('Error importing member:', error);
+                        setError('Failed to import members');
+                    });
+                });
+            }
         });
     };
 
     return (
-        <div>
-            <h1>Team Members</h1>
+        <div className={styles.teamMemberList}>
+            <h1>Member Management</h1>
             <ul>
                 {members.map(member => (
                     <li key={member.id}>
-                        {member.name} ({member.email}) - {member.membership_category}
+                        {member.name} ({member.email}) - {member.membershipCategory}
+                        <button onClick={() => editMember(member)}>Edit</button>
                         <button onClick={() => deleteMember(member.id)}>Delete</button>
+                        <button onClick={() => viewMember(member)}>View</button>
                     </li>
                 ))}
             </ul>
-            <div>
-                <h2>Add Team Member</h2>
-                <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-                <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <input type="text" placeholder="Membership Category" value={membershipCategory} onChange={(e) => setMembershipCategory(e.target.value)} />
-                <button onClick={addMember}>Add</button>
-                {message && <p style={{ color: 'green' }}>{message}</p>}
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+            <div className={styles.form}>
+                <h2>{editMode ? 'Edit' : 'Create'} Team Member</h2>
+                <input name="name" type="text" placeholder="Name" value={currentMember.name} onChange={handleMemberChange} />
+                <input name="email" type="email" placeholder="Email" value={currentMember.email} onChange={handleMemberChange} />
+                <input name="membershipCategory" type="text" placeholder="Membership Category" value={currentMember.membershipCategory} onChange={handleMemberChange} />
+                <button onClick={createOrUpdateMember}>{editMode ? 'Update' : 'Create'}</button>
+                <input type="file" onChange={handleFileUpload} />
+                {message && <p className={styles.message + ' ' + (error ? styles.error : styles.success)}>{message || error}</p>}
+                {editMode && <button onClick={resetForm}>Cancel Edit</button>}
             </div>
         </div>
     );
