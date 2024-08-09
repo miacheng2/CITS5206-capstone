@@ -1,4 +1,4 @@
-# CITS5206 Group Project -- NYC Volunteer Management System
+# CITS5206 Group Project -- Group Number-17 -- Project 4 -- NYC Volunteer Management System
 
 ## Group Member Information Table
 
@@ -13,7 +13,7 @@
 
 ## Overview
 
-The NYC Volunteer Management System is designed to streamline the management of volunteers across various activities and events. This system facilitates the management of user roles, team coordination, activity scheduling, and points management, enhancing the efficiency and effectiveness of volunteer administration.
+The Nedland Yacht Club (NYC) Volunteer Management System is designed to streamline the management of volunteers across various activities and events. This system facilitates the management of user roles, team coordination, activity scheduling, and points management, enhancing the efficiency and effectiveness of volunteer administration.
 
 ## System Roles
 
