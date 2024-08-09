@@ -105,19 +105,22 @@ The NYC Volunteer Management System is designed to streamline the management of 
 To set up the NYC Volunteer Management System locally:
 
 ```bash
-# Clone the repository
+# Step 1:Clone the repository
 git clone https://github.com/miacheng2/CITS5206-capstone.git
 
-# Navigate to the project directory
+# Step 2:Navigate to the project directory
 cd CITS5206-capstone/
 
-# Install dependencies
-npm install
+# Step 3:Create a virtual environment in the project directory
+python -m venv venv
 
-# Run the application
+# Step 4: Install Python Dependencies
+pip install -r requirements.txt
+
+# Step 5:Run the application
 npm start
 
-# Run the backend
+# Step 6:Run the backend
 python manage.py runserver
 ```
 ## Architecture of the application
