@@ -4,12 +4,12 @@
 
 | UWA ID   | Student name    | Github user name | work allocated
 |----------|-----------------|------------------|-----------------------------------------------------------------
-| 23927347 | Nanxi Rao       |  flappyfishhh    |Backend of Member Management,Work Team Management,User Management
-| 23740033 | Zhengyuan Zhang | Ivy(Zhengyuan)   |Both back end and front end of Event,Volunteer Point Management,Reporting
-| 24061397 | Xia Cheng       |   miacheng2      |Frontend of Member Management,Work Team Management,User Management
-| 23813666 | Brandon Ge      |    brand         |Backend of Member Management,Work Team Management,User Management
-| 23806063 | Yuxiao Shi      |   Rita2023       |Both back end and front end of Event,Volunteer Point Management,Reporting
-| 23804552 | Ninu Latheesh   |    Ninu1         |Both back end and front end of Event,Volunteer Point Management,Reporting
+| 23927347 | Nanxi Rao       |  flappyfishhh    |Back-end of Member Management,Work Team Management,User Management
+| 23740033 | Zhengyuan Zhang | Ivy(Zhengyuan)   |Both back-end and front-end of Event,Volunteer Point Management,Reporting
+| 24061397 | Xia Cheng       |   miacheng2      |Front-end of Member Management,Work Team Management,User Management
+| 23813666 | Brandon Ge      |    brand         |Back-end of Member Management,Work Team Management,User Management
+| 23806063 | Yuxiao Shi      |   Rita2023       |Both back-end and front-end of Event,Volunteer Point Management,Reporting
+| 23804552 | Ninu Latheesh   |    Ninu1         |Both back-end and front-end of Event,Volunteer Point Management,Reporting
 
 ## Overview
 
@@ -78,7 +78,7 @@ The NYC Volunteer Management System is designed to streamline the management of 
 - **Framework**: Django
 - Provides a robust backend solution for complex web applications.
 
-## Data Model(This part need to be updated after we got the volunteer form template.)
+## Data Model(This part need to be updated after we get the volunteer form template.)
 
 ### Users
 
@@ -122,6 +122,7 @@ python manage.py runserver
 ```
 ## Architecture of the application
 
+```
 CITS5206-capstone/
 ├── Front_end/
 │   ├── node_modules/              # Node.js packages
@@ -170,3 +171,4 @@ CITS5206-capstone/
 ├── package-lock.json              # Locked versions of each package
 ├── package.json                   # Project metadata and dependencies
 └── README.md                      # Project README file
+```
