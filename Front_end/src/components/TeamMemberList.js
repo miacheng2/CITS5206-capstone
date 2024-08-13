@@ -3,6 +3,16 @@ import api from '../api';
 import styles from './styles/Membermanagement.module.css';
 import Papa from 'papaparse';
 
+const membershipCategories = [
+    'Senior sailing membership',
+    'Senior crew membership',
+    'Junior sailing membership',
+    'Family membership',
+    'Non sailing membership',
+    'Provisional Membership',
+    'Pensioner/Student',
+];
+
 function TeamMemberList() {
     const [members, setMembers] = useState([]);
     const [currentMember, setCurrentMember] = useState({ id: null, name: '', email: '', membershipCategory: '' });

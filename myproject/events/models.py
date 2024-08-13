@@ -1,9 +1,27 @@
 from django.db import models
 
 class TeamMember(models.Model):
+    SENIOR_SAILING = 'Senior sailing membership'
+    SENIOR_CREW = 'Senior crew membership'
+    JUNIOR_SAILING = 'Junior sailing membership'
+    FAMILY = 'Family membership'
+    NON_SAILING = 'Non sailing membership'
+    PROVISIONAL = 'Provisional Membership'
+    PENSIONER_STUDENT = 'Pensioner/Student'
+    
+    MEMBERSHIP_CATEGORY_CHOICES = [
+        (SENIOR_SAILING, 'Senior sailing membership – A senior sailor is any member over the age of 18 with full member privileges'),
+        (SENIOR_CREW, 'Senior crew membership – A senior crew is any member over the age of 18 but does not own a boat within the club'),
+        (JUNIOR_SAILING, 'Junior sailing membership – Any sailing member under the age of 18'),
+        (FAMILY, 'Family membership – This membership is for families consisting of two adult members over the age of 18 with dependents under the age of 18'),
+        (NON_SAILING, 'Non sailing membership – for members that want to be part of the club that do not sail a boat'),
+        (PROVISIONAL, 'Provisional Membership – A person who is a full member of a kindred water sports club'),
+        (PENSIONER_STUDENT, 'Pensioner/Student – (see concession information below)'),
+    ]
+    
     name = models.CharField(max_length=100)
     email = models.EmailField()
-    membership_category = models.CharField(max_length=50)
+    membership_category = models.CharField(max_length=50, choices=MEMBERSHIP_CATEGORY_CHOICES)
 
 class Event(models.Model):
     EVENT_TYPE_CHOICES = (
