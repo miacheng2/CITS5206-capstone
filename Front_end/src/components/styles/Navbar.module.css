@@ -1,0 +1,105 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+}
+
+.navbarOutter {
+    height: 115px;
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.rightDiv {
+    display: flex;
+    align-items: center;
+}
+
+.leftDiv {
+    display: flex;
+    align-items: center;
+}
+
+.leftDiv>button {
+    background-color: #4d48a4;
+    color: #fff !important;
+    border: none;
+}
+
+.navbar {
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    margin: auto;
+    height: 100px;
+    margin-right: 20px;
+}
+
+.navList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: space-evenly;
+    /* 菜单项平均分布 */
+}
+
+.navList li {
+    padding: 10px 10px;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.navList li>a,
+.leftDiv>button {
+    text-decoration: none;
+    font-family: 'NunitoSans', sans-serif;
+    font-weight: bold;
+    font-weight: normal;
+    color: #2d383c;
+    font-size: 14px;
+    line-height: 20px;
+    padding: 8px 10px 5px;
+    border-radius: 15px;
+    text-transform: uppercase;
+    transition: all 0.5s;
+}
+
+.navList li:first-child>a {
+    background-color: #f7fc00;
+}
+
+
+
+.navList li>a:hover {
+    background-color: #f7fc00;
+}
+
+.dropdownContent {
+    display: block;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+.dropdownItem {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdownItem:hover {
+    background-color: #f1f1f1;
+}

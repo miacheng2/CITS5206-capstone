@@ -1,0 +1,61 @@
+.container {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    width: 60%;
+    margin: 40px auto;
+    font-family: 'Arial', sans-serif;
+    /* 更专业的字体 */
+}
+
+.feature {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.button {
+    background-color: #4C49A2;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    width: auto;
+    /* 或许允许按钮大小根据内容自动调整 */
+    display: inline-block;
+    /* 改进按钮的布局 */
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+    /* 平滑的颜色过渡 */
+}
+
+.button:hover {
+    background-color: #3a3784;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* 增加表单元素之间的间距 */
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    /* 输入框边框颜色过渡 */
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #4C49A2;
+    /* 输入焦点时边框颜色 */
+}
