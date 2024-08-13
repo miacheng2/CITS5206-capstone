@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import api from '../api';
 import styles from './styles/Membermanagement.module.css';
-import Papa from 'papaparse'; // 引入Papa Parse库来解析CSV文件
+import Papa from 'papaparse';
 
 function TeamMemberList() {
     const [members, setMembers] = useState([]);
@@ -9,6 +9,8 @@ function TeamMemberList() {
     const [editMode, setEditMode] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+
+    const fileInputRef = useRef(null); // 创建引用
 
     useEffect(() => {
         fetchMembers();
@@ -100,9 +102,13 @@ function TeamMemberList() {
         });
     };
 
+    const handleUploadClick = () => {
+        fileInputRef.current.click(); // 触发 file input 的点击事件
+    };
+
     return (
         <div className={styles.teamMemberList}>
-            <h1>Member Management</h1>
+            <h1>NYC Member Management</h1>
             <ul>
                 {members.map(member => (
                     <li key={member.id}>
@@ -119,7 +125,8 @@ function TeamMemberList() {
                 <input name="email" type="email" placeholder="Email" value={currentMember.email} onChange={handleMemberChange} />
                 <input name="membershipCategory" type="text" placeholder="Membership Category" value={currentMember.membershipCategory} onChange={handleMemberChange} />
                 <button onClick={createOrUpdateMember}>{editMode ? 'Update' : 'Create'}</button>
-                <input type="file" onChange={handleFileUpload} />
+                <input id="csvUpload" type="file" onChange={handleFileUpload} ref={fileInputRef} style={{ display: 'none' }} />
+                <button className={styles.csvUploadBtn} onClick={handleUploadClick}>Upload CSV</button>
                 {message && <p className={styles.message + ' ' + (error ? styles.error : styles.success)}>{message || error}</p>}
                 {editMode && <button onClick={resetForm}>Cancel Edit</button>}
             </div>
