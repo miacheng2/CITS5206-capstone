@@ -117,11 +117,14 @@ python -m venv venv
 # Step 4: Install Python Dependencies
 pip install -r requirements.txt
 
-# Step 5:Run the application
+# Step 5:Run the backend/ Navigate to myproject directory
+cd myproject
+python manage.py runserver
+
+# Step 6:Run the frontend/open second terminal and Navigate to the Front_end/ directory.
+cd Front_end
 npm start
 
-# Step 6:Run the backend
-python manage.py runserver
 ```
 ## Architecture of the application
 
