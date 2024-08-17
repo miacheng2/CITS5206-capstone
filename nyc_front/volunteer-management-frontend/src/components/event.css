@@ -1,0 +1,129 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color:#010634;
+    color: white;
+}
+
+.navbar .logo {
+    width: 50px;
+    margin-right: 20px;
+}
+
+.navbar h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+  }
+  
+  .nav-links li {
+    padding: 5px 10px;
+  }
+  
+  .nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .nav-links a:hover {
+    text-decoration: underline;
+  }
+
+.event-section {
+    position: relative;
+    background-image: url('nycimg5.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 400px;
+}
+
+.event-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.text-container {
+    color: white;
+    text-align: center;
+}
+
+.text-container h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.text-container p {
+    font-size: 18px;
+    margin: 0;
+}
+
+/* Cards Section */
+.cards-section {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px 50px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    text-align: center;
+    width: 28%; 
+    margin: 10px;
+    height: auto;
+}
+
+.card img {
+    width: 100%;
+    height: 150px; 
+    object-fit: cover;
+    border-radius: 10px 10px 0 0;
+}
+
+.card h3 {
+    margin: 10px 0;
+    font-size: 1.1em;
+}
+
+.learn-more {
+    background-color: #010634;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    margin: 10px 0 20px 0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.learn-more:hover {
+    background-color: #025aa5;
+}
