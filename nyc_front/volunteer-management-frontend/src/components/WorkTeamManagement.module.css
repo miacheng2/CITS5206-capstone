@@ -1,0 +1,145 @@
+
+.navbar {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background-color: #010634;
+    color: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.logo {
+    width: 50px;
+    margin-right: 20px;
+}
+
+.navLinks {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.navLinks li {
+    padding: 5px 10px;
+}
+
+.navLinks a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navLinks a:hover {
+    text-decoration: underline;
+}
+
+
+/* Container Styles */
+.container {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    width: 90%;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    margin: 100px auto;
+}
+
+.container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+.feature {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.feature:hover {
+    background-color: #e2e6ea;
+}
+
+.feature>div:first-child {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* Button Styles */
+.feature>div>div>button:first-child {
+    background-color: #eedc15;
+    color: #000;
+}
+
+td>button:first-child {
+    background-color: #eedc15;
+    color: #000;
+}
+
+td>button:last-child {
+    background-color: #cc6c6a;
+    color: #fff;
+}
+
+.feature>div>div>button,
+td>button {
+    text-decoration: none;
+    margin: 0 0.5em;
+    font-family: 'NunitoSans', sans-serif;
+    font-weight: bold;
+    color: #fff;
+    background-color: #4d48a4;
+    border-color: #4d48a4;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 3px 10px 3px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+.feature>div>div>button:hover {
+    background-color: #f7fc00;
+    color: #000;
+}
+
+/* Selected Row Highlight */
+.selectedRow {
+    background-color: #e3dfb3 !important;
+}
+
+/* Table Styles */
+.teamTable {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.teamTable th,
+.teamTable td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.teamTable th {
+    background-color: #4d48a4; 
+    color: white;
+}
+
+.teamTable td {
+    background-color: #fff;
+}
+
+.teamTable tr:last-child td {
+    border-bottom: none;
+}
