@@ -1,0 +1,101 @@
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #010634;
+  color: white;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.navbar .logo {
+  width: 50px;
+  margin-right: 20px;
+}
+
+.navbar h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.nav-links li {
+  padding: 5px 10px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+.add-volunteer-container {
+  padding: 100px 20px 20px; /* Adds padding to the top to avoid overlap with the navbar */
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Search Bar Styles */
+.search-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: calc(100% - 20px);
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+/* Table Styles */
+.volunteer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.volunteer-table th, .volunteer-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.volunteer-table th {
+  background-color: #6b0c59;
+  color: white;
+}
+
+.volunteer-table select,
+.volunteer-table input[type="number"], 
+.volunteer-table input[type="text"], 
+.volunteer-table input[type="date"] {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.volunteer-table button {
+  background-color: #258178;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.volunteer-table button:hover {
+  background-color: #45a049;
+}

@@ -1,0 +1,82 @@
+
+.login-container {
+    font-family: 'Arial', sans-serif;
+    background: url('nycimg8.jpg') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+ 
+  .login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;  
+  }
+  
+  .login-card {
+    background: rgba(255, 255, 255, 0.85); 
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+  }
+  
+  .login-card h2 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+  }
+  
+  .input-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+  }
+  
+  .input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .login-btn {
+    background: #ff6e7f;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .login-btn:hover {
+    background: #ff4655;
+  }
+  
+  .signup-text {
+    margin-top: 20px;
+    color: #666;
+  }
+  
+  .signup-text a {
+    color: #ff6e7f;
+    text-decoration: none;
+  }
+  
+  .signup-text a:hover {
+    text-decoration: underline;
+  }
+  

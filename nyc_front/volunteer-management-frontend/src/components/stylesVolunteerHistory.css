@@ -1,0 +1,93 @@
+
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #010634;
+  color: white;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.logo {
+  height: 50px;
+  margin-right: 20px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.nav-links li {
+  padding: 5px 10px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Container for Volunteer History */
+.volunteer-history-container {
+  padding: 20px;
+  margin-top: 100px; /* Ensure it is below the navbar */
+}
+
+/* Search Bar Styling */
+.search-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Table Styling */
+.volunteer-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.volunteer-history-table th, 
+.volunteer-history-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.volunteer-history-table th {
+  background-color: #6b0c59;
+  color: white;
+}
+
+.volunteer-history-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Download Button Styling */
+.download-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #010634;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.download-btn:hover {
+  background-color: #8b2ec1;
+}
