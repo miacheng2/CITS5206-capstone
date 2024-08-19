@@ -7,6 +7,8 @@ import EventList from './components/EventList';
 import VolunteerPointsList from './components/VolunteerPointsList';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
+import Home from './components/Home';
+
 import './assets/fonts/fonts.css';
 
 
@@ -30,7 +32,8 @@ function App() {
         <Router>
             <Navbar setToken={setToken} />
             <Routes>
-                <Route path="/" element={<TeamMemberList />} />
+                <Route path="/" element={<Home setToken={setToken} />} />
+
                 <Route path="/memberManagement" element={<TeamMemberList />} />
                 <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
                 <Route path="/AdminUserManagement" element={<AdminUserManagement />} />

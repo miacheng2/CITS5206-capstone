@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
-from events.views import TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView
+from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,
+CreateAdminUserView,RegisterView,GetProfileView ) 
 
 router = DefaultRouter()
 router.register(r'team-members', TeamMemberViewSet)
@@ -15,5 +16,8 @@ urlpatterns = [
     path('api/token-auth/', obtain_auth_token),
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('api/update-profile/', UpdateProfileView.as_view(), name='update-profile'),
+    path('api/create-admin/', CreateAdminUserView.as_view(), name='create-admin'),
+    path('api/register/', RegisterView.as_view(), name='register'),
+    path('api/get-profile/', GetProfileView.as_view(), name='get-profile'),
 ]
 

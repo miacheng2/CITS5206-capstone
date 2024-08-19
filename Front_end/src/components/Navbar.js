@@ -1,37 +1,25 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 import styles from './styles/Navbar.module.css';
 
-
 function Navbar({ setToken }) {
 
-    const [showDropdown, setShowDropdown] = useState(false);
-
-
-    const handleMouseEnter = () => {
-        setShowDropdown(true);
-    };
-
-    const handleMouseLeave = () => {
-        setShowDropdown(false);
-    };
-
+  
     return (
         <div className={styles.navbarOutter}>
             <div className={styles.rightDiv}>
                 <img src="/pic/NYC.jpg" className={styles.logo} alt="Yacht Club Logo" />
-                <h2>(08) 9386 5496</h2>
+                <h2>Nedlands Yacht Club</h2>
             </div>
             <nav className={styles.navbar}>
-
                 <ul className={styles.navList}>
-                    <li><Link className={styles.navLink} to="/"><b>Home</b></Link></li>
-                    <li><Link className={styles.navLink} to="/memberManagement"><b>Member management</b></Link></li>
-                    <li><Link className={styles.dropdownItem} to="/WorkTeamManagement"><b>Team Member Management</b></Link></li>
-                    <li><Link className={styles.navLink} to="/AdminUserManagement"><b>Admin User Management</b></Link></li>
-                    <li><Link className={styles.navLink} to="/volunteer-points"><b>Volunteer Points</b></Link></li>
-                    <li><Link className={styles.navLink} to="/events"><b>Events</b></Link></li>
+                    <li><NavLink exact to="/" activeClassName={styles.active}><b>Home</b></NavLink></li>
+                    <li><NavLink to="/memberManagement" activeClassName={styles.active}><b>Member Management</b></NavLink></li>
+                    <li><NavLink to="/WorkTeamManagement" activeClassName={styles.active}><b>Team Member Management</b></NavLink></li>
+                    <li><NavLink to="/AdminUserManagement" activeClassName={styles.active}><b>Admin User Management</b></NavLink></li>
+                    <li><NavLink to="/volunteer-points" activeClassName={styles.active}><b>Volunteer Points</b></NavLink></li>
+                    <li><NavLink to="/events" activeClassName={styles.active}><b>Events</b></NavLink></li>
                 </ul>
             </nav>
             <div className={styles.leftDiv}>

@@ -6,15 +6,32 @@ body {
 }
 
 .navbarOutter {
-    height: 115px;
+    height: 70px; /* 固定高度 */
     display: flex;
     width: 100%;
-    justify-content: space-evenly;
+    justify-content: space-between;
+    background-color: #00004D;
+    align-items: center;
+    padding: 0 20px;
+    position: relative; /* 确保它在布局中的位置是相对的 */
 }
 
 .rightDiv {
     display: flex;
-    align-items: center;
+    align-items: center; /* 确保 logo 和标题垂直居中对齐 */
+}
+
+.rightDiv h1 {
+    font-size: 24px;
+    color: white; /* 标题颜色 */
+    margin: 0;
+    font-weight: bold;
+}
+
+.logo {
+    height: 50px; /* 调整 logo 大小 */
+    margin-right: 15px; /* 确保 logo 和标题之间有足够的间距 */
+    vertical-align: middle; /* 确保 logo 在容器中居中 */
 }
 
 .leftDiv {
@@ -24,8 +41,18 @@ body {
 
 .leftDiv>button {
     background-color: #4d48a4;
-    color: #fff !important;
+    color: white !important;
     border: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.leftDiv>button:hover {
+    background-color: #FFD700;
+    color: #00004D !important;
 }
 
 .navbar {
@@ -33,12 +60,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-.logo {
-    margin: auto;
-    height: 100px;
-    margin-right: 20px;
+    background-color: #00004D; /* 深蓝色背景 */
+    color: white;
+    height: 50px; /* 根据需要调整高度 */
 }
 
 .navList {
@@ -47,9 +71,7 @@ body {
     margin: 0;
     display: flex;
     align-items: center;
-    flex-grow: 1;
-    justify-content: space-evenly;
-    /* 菜单项平均分布 */
+    gap: 20px; /* 增加导航链接之间的间距 */
 }
 
 .navList li {
@@ -61,27 +83,18 @@ body {
 
 .navList li>a,
 .leftDiv>button {
-    text-decoration: none;
-    font-family: 'NunitoSans', sans-serif;
+    color: white; /* 将字体颜色改为白色 */
+    font-size: 16px;
     font-weight: bold;
-    font-weight: normal;
-    color: #2d383c;
-    font-size: 14px;
-    line-height: 20px;
-    padding: 8px 10px 5px;
-    border-radius: 15px;
-    text-transform: uppercase;
-    transition: all 0.5s;
-}
-
-.navList li:first-child>a {
-    background-color: #f7fc00;
+    text-decoration: none; /* 移除下划线 */
 }
 
 
 
 .navList li>a:hover {
     background-color: #f7fc00;
+    color: #00004D;
+    text-decoration: none; /* 移除悬停时的下划线 */
 }
 
 .dropdownContent {
@@ -91,6 +104,11 @@ body {
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
+}
+/* Navbar.module.css */
+.active {
+    background-color: #f7fc00;
+    color: #00004D;
 }
 
 .dropdownItem {
