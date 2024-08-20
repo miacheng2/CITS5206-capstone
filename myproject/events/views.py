@@ -115,29 +115,39 @@ class EventViewSet(viewsets.ModelViewSet):
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+from django.contrib.auth.models import User
 
 class UpdateProfileView(APIView):
-    permission_classes = [AllowAny]  # 暂时允许任何用户访问
+    permission_classes = [AllowAny]
 
     def put(self, request):
-        # 假设你有某种方式能够标识用户（如通过提交的用户名）
-        username = request.data.get('username')
-        email = request.data.get('email')
-
         try:
-            user = User.objects.get(username=username)
-            user.email = email
+            user = User.objects.get(username=request.data.get('username'))
+            new_username = request.data.get('new_username')
+            new_email = request.data.get('email')
+
+            if not new_username:
+                return Response({"detail": "New username is required"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            if not new_email:
+                return Response({"detail": "New email is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+            user.username = new_username
+            user.email = new_email
             user.save()
 
-            return Response({'detail': 'Profile updated successfully'}, status=status.HTTP_200_OK)
-        except User.DoesNotExist:
-            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Profile updated successfully"}, status=status.HTTP_200_OK)
 
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        
 class ChangePasswordView(UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     model = User
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_object(self, queryset=None):
         return self.request.user

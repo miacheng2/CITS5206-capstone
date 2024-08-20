@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,
-CreateAdminUserView,RegisterView,GetProfileView ) 
+CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView ) 
 
 router = DefaultRouter()
 router.register(r'team-members', TeamMemberViewSet)

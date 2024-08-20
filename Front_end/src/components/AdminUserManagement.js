@@ -1,61 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './styles/AdminUserManagement.module.css';
 
 const AdminUserManagement = ({ userProfile }) => {
-    const [user, setUser] = useState({
+    const [createUser, setCreateUser] = useState({
         username: '',
         password: '',
         email: ''
     });
-
-    const [profile, setProfile] = useState({
-        username: userProfile.username,
-        email: userProfile.email,
+    const [editProfile, setEditProfile] = useState({
+        username: userProfile?.username || '',
+        new_username: '',
+        email: userProfile?.email || ''
     });
 
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [createSuccessMessage, setCreateSuccessMessage] = useState('');
+    const [createErrorMessage, setCreateErrorMessage] = useState('');
+    const [editSuccessMessage, setEditSuccessMessage] = useState('');
+    const [editErrorMessage, setEditErrorMessage] = useState('');
 
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setUser(prev => ({ ...prev, [name]: value }));
+    useEffect(() => {
+        if (editProfile.username || editProfile.email) {
+            setEditErrorMessage(''); // 如果成功获取到用户名或邮箱，清除错误消息
+        }
+    }, [editProfile]);
+
+    const fetchProfile = async () => {
+        try {
+            const response = await axios.get('http://localhost:8000/api/get-profile/');
+            setEditProfile({
+                username: response.data.username,
+                email: response.data.email
+            });
+            setEditErrorMessage('');
+        } catch (error) {
+            console.error('Failed to fetch profile:', error.response ? error.response.data : error.message);
+            setEditErrorMessage('Failed to load profile information.');
+        }
     };
 
-    const handleProfileChange = (event) => {
+    const handleCreateInputChange = (event) => {
         const { name, value } = event.target;
-        setProfile(prev => ({ ...prev, [name]: value }));
+        setCreateUser(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (event) => {
+    const handleEditProfileChange = (event) => {
+        const { name, value } = event.target;
+        setEditProfile(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCreateSubmit = async (event) => {
         event.preventDefault();
         try {
             const response = await axios.post('http://localhost:8000/api/create-admin/', {
-                username: user.username,
-                password: user.password,
-                email: user.email,
+                username: createUser.username,
+                password: createUser.password,
+                email: createUser.email,
             });
 
-            setSuccessMessage(`Admin account created successfully for ${response.data.username}`);
-            setErrorMessage('');
+            setCreateSuccessMessage(`Admin account created successfully for ${response.data.username}`);
+            setCreateErrorMessage('');
         } catch (error) {
-            setErrorMessage('Failed to create admin account. Please try again.');
+            setCreateErrorMessage('Failed to create admin account. Please try again.');
             console.error('Error details:', error.response ? error.response.data : error.message);
         }
     };
 
-    const handleProfileSubmit = async (event) => {
+    const handleEditProfileSubmit = async (event) => {
         event.preventDefault();
         try {
-            await axios.put('http://localhost:8000/api/update-profile/', {
-                username: user.username,  // 使用 user.username
-                email: user.email,
+            const response = await axios.put('http://localhost:8000/api/update-profile/', {
+                username: editProfile.username,
+                new_username: editProfile.new_username,
+                email: editProfile.email,
             });
 
-            setSuccessMessage('Profile updated successfully');
-            setErrorMessage('');
+            setEditSuccessMessage('Profile updated successfully');
+            setEditErrorMessage('');
         } catch (error) {
-            setErrorMessage('Failed to update profile. Please try again.');
+            setEditErrorMessage('Failed to update profile. Please try again.');
             console.error('Error details:', error.response ? error.response.data : error.message);
         }
     };
@@ -63,60 +86,74 @@ const AdminUserManagement = ({ userProfile }) => {
     return (
         <div className={styles.container}>
             <h2>Admin Management</h2>
+
+            {/* Create Admin User Section */}
             <div className={styles.feature}>
                 <h2>Create Admin User</h2>
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleCreateSubmit} className={styles.form}>
                     <input
                         name="username"
                         type="text"
                         placeholder="Username"
-                        value={user.username}
-                        onChange={handleInputChange}
+                        value={createUser.username}
+                        onChange={handleCreateInputChange}
                         required
                     />
                     <input
                         name="password"
                         type="password"
                         placeholder="Password"
-                        value={user.password}
-                        onChange={handleInputChange}
+                        value={createUser.password}
+                        onChange={handleCreateInputChange}
                         required
                     />
                     <input
                         name="email"
                         type="email"
                         placeholder="Email"
-                        value={user.email}
-                        onChange={handleInputChange}
+                        value={createUser.email}
+                        onChange={handleCreateInputChange}
                         required
                     />
-                    <button type="submit">Submit</button>
+                    <button type="submit">Create Admin</button>
                 </form>
+                {createSuccessMessage && <p className={styles.successMessage}>{createSuccessMessage}</p>}
+                {createErrorMessage && <p className={styles.errorMessage}>{createErrorMessage}</p>}
             </div>
+
+            {/* Edit Profile Section */}
             <div className={styles.feature}>
                 <h2>Edit Profile</h2>
-                <form onSubmit={handleProfileSubmit} className={styles.form}>
+                <form onSubmit={handleEditProfileSubmit} className={styles.form}>
                     <input
                         name="username"
                         type="text"
-                        placeholder="Username"
-                        value={profile.username}
-                        onChange={handleProfileChange}
+                        placeholder="Current Username"
+                        value={editProfile.username}
+                        onChange={handleEditProfileChange}
+                        disabled
+                    />
+                    <input
+                        name="new_username"
+                        type="text"
+                        placeholder="New Username"
+                        value={editProfile.new_username || ''}
+                        onChange={handleEditProfileChange}
                         required
                     />
                     <input
                         name="email"
                         type="email"
                         placeholder="Email"
-                        value={profile.email}
-                        onChange={handleProfileChange}
+                        value={editProfile.email}
+                        onChange={handleEditProfileChange}
                         required
                     />
                     <button type="submit">Update Profile</button>
                 </form>
+                {editSuccessMessage && <p className={styles.successMessage}>{editSuccessMessage}</p>}
+                {editErrorMessage && <p className={styles.errorMessage}>{editErrorMessage}</p>}
             </div>
-            {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
-            {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
         </div>
     );
 };
