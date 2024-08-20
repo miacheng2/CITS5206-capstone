@@ -3,9 +3,8 @@ import { NavLink } from 'react-router-dom';
 
 import styles from './styles/Navbar.module.css';
 
-function Navbar({ setToken }) {
+function Navbar({ logout }) {
 
-  
     return (
         <div className={styles.navbarOutter}>
             <div className={styles.rightDiv}>
@@ -23,11 +22,15 @@ function Navbar({ setToken }) {
                 </ul>
             </nav>
             <div className={styles.leftDiv}>
-                <button className={styles.logoutButton} onClick={() => { localStorage.removeItem('token'); setToken(null); }}><b>Logout</b></button>
+                <button 
+                    className={styles.logoutButton} 
+                    onClick={logout}  // 简单地调用传递的 logout 函数
+                >
+                    <b>Logout</b>
+                </button>
             </div>
         </div>
     );
 }
 
 export default Navbar;
-

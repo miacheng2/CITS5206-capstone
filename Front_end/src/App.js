@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import TeamMemberList from './components/TeamMemberList';
 import WorkTeamManagement from './components/WorkTeamManagement';
 import AdminUserManagement from './components/AdminUserManagement';
@@ -11,9 +11,9 @@ import Home from './components/Home';
 
 import './assets/fonts/fonts.css';
 
-
 function App() {
     const [token, setToken] = useState(localStorage.getItem('token'));
+    const [userProfile, setUserProfile] = useState({ username: '', email: '' });
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
@@ -22,25 +22,32 @@ function App() {
         }
     }, []);
 
-    if (!token) {
-        return <>
-            <Login setToken={setToken} />
-        </>;
-    }
+    const logout = () => {
+        setToken(null);
+        setUserProfile({ username: '', email: '' });
+        localStorage.removeItem('token');
+    };
 
     return (
         <Router>
-            <Navbar setToken={setToken} />
-            <Routes>
-                <Route path="/" element={<Home setToken={setToken} />} />
-
-                <Route path="/memberManagement" element={<TeamMemberList />} />
-                <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
-                <Route path="/AdminUserManagement" element={<AdminUserManagement />} />
-                <Route path="/events" element={<EventList />} />
-                <Route path="/volunteer-points" element={<VolunteerPointsList />} />
-                <Route path="/login" element={<Login setToken={setToken} />} />
-            </Routes>
+            {!token ? (
+                <Routes>
+                    <Route path="*" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
+                </Routes>
+            ) : (
+                <>
+                    <Navbar setToken={setToken} logout={logout} />
+                    <Routes>
+                        <Route path="/" element={<Home setToken={setToken} userProfile={userProfile} />} />
+                        <Route path="/memberManagement" element={<TeamMemberList />} />
+                        <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
+                        <Route path="/AdminUserManagement" element={<AdminUserManagement userProfile={userProfile} />} />
+                        <Route path="/events" element={<EventList />} />
+                        <Route path="/volunteer-points" element={<VolunteerPointsList />} />
+                        <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
+                    </Routes>
+                </>
+            )}
         </Router>
     );
 }

@@ -1,38 +1,55 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import style from './styles/Login.module.css'
 
-function Login({ setToken }) {
+function Login({ setToken, setUserProfile }) {  // Pass a function to update user profile in the parent component
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [isRegistering, setIsRegistering] = useState(false);  // 用于切换登录和注册模式
+    const [isRegistering, setIsRegistering] = useState(false);
+    const navigate = useNavigate();
 
-    const login = () => {
-        axios.post('http://localhost:8000/api/token-auth/', {
-            username,
-            password
-        }).then(response => {
+    const login = async () => {
+        try {
+            const response = await axios.post('http://localhost:8000/api/token-auth/', { username, password });
             const token = response.data.token;
             setToken(token);
             localStorage.setItem('token', token);
-            setErrorMessage(''); 
-        }).catch(error => {
+            setErrorMessage('');
+
+            // Fetch user profile immediately after login and update parent state
+             fetchUserProfile(username);
+             navigate('/');
+        } catch (error) {
             if (error.response && error.response.status === 400) {
                 setErrorMessage('Username/Password incorrect');
             } else {
                 setErrorMessage('Login error');
             }
             console.error('Error:', error.response ? error.response.data : error.message);
-        });
+        }
     };
 
+    const fetchUserProfile = (username) => {
+        axios.get(`http://localhost:8000/api/get-profile/?username=${username}`)
+            .then(response => {
+                setUserProfile({
+                    username: response.data.username,
+                    email: response.data.email
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching profile:', error.response ? error.response.data : error.message);
+            });
+    };
+    
+
     const register = () => {
-        axios.post('http://localhost:8000/api/register/', {  // 假设注册的API路径为 /api/register/
+        axios.post('http://localhost:8000/api/register/', {
             username,
             password
         }).then(response => {
-            // 注册成功后直接登录
             login();
         }).catch(error => {
             if (error.response && error.response.status === 400) {
@@ -47,7 +64,7 @@ function Login({ setToken }) {
     return (
         <div className={style.login_container}>
             <div className={style.login_form}>
-                <img src="/pic/NYC.jpg" alt="Nedlands Yacht Club Logo" /> {/* 添加 Logo 图片 */}
+                <img src="/pic/NYC.jpg" alt="Nedlands Yacht Club Logo" />
                 <h2>Nedlands Yacht Club System</h2>
                 <input 
                     type="text" 

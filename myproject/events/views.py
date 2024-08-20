@@ -47,18 +47,21 @@ class GetProfileView(APIView):
     permission_classes = [AllowAny]  # 允许任何人访问此视图
 
     def get(self, request):
-        logger.info(f"Request received. User: {request.user}")
-
-        if request.user.is_authenticated:
+        # 假设我们根据传入的username来查找用户
+        username = request.query_params.get('username')
+        
+        if not username:
+            return Response({"detail": "Username not provided"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(username=username)
             profile_data = {
-                'username': request.user.username,
-                'email': request.user.email,
+                'username': user.username,
+                'email': user.email,
             }
-            logger.info(f"Profile data sent: {profile_data}")
-            return Response(profile_data, status=status.HTTP_200_OK)
-        else:
-            logger.warning("Unauthenticated request.")
-            return Response({"detail": "User not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(profile_data)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
@@ -115,32 +118,21 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
 class UpdateProfileView(APIView):
-    permission_classes = [AllowAny]  # 确保只有已认证用户可以访问此视图
+    permission_classes = [AllowAny]  # 暂时允许任何用户访问
 
     def put(self, request):
-        user = request.user
-        try:
-            # 获取请求中的数据
-            username = request.data.get('username')
-            email = request.data.get('email')
+        # 假设你有某种方式能够标识用户（如通过提交的用户名）
+        username = request.data.get('username')
+        email = request.data.get('email')
 
-            # 更新用户的用户名和电子邮件
-            if username:
-                user.username = username
-            if email:
-                user.email = email
-            
-            # 保存更改
+        try:
+            user = User.objects.get(username=username)
+            user.email = email
             user.save()
 
-            return Response({
-                "username": user.username,
-                "email": user.email,
-                "message": "Profile updated successfully"
-            }, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Profile updated successfully'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
 class ChangePasswordView(UpdateAPIView):
     serializer_class = ChangePasswordSerializer
