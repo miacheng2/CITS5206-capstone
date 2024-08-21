@@ -14,10 +14,18 @@ const AdminUserManagement = ({ userProfile }) => {
         email: userProfile?.email || ''
     });
 
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+    });
+
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
     const [createErrorMessage, setCreateErrorMessage] = useState('');
     const [editSuccessMessage, setEditSuccessMessage] = useState('');
     const [editErrorMessage, setEditErrorMessage] = useState('');
+    const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
 
     useEffect(() => {
         if (editProfile.username || editProfile.email) {
@@ -47,6 +55,10 @@ const AdminUserManagement = ({ userProfile }) => {
     const handleEditProfileChange = (event) => {
         const { name, value } = event.target;
         setEditProfile(prev => ({ ...prev, [name]: value }));
+    };
+    const handlePasswordChange = (event) => {
+        const { name, value } = event.target;
+        setPasswordData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleCreateSubmit = async (event) => {
@@ -79,6 +91,30 @@ const AdminUserManagement = ({ userProfile }) => {
             setEditErrorMessage('');
         } catch (error) {
             setEditErrorMessage('Failed to update profile. Please try again.');
+            console.error('Error details:', error.response ? error.response.data : error.message);
+        }
+    };
+    const handlePasswordSubmit = async (event) => {
+        event.preventDefault();
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordErrorMessage('New password and confirm password do not match.');
+            return;
+        }
+
+        try {
+            // 发送 PUT 请求到 /api/change-password/
+            const response = await axios.put('http://localhost:8000/api/change-password/', {
+                username: userProfile.username,  // 提供当前用户名
+                current_password: passwordData.currentPassword,
+                new_password: passwordData.newPassword
+            });
+    
+            // 成功处理
+            setPasswordSuccessMessage('Password updated successfully');
+            setPasswordErrorMessage('');
+        } catch (error) {
+            // 失败处理
+            setPasswordErrorMessage('Failed to update password. Please try again.');
             console.error('Error details:', error.response ? error.response.data : error.message);
         }
     };
@@ -153,6 +189,40 @@ const AdminUserManagement = ({ userProfile }) => {
                 </form>
                 {editSuccessMessage && <p className={styles.successMessage}>{editSuccessMessage}</p>}
                 {editErrorMessage && <p className={styles.errorMessage}>{editErrorMessage}</p>}
+            </div>
+
+            {/* Change Password Section */}
+            <div className={styles.feature}>
+                <h2>Change Password</h2>
+                <form onSubmit={handlePasswordSubmit} className={styles.form}>
+                    <input
+                        name="currentPassword"
+                        type="password"
+                        placeholder="Current Password"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <input
+                        name="newPassword"
+                        type="password"
+                        placeholder="New Password"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <input
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm New Password"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <button type="submit">Change Password</button>
+                </form>
+                {passwordSuccessMessage && <p className={styles.successMessage}>{passwordSuccessMessage}</p>}
+                {passwordErrorMessage && <p className={styles.errorMessage}>{passwordErrorMessage}</p>}
             </div>
         </div>
     );

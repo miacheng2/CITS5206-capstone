@@ -144,26 +144,34 @@ class UpdateProfileView(APIView):
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
-class ChangePasswordView(UpdateAPIView):
-    serializer_class = ChangePasswordSerializer
-    model = User
-    permission_classes = [AllowAny]
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
 
-    def get_object(self, queryset=None):
-        return self.request.user
+class ChangePasswordView(APIView):
+    permission_classes = [AllowAny]  # 禁用认证
 
-    def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        serializer = self.get_serializer(data=request.data)
+    def put(self, request):
+        try:
+            username = request.data.get('username')
+            current_password = request.data.get('current_password')
+            new_password = request.data.get('new_password')
 
-        if serializer.is_valid():
-            # Check old password
-            if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            # 查找用户
+            user = User.objects.get(username=username)
 
-            # Set new password
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            return Response({"status": "password set"}, status=status.HTTP_200_OK)
+            # 验证当前密码
+            if not user.check_password(current_password):
+                return Response({"detail": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # 设置新密码
+            user.set_password(new_password)
+            user.save()
+
+            return Response({"detail": "Password updated successfully"}, status=status.HTTP_200_OK)
+        
+        except User.DoesNotExist:
+            return Response({"detail": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
