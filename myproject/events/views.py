@@ -23,28 +23,28 @@ class RegisterView(APIView):
         username = request.data.get('username')
         password = request.data.get('password')
 
-        # 检查用户名和密码是否提供
+      
         if not username or not password:
             return Response({'message': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 检查用户名是否已存在
+       
         if User.objects.filter(username=username).exists():
             return Response({'message': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # 创建用户
+            # crate admin user
             user = User.objects.create(
                 username=username,
-                password=make_password(password)  # 确保密码被哈希处理
+                password=make_password(password)  
             )
             return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            # 捕获其他异常并返回错误信息
+         
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 class GetProfileView(APIView):
-    permission_classes = [AllowAny]  # 允许任何人访问此视图
+    permission_classes = [AllowAny] 
 
     def get(self, request):
         # 假设我们根据传入的username来查找用户
