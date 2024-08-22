@@ -44,13 +44,13 @@ td>button:first-child {
 
 td>button:last-child {
     background-color: #cc6c6a;
-    color: #fff;
+    color: #000;
 }
 
 
 .feature>div>div>button,
-.teamCardUp>button,
-.popup button {
+td>button,
+.modalButtons>button {
     text-decoration: none;
     margin: 0 0.5em;
     font-family: 'NunitoSans', sans-serif;
@@ -81,90 +81,74 @@ td>button:last-child {
     margin: 20px auto;
 }
 
-.teams {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    gap: 1em;
+.teamTable {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
 }
 
-.teamCard {
-    min-width: 400px;
-    border-radius: 20px;
-    background-color: #fff;
-    padding: 1em;
-    margin: 1em;
-    transition: all 0.3s;
-    box-shadow: 5px 5px 15px #bcbcbc;
+.teamTable th,
+.teamTable td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
 }
 
-.teamCard:hover {
-    box-shadow: 10px 10px 20px #818181;
-}
-
-.teamCardUp {
-    padding: 0 1em;
-    border-radius: 20px;
+.teamTable th {
     background-color: #4d48a4;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: #fff;
 }
 
-.teamCardUp>button {
-    background-color: #eedc15;
-    color: #4d48a4;
-}
-
-.teamCardDown>div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.popupBack {
-    position: absolute;
-    top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #33333368;
-}
-
-.popup {
-    border-radius: 20px;
+.teamTable td {
     background-color: #fff;
-    width: 1280px;
-    margin: 20em auto;
-    padding: 1em;
 }
 
-.popupContent {
-    padding: 1em;
+.teamTable tr:last-child td {
+    border-bottom: none;
 }
 
-.popupContent:last-child * {
-    margin-top: 1em;
-}
-
-.teamAddMember {
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-start;
+    z-index: 1000;
 }
 
-.teamAddMember * {
-    margin: 1em;
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    width: 100%;
 }
 
-.editTeam {
+.modalContent>h2 {
+    text-align: center;
+}
+
+.modalContent>form {
+    flex-direction: column;
+    align-items: center;
     display: flex;
-    align-items: center;
 }
 
-.editTeam * {
-    margin: 1em 1em 0 0;
+.modalContent>form>label {
+    margin: 0.5em;
+    width: 500px;
 }
 
-table {
-    margin-bottom: 1em;
+.modalContent>form>label>input {
+    width: 500px;
+}
+
+.modalButtons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
 }
