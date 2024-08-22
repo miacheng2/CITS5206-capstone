@@ -1,11 +1,11 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.js
-/venv/
+/Front_end/node_modules/
 
+/build/
+/dist/
+*.log
+*.lock
 # testing
 /coverage
 
@@ -15,7 +15,7 @@
 #venv
 venv/
 
-Front_end/
+
 
 # misc
 .DS_Store
