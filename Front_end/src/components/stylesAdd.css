@@ -1,18 +1,71 @@
 /* Navbar Styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Distribute space between items */
+  padding: 15px;
+  background-color: #010634;
+  color: white;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
 
+.logo {
+  width: 50px;
+  margin-right: 20px;
+}
 
+.navLinks {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.navLinks li {
+  padding: 5px 10px;
+}
+
+.navLinks a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navLinks a:hover {
+  text-decoration: none;
+}
+
+/* General Container Styles */
+.container {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  width: 80%;
+  max-width: 1200px; /* 设置最大宽度 */
+  padding-top: 100px;
+}
+
+/* Add Volunteer Container */
 .add-volunteer-container {
-  padding: 20px 20px 20px; /* Adds padding to the top to avoid overlap with the navbar */
+  padding: 20px; /* Adds padding to avoid overlap with the navbar */
   width: 100%;
   margin: 0 auto;
-  
 }
 
 /* Search Bar Styles */
 .search-bar {
   padding: 10px;
   margin-bottom: 20px;
-  width: calc(100% - 20px);
+  width: 100%; /* Use full width */
+  max-width: 600px; /* Optional max width */
   border: 1px solid #ddd;
   border-radius: 5px;
   box-sizing: border-box;
@@ -38,8 +91,8 @@
 }
 
 .volunteer-table select,
-.volunteer-table input[type="number"], 
-.volunteer-table input[type="text"], 
+.volunteer-table input[type="number"],
+.volunteer-table input[type="text"],
 .volunteer-table input[type="date"] {
   width: 100%;
   padding: 5px;
@@ -59,10 +112,12 @@
   background-color: #45a049;
 }
 
+/* Team Buttons */
 .team-buttons {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap; /* Wrap buttons to new lines on smaller screens */
 }
 
 .team-buttons button {
@@ -84,4 +139,25 @@
 
 .team-buttons button:last-child:hover {
   background-color: #45a049;
+}
+
+/* Responsive adjustments */
+@media only screen and (max-width: 768px) {
+  .container {
+    width: 90%; /* Increase width for smaller screens */
+    padding-top: 80px; /* Adjust top padding for smaller screens */
+  }
+
+  .navLinks {
+    flex-direction: column; /* Stack links vertically on small screens */
+    gap: 10px;
+  }
+
+  .add-volunteer-container, .volunteer-table, .team-buttons {
+    width: 100%;
+  }
+
+  .card, .volunteer-table, .team-buttons button {
+    width: 100%; /* Full width on smaller screens */
+  }
 }
