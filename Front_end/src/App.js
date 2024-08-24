@@ -5,6 +5,7 @@ import WorkTeamManagement from './components/WorkTeamManagement';
 import AdminUserManagement from './components/AdminUserManagement';
 import EventList from './components/EventList';
 import VolunteerPointsList from './components/VolunteerPointsList';
+import AddVolunteerPoints from './components/AddVolunteerPoints';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -42,6 +43,7 @@ function App() {
                         <Route path="/memberManagement" element={<TeamMemberList />} />
                         <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
                         <Route path="/AdminUserManagement" element={<AdminUserManagement userProfile={userProfile} />} />
+                        <Route path="/add-points" element={<AddVolunteerPoints />} />
                         <Route path="/events" element={<EventList />} />
                         <Route path="/volunteer-points" element={<VolunteerPointsList />} />
                         <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
