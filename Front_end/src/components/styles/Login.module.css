@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-image: url('../nycimg5.jpg'); /* 背景图片路径 */
+    background-image: url('../nycimg5.jpg'); 
     background-size: cover;
     background-position: center;
 }
@@ -11,7 +11,7 @@
 
 .login_form {
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
+    background-color: rgba(255, 255, 255, 0.9); 
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 300px;
@@ -25,11 +25,11 @@
 .login_form h2 {
     text-align: center;
     margin-bottom: 20px;
-    color: #333; /* 黑色字体 */
+    color: #333; 
 }
 
 .login_form img {
-    width: 100px; /* 调整 Logo 大小 */
+    width: 100px; 
     margin-bottom: 20px;
 }
 .login_form input {
