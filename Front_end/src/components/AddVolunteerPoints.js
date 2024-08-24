@@ -101,23 +101,7 @@ function AddVolunteerPoints() {
   };
 
   return (
-    <div>
-      {/* Navbar */}
-      <nav className="navbar">
-        <img src="nyclogo.jpg" alt="Nedlands Yacht Club Logo" className="logo" />
-        <h1>Nedlands Yacht Club</h1>
-        <ul className="nav-links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/WorkTeamManagement">Team Management</Link></li>
-          <li><Link to="/membermanagement">Member Management</Link></li>
-          <li><Link to="/events">Event</Link></li>
-          <li><Link to="/VolunteerPoint">Volunteer Point</Link></li>
-          <li><Link to="/reports">Report</Link></li>
-          <li><Link to="/Admin">Admin</Link></li>
-          <li><Link to="/">Logout</Link></li>
-        </ul>
-      </nav>
-
+    
       <div className="add-volunteer-container">
         {/* Team Buttons */}
         <div className="team-buttons">
@@ -257,7 +241,7 @@ function AddVolunteerPoints() {
           </tbody>
         </table>
       </div>
-    </div>
+    
   );
 }
 

@@ -43,23 +43,7 @@ function RewardCheckin() {
   };
 
   return (
-    <div>
-      {/* Navbar */}
-      <nav className="navbar">
-        <img src="nyclogo.jpg" alt="Nedlands Yacht Club Logo" className="logo" />
-        <h1>Nedlands Yacht Club</h1>
-        <ul className="nav-links">
-          <li><Link to="/">Home</Link></li>
-          <li><Link to="/WorkTeamManagement">Team Management</Link></li>
-          <li><Link to="/membermanagement">Member Management</Link></li>
-          <li><Link to="/events">Event</Link></li>
-          <li><Link to="/VolunteerPoint">Volunteer Point</Link></li>
-          <li><Link to="/reports">Report</Link></li>
-          <li><Link to="/Admin">Admin</Link></li>
-          <li><Link to="/">Logout</Link></li>
-        </ul>
-      </nav>
-
+    
       <div className="reward-checkin-container">
         {/* Search Bar */}
         <input
@@ -118,7 +102,7 @@ function RewardCheckin() {
         <button className="download-btn" onClick={handleDownload}>Download CSV</button>
        
       </div>
-    </div>
+    
   );
 }
 

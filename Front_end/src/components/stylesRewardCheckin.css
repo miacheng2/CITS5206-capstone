@@ -1,47 +1,8 @@
-/* Navbar styles */
-.navbar {
-  display: flex;
-  align-items: center;
-  padding: 15px;
-  background-color: #010634;
-  color: white;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-}
-
-.logo {
-  height: 50px;
-  margin-right: 20px;
-}
-
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 15px;
-  margin-left: auto;
-}
-
-.nav-links li {
-  padding: 5px 10px;
-}
-
-.nav-links a {
-  color: #fff;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.nav-links a:hover {
-  text-decoration: underline;
-}
 
 /* Container for Reward Check-in */
 .reward-checkin-container {
   padding: 20px;
-  margin-top: 100px; 
+  margin-top: 20px; 
 }
 
 /* Search Bar Styling */

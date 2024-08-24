@@ -33,12 +33,7 @@ function App() {
 
     return (
         <Router>
-            {!token ? (
-                <Routes>
-                    <Route path="*" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
-                </Routes>
-            ) : (
-                <>
+            
                     <Navbar setToken={setToken} logout={logout} />
                     <Routes>
                         <Route path="/" element={<Home setToken={setToken} userProfile={userProfile} />} />
@@ -52,8 +47,8 @@ function App() {
                         <Route path="/volunteer-points" element={<VolunteerPointsList />} />
                         <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
                     </Routes>
-                </>
-            )}
+               
+            
         </Router>
     );
 }
