@@ -1,0 +1,115 @@
+/* Navbar styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #010634;
+  color: white;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.logo {
+  height: 50px;
+  margin-right: 20px;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.nav-links li {
+  padding: 5px 10px;
+}
+
+.nav-links a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.nav-links a:hover {
+  text-decoration: underline;
+}
+
+/* Container for Reward Check-in */
+.reward-checkin-container {
+  padding: 20px;
+  margin-top: 100px; 
+}
+
+/* Search Bar Styling */
+.search-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Table Styling */
+.reward-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.reward-table th, 
+.reward-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.reward-table th {
+  background-color: #6b0c59;
+  color: white;
+}
+
+.reward-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Button Styling */
+.action-btn {
+  background-color: #258178;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+  border-radius: 5px;
+}
+
+.action-btn:hover {
+  background-color: #45a049;
+}
+
+.edit-btn {
+  background-color: #ffcc00;
+}
+
+.save-btn {
+  background-color: #008cba;
+}
+
+.delete-btn {
+  background-color: #f44336;
+}
+
+
+.input-field {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+}
+
