@@ -83,10 +83,10 @@ body {
 
 .navList li>a,
 .leftDiv>button {
-    color: white; /* 将字体颜色改为白色 */
+    color: white; 
     font-size: 16px;
     font-weight: bold;
-    text-decoration: none; /* 移除下划线 */
+    text-decoration: none; 
 }
 
 
@@ -94,7 +94,7 @@ body {
 .navList li>a:hover {
     background-color: #f7fc00;
     color: #00004D;
-    text-decoration: none; /* 移除悬停时的下划线 */
+    text-decoration: none; 
 }
 
 .dropdownContent {

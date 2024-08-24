@@ -13,7 +13,6 @@ const WorkTeamManagement = () => {
     const generateTableHeaders = (data) => {
         if (data.length > 0) {
             return Object.keys(data[0]).map(key => {
-                // 将字段名转换为更友好的格式
                 const header = key.replace(/([A-Z])/g, ' $1').trim();
                 return header.charAt(0).toUpperCase() + header.slice(1);
             });
