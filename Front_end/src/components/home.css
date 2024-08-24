@@ -1,41 +1,7 @@
-/* Navbar Styles */
-.navbar {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background-color: #010634;
-    color: white;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
 
 .logo {
     width: 50px;
     margin-right: 20px;
-}
-
-.navLinks {
-    list-style: none;
-    display: flex;
-    gap: 15px;
-    margin-left: auto;
-}
-
-.navLinks li {
-    padding: 5px 10px;
-}
-
-.navLinks a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.navLinks a:hover {
-    text-decoration: none;
 }
 
 /* General Container Styles */
@@ -77,4 +43,21 @@
 .home-section .text-container {
     text-align: center;
     color: white;
+}
+
+/* Responsive Design for Smaller Screens */
+@media only screen and (max-width: 768px) {
+   
+
+    .home-section {
+        height: 50vh; /* Adjust the height for smaller screens */
+    }
+
+    .home-section .text-container h2 {
+        font-size: 1.5rem; /* Smaller font size for headings */
+    }
+
+    .home-section .text-container p {
+        font-size: 1rem; /* Smaller font size for paragraphs */
+    }
 }
