@@ -1,4 +1,4 @@
-from rest_framework import viewsets  # 确保导入 viewsets
+from rest_framework import viewsets  # viewsets
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
 from rest_framework.response import Response
@@ -47,7 +47,7 @@ class GetProfileView(APIView):
     permission_classes = [AllowAny] 
 
     def get(self, request):
-        # 假设我们根据传入的username来查找用户
+        
         username = request.query_params.get('username')
         
         if not username:
@@ -150,7 +150,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 
 class ChangePasswordView(APIView):
-    permission_classes = [AllowAny]  # 禁用认证
+    permission_classes = [AllowAny]  # Allow All for now
 
     def put(self, request):
         try:
@@ -158,14 +158,14 @@ class ChangePasswordView(APIView):
             current_password = request.data.get('current_password')
             new_password = request.data.get('new_password')
 
-            # 查找用户
+         
             user = User.objects.get(username=username)
 
-            # 验证当前密码
+          
             if not user.check_password(current_password):
                 return Response({"detail": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # 设置新密码
+         
             user.set_password(new_password)
             user.save()
 

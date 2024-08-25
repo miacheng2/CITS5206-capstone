@@ -25,7 +25,7 @@ function Navbar({ logout }) {
             <div className={styles.leftDiv}>
                 <button 
                     className={styles.logoutButton} 
-                    onClick={logout}  // 简单地调用传递的 logout 函数
+                    onClick={logout}  
                 >
                     <b>Logout</b>
                 </button>

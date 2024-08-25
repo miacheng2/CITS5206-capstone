@@ -29,7 +29,7 @@ const AdminUserManagement = ({ userProfile }) => {
 
     useEffect(() => {
         if (editProfile.username || editProfile.email) {
-            setEditErrorMessage(''); // 如果成功获取到用户名或邮箱，清除错误消息
+            setEditErrorMessage(''); 
         }
     }, [editProfile]);
 
@@ -102,18 +102,16 @@ const AdminUserManagement = ({ userProfile }) => {
         }
 
         try {
-            // 发送 PUT 请求到 /api/change-password/
+            // /api/change-password/
             const response = await axios.put('http://localhost:8000/api/change-password/', {
-                username: userProfile.username,  // 提供当前用户名
+                username: userProfile.username,  
                 current_password: passwordData.currentPassword,
                 new_password: passwordData.newPassword
             });
     
-            // 成功处理
             setPasswordSuccessMessage('Password updated successfully');
             setPasswordErrorMessage('');
         } catch (error) {
-            // 失败处理
             setPasswordErrorMessage('Failed to update password. Please try again.');
             console.error('Error details:', error.response ? error.response.data : error.message);
         }
