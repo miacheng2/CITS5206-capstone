@@ -10,6 +10,7 @@ import CheckVolunteerHistory from './components/CheckVolunteerHistory';
 import RewardCheckin from './components/RewardCheckin';
 import Login from './components/Login';
 import Navbar from './components/Navbar';
+import Report from './components/Report';
 import Home from './components/Home';
 
 import './assets/fonts/fonts.css';
@@ -45,6 +46,7 @@ function App() {
                         <Route path="/events" element={<EventList />} />
                         <Route path="/reward-checkin" element={<RewardCheckin />} />
                         <Route path="/volunteer-points" element={<VolunteerPointsList />} />
+                        <Route path="/reports" element={<Report />} />
                         <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
                     </Routes>
                

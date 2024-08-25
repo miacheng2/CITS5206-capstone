@@ -31,20 +31,15 @@ function EventList() {
           <section className="cards-section">
           <div className="card" onClick={() => navigate('/events')}>
               <img src="nycimg4.jpg" alt="Event 1" />
-              <h3>Off Water events</h3>
+              <h3>Upcoming events</h3>
               <button className="learn-more">Learn more</button>
             </div>
             <div className="card" onClick={() => navigate('/events')}>
               <img src= "nycimg3.jpg" alt="Event 1" />
-              <h3>On water events</h3>
+              <h3>Past events</h3>
               <button className="learn-more">Learn more</button>
             </div>
-            <div className="card" onClick={() => navigate('/events')}>
-              <img src="nycimg2.jpg" alt="Event 1" />
-              <h3>Functions</h3>
-              <button className="learn-more">Learn more</button>
-            </div>
-           
+            
           </section>
         </div>
     );
