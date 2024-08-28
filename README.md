@@ -92,13 +92,13 @@ The Nedland Yacht Club (NYC) Volunteer Management System is designed to streamli
 
 - Fields: ID, Team Name, Team Description, Creation Date
 
-### Activities
+### Event
 
-- Fields: ID, Activity Name, Description, Location, Time
+- Fields: ID, Event Name, Event Type, Event date, Create By
 
-### Points
+### Volunteer Points
 
-- Fields: ID, User ID, Activity ID, Points Awarded, Date Awarded
+- Fields: ID, Member ID, Event ID, Points Awarded, Volunteer hours, Awarded by
 
 ## Getting Started
 
