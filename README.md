@@ -86,7 +86,7 @@ The Nedland Yacht Club (NYC) Volunteer Management System is designed to streamli
 
 ### Members
 
-- Fields: ID, User ID, Member Type, Join Date
+- Fields: australian_sailing_number, first_name, last_name, mobile, email_address, payment_status, volunteer_levy_status, volunteer_teams
 
 ### Teams
 
