@@ -1,0 +1,154 @@
+/* WorkTeamManagement.module.css */
+.container {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333;
+    min-width: 80%;
+    margin: 20px auto;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.container:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.feature {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.feature:hover {
+    background-color: #e2e6ea;
+}
+
+.feature>div:first-child {
+    display: flex;
+    justify-content: space-between;
+}
+
+.feature>div>div>button:first-child {
+    background-color: #eedc15;
+    color: #000;
+}
+
+td>button:first-child {
+    background-color: #eedc15;
+    color: #000;
+}
+
+td>button:last-child {
+    background-color: #cc6c6a;
+    color: #000;
+}
+
+
+.feature>div>div>button,
+td>button,
+.modalButtons>button {
+    text-decoration: none;
+    margin: 0 0.5em;
+    font-family: 'NunitoSans', sans-serif;
+    font-weight: bold;
+    font-weight: normal;
+    color: #fff;
+    background-color: #4d48a4;
+    border-color: #4d48a4;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 3px 10px 3px;
+    border-radius: 15px;
+    transition: all 0.3s;
+}
+
+.feature>div>div>button:hover {
+    background-color: #f7fc00;
+    color: #000;
+}
+
+.selectedRow {
+    background-color: #e3dfb3 !important;
+}
+
+.container {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 20px auto;
+}
+
+.teamTable {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.teamTable th,
+.teamTable td {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+}
+
+.teamTable th {
+    background-color: #4d48a4;
+}
+
+.teamTable td {
+    background-color: #fff;
+}
+
+.teamTable tr:last-child td {
+    border-bottom: none;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    max-width: 700px;
+    width: 100%;
+}
+
+.modalContent>h2 {
+    text-align: center;
+}
+
+.modalContent>form {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+}
+
+.modalContent>form>label {
+    margin: 0.5em;
+    width: 500px;
+}
+
+.modalContent>form>label>input {
+    width: 500px;
+}
+
+.modalButtons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+}

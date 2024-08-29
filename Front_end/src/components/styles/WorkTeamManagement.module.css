@@ -53,12 +53,12 @@ td>button:first-child {
 
 td>button:last-child {
     background-color: #cc6c6a;
-    color: #000;
+    color: #fff;
 }
 
 .feature>div>div>button,
-td>button,
-.modalButtons>button {
+.teamCardUp>button,
+.popup button {
     text-decoration: none;
     margin: 0 0.5em;
     font-weight: bold;
@@ -82,115 +82,105 @@ td>button,
     background-color: #e3dfb3 !important;
 }
 
+<<<<<<< HEAD
+
 /* Table Styles */
 .teamTable {
     width: 100%;
     margin-top: 20px;
     border-collapse: collapse;
-}
 
-.teamTable th,
-.teamTable td {
-    padding: 10px;
-    border-bottom: 1px solid #ccc;
-    text-align: left;
-}
-
-.teamTable th {
-    background-color: #f2f2f2;
-}
-
-.teamTable td {
-    background-color: #fff;
-}
-
-.teamTable tr:last-child td {
-    border-bottom: none;
-}
-
-/* Modal Styles */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modalContent {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    max-width: 700px;
-    width: 100%;
-}
-
-.modalContent>h2 {
-    text-align: center;
-}
-
-.modalContent>form {
-    flex-direction: column;
-    align-items: center;
-    display: flex;
-}
-
-.modalContent>form>label {
-    margin: 0.5em;
-    width: 100%;
-    max-width: 500px;
-}
-
-.modalContent>form>label>input {
-    width: 100%;
-    max-width: 500px;
-}
-
-.modalButtons {
-    margin-top: 20px;
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Responsive Design */
-@media only screen and (max-width: 768px) {
-    .container {
-        width: 90%;
-        padding: 10px;
+    =======.container {
+        font-family: 'Arial', sans-serif;
+        color: #333;
+        margin: 20px auto;
     }
 
-    .feature {
-        padding: 10px;
+    .teams {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 1em;
+        >>>>>>>Xia_Front_End
     }
 
-    .teamTable th,
-    .teamTable td {
-        padding: 5px;
-        font-size: 12px;
+    .teamCard {
+        min-width: 400px;
+        border-radius: 20px;
+        background-color: #fff;
+        padding: 1em;
+        margin: 1em;
+        transition: all 0.3s;
+        box-shadow: 5px 5px 15px #bcbcbc;
     }
 
-    .modalContent {
-        width: 90%;
-        max-width: 90%;
+    .teamCard:hover {
+        box-shadow: 10px 10px 20px #818181;
     }
 
-    .modalContent>form>label {
-        width: 100%;
+    .teamCardUp {
+        padding: 0 1em;
+        border-radius: 20px;
+        background-color: #4d48a4;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #fff;
     }
 
-    .modalContent>form>label>input {
-        width: 100%;
+    .teamCardUp>button {
+        background-color: #eedc15;
+        color: #4d48a4;
     }
 
-    .navLinks {
-        flex-direction: column;
-        width: 100%;
-        gap: 10px;
+    .teamCardDown>div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-}
+
+    .popupBack {
+        position: absolute;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #33333368;
+    }
+
+    .popup {
+        border-radius: 20px;
+        background-color: #fff;
+        width: 1280px;
+        margin: 20em auto;
+        padding: 1em;
+    }
+
+    .popupContent {
+        padding: 1em;
+    }
+
+    .popupContent:last-child * {
+        margin-top: 1em;
+    }
+
+    .teamAddMember {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    .teamAddMember * {
+        margin: 1em;
+    }
+
+    .editTeam {
+        display: flex;
+        align-items: center;
+    }
+
+    .editTeam * {
+        margin: 1em 1em 0 0;
+    }
+
+    table {
+        margin-bottom: 1em;
+    }
