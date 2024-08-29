@@ -60,11 +60,16 @@ class User(AbstractBaseUser):
 
 class Team(models.Model):
     name = models.CharField(max_length=100)
+    description = models.TextField(null=True, blank=True)  
+    creation_date = models.DateField(auto_now_add=True)  
     
     def __str__(self):
         return self.name
 
 class TeamMember(models.Model):
+    I_WILL_VOLUNTEER = 'I will volunteer'
+    I_WILL_PAY_LEVY = 'I will pay the levy'
+
     SENIOR_SAILING = 'Senior sailing membership'
     SENIOR_CREW = 'Senior crew membership'
     JUNIOR_SAILING = 'Junior sailing membership'
@@ -72,6 +77,11 @@ class TeamMember(models.Model):
     NON_SAILING = 'Non sailing membership'
     PROVISIONAL = 'Provisional Membership'
     PENSIONER_STUDENT = 'Pensioner/Student'
+    
+    VOLUNTEER_OR_LEVY_CHOICES = [
+        (I_WILL_VOLUNTEER, 'I will volunteer'),
+        (I_WILL_PAY_LEVY, 'I will pay the levy'),
+    ]
     
     MEMBERSHIP_CATEGORY_CHOICES = [
         (SENIOR_SAILING, 'Senior sailing membership – A senior sailor is any member over the age of 18 with full member privileges'),
@@ -83,10 +93,20 @@ class TeamMember(models.Model):
         (PENSIONER_STUDENT, 'Pensioner/Student – (see concession information below)'),
     ]
     
+    australian_sailing_number = models.CharField(max_length=20, primary_key=True)
     name = models.CharField(max_length=100)
     email = models.EmailField()
     membership_category = models.CharField(max_length=50, choices=MEMBERSHIP_CATEGORY_CHOICES)
+    will_volunteer_or_pay_levy = models.CharField(
+        max_length=50, 
+        choices=VOLUNTEER_OR_LEVY_CHOICES, 
+        blank=True,
+        null=True,
+    )
     teams = models.ManyToManyField(Team, related_name='members', blank=True)
+    
+    def __str__(self):
+        return f"{self.name} - {self.australian_sailing_number}"
 
 class Event(models.Model):
     EVENT_TYPE_CHOICES = (
