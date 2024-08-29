@@ -3,9 +3,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,
-CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView ) 
+CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet) 
 
 router = DefaultRouter()
+router.register(r'users', UserViewSet)
+router.register(r'teams', TeamViewSet)
 router.register(r'team-members', TeamMemberViewSet)
 router.register(r'events', EventViewSet)
 router.register(r'volunteer-points', VolunteerPointsViewSet)

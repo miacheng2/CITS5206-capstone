@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from .models import TeamMember, Event, VolunteerPoints
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
 import logging
 
 logger = logging.getLogger(__name__)
@@ -175,3 +176,23 @@ class ChangePasswordView(APIView):
             return Response({"detail": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class TeamViewSet(viewsets.ModelViewSet):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+
+class TeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+class VolunteerPointsViewSet(viewsets.ModelViewSet):
+    queryset = VolunteerPoints.objects.all()
+    serializer_class = VolunteerPointsSerializer
