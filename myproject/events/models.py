@@ -33,7 +33,7 @@ class User(AbstractBaseUser):
         (TEAM_LEADER, 'Team Leader'),
     ]
     
-    email = models.EmailField(primary_key=True, unique=True)
+    email = models.EmailField(unique=True)  # Email is unique but not the primary key
     username = models.CharField(max_length=50)
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     
@@ -61,7 +61,7 @@ class User(AbstractBaseUser):
 class Team(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)  
-    creation_date = models.DateField(auto_now_add=True)  
+    creation_date = models.DateField(auto_now_add=True)
     
     def __str__(self):
         return self.name
@@ -93,7 +93,7 @@ class TeamMember(models.Model):
         (PENSIONER_STUDENT, 'Pensioner/Student – (see concession information below)'),
     ]
     
-    australian_sailing_number = models.CharField(max_length=20, primary_key=True)
+    australian_sailing_number = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=100)
     email = models.EmailField()
     membership_category = models.CharField(max_length=50, choices=MEMBERSHIP_CATEGORY_CHOICES)
