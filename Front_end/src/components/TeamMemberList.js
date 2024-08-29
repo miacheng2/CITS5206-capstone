@@ -5,9 +5,9 @@ import styles from './styles/TeamMemberList.module.css';
 
 const TeamMemberList = () => {
     const [teamMembers, setTeamMembers] = useState([
-        { name: "Charles John", email: "charles.j@gmail.com", dob: "13-Jan-1967", country: "ID", startDate: "11/12/2023", type: "Contract", position: "UX Researcher", status: "Active" },
-        { name: "Dianne Russell", email: "dianne@gmail.com", dob: "17-Aug-1982", country: "US", startDate: "10/08/2022", type: "Full-time", position: "UX Designer", status: "Active" },
-        { name: "Anette Black", email: "anette@gmail.com", dob: "04-Mar-1959", country: "UK", startDate: "10/08/2022", type: "Full-time", position: "Project Manager", status: "Active" },
+        { numberId: "683561", firstName: "Michael", lastName: "Roberts", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
+        { numberId: "683562", firstName: "Dianne", lastName: "Russell", email: "Russell@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Painting and building maintenance" },
+        { numberId: "68353", firstName: "Anette", lastName: "Black", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
     ]);
 
     const generateTableHeaders = (data) => {
@@ -23,13 +23,14 @@ const TeamMemberList = () => {
     const [selectedMembers, setSelectedMembers] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newMember, setNewMember] = useState({
-        name: '',
+        numberId: '',
+        firstName: '',
+        lastName: '',
         email: '',
-        dob: '',
-        country: '',
-        startDate: '',
-        type: '',
-        position: '',
+        mobile: '',
+        paymentStatus: '',
+        volubteerOrPay: '',
+        teamType: '',
         status: ''
     });
 
@@ -84,13 +85,14 @@ const TeamMemberList = () => {
     const closeModal = () => {
         setIsModalOpen(false);
         setNewMember({
-            name: '',
+            numberId: '',
+            firstName: '',
+            lastName: '',
             email: '',
-            dob: '',
-            country: '',
-            startDate: '',
-            type: '',
-            position: '',
+            mobile: '',
+            paymentStatus: '',
+            volubteerOrPay: '',
+            teamType: '',
             status: ''
         });
     };

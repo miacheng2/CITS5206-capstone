@@ -5,16 +5,16 @@ import styles from './styles/WorkTeamManagement.module.css';
 
 const WorkTeamManagement = () => {
     const initialMembers = [
-        { name: "Charles John", email: "charles.j@gmail.com", dob: "13-Jan-1967", country: "ID", startDate: "11/12/2023", type: "Contract", position: "UX Researcher", status: "Active" },
-        { name: "Dianne Russell", email: "dianne@gmail.com", dob: "17-Aug-1982", country: "US", startDate: "10/08/2022", type: "Full-time", position: "UX Designer", status: "Active" },
-        { name: "Anette Black", email: "anette@gmail.com", dob: "04-Mar-1959", country: "UK", startDate: "10/08/2022", type: "Full-time", position: "Project Manager", status: "Active" },
-        { name: "Tom Green", email: "tom.green@gmail.com", dob: "22-May-1974", country: "CA", startDate: "01/01/2022", type: "Part-time", position: "Developer", status: "Active" },
-        { name: "Lucy Grey", email: "lucy.grey@gmail.com", dob: "30-Oct-1990", country: "AU", startDate: "15/01/2023", type: "Full-time", position: "Marketing Manager", status: "Active" },
-        { name: "Ethan Hunt", email: "ethan.hunt@gmail.com", dob: "19-Feb-1985", country: "US", startDate: "20/05/2021", type: "Contract", position: "Sales Executive", status: "Active" },
-        { name: "Sophia Loren", email: "sophia.loren@gmail.com", dob: "09-Jul-1972", country: "IT", startDate: "23/11/2022", type: "Full-time", position: "Human Resources", status: "Active" },
-        { name: "Oliver Twist", email: "oliver.twist@gmail.com", dob: "15-Mar-1980", country: "UK", startDate: "12/02/2020", type: "Part-time", position: "Customer Service Representative", status: "Active" },
-        { name: "Maria Garcia", email: "maria.garcia@gmail.com", dob: "27-Apr-1992", country: "ES", startDate: "07/07/2023", type: "Full-time", position: "Data Analyst", status: "Active" },
-        { name: "John Doe", email: "john.doe@gmail.com", dob: "01-Jan-1988", country: "US", startDate: "22/08/2021", type: "Full-time", position: "Software Engineer", status: "Active" }
+        { numberId: "12345", name: "Charles John", name: "Charles John", email: "charles.j@gmail.com", dob: "13-Jan-1967", country: "ID", startDate: "11/12/2023", type: "Contract", position: "UX Researcher", status: "Active" },
+        { numberId: "12345", name: "Dianne Russell", email: "dianne@gmail.com", dob: "17-Aug-1982", country: "US", startDate: "10/08/2022", type: "Full-time", position: "UX Designer", status: "Active" },
+        { numberId: "12345", name: "Anette Black", email: "anette@gmail.com", dob: "04-Mar-1959", country: "UK", startDate: "10/08/2022", type: "Full-time", position: "Project Manager", status: "Active" },
+        { numberId: "12345", name: "Tom Green", email: "tom.green@gmail.com", dob: "22-May-1974", country: "CA", startDate: "01/01/2022", type: "Part-time", position: "Developer", status: "Active" },
+        { numberId: "12345", name: "Lucy Grey", email: "lucy.grey@gmail.com", dob: "30-Oct-1990", country: "AU", startDate: "15/01/2023", type: "Full-time", position: "Marketing Manager", status: "Active" },
+        { numberId: "12345", name: "Ethan Hunt", email: "ethan.hunt@gmail.com", dob: "19-Feb-1985", country: "US", startDate: "20/05/2021", type: "Contract", position: "Sales Executive", status: "Active" },
+        { numberId: "12345", name: "Sophia Loren", email: "sophia.loren@gmail.com", dob: "09-Jul-1972", country: "IT", startDate: "23/11/2022", type: "Full-time", position: "Human Resources", status: "Active" },
+        { numberId: "12345", name: "Oliver Twist", email: "oliver.twist@gmail.com", dob: "15-Mar-1980", country: "UK", startDate: "12/02/2020", type: "Part-time", position: "Customer Service Representative", status: "Active" },
+        { numberId: "12345", name: "Maria Garcia", email: "maria.garcia@gmail.com", dob: "27-Apr-1992", country: "ES", startDate: "07/07/2023", type: "Full-time", position: "Data Analyst", status: "Active" },
+        { numberId: "12345", name: "John Doe", email: "john.doe@gmail.com", dob: "01-Jan-1988", country: "US", startDate: "22/08/2021", type: "Full-time", position: "Software Engineer", status: "Active" }
     ];
     const selectRandomMembers = (count) => {
         const shuffled = [...initialMembers].sort(() => 0.5 - Math.random());
@@ -22,12 +22,12 @@ const WorkTeamManagement = () => {
     };
 
     const [teams, setTeams] = useState([
-        { TeamName: "Alpha", TeamLeader: "Charles John", Description: "Lead Design Team", CreatedDate: "2020-01-10", LastModifyDate: "2023-07-21", Members: selectRandomMembers(4) },
-        { TeamName: "Beta", TeamLeader: "Dianne Russell", Description: "Project Management Team", CreatedDate: "2020-02-15", LastModifyDate: "2023-07-22", Members: selectRandomMembers(3) },
-        { TeamName: "Gamma", TeamLeader: "Anette Black", Description: "Research and Development Team", CreatedDate: "2021-03-20", LastModifyDate: "2023-07-23", Members: selectRandomMembers(6) },
-        { TeamName: "Delta", TeamLeader: "Charles John", Description: "Quality Assurance Team", CreatedDate: "2021-04-25", LastModifyDate: "2023-07-24", Members: selectRandomMembers(4) },
-        { TeamName: "Epsilon", TeamLeader: "Dianne Russell", Description: "Human Resources Team", CreatedDate: "2021-05-30", LastModifyDate: "2023-07-25", Members: selectRandomMembers(3) },
-        { TeamName: "Zeta", TeamLeader: "Anette Black", Description: "Marketing Team", CreatedDate: "2022-06-15", LastModifyDate: "2023-07-26", Members: selectRandomMembers(2) }
+        { TeamName: "team1", TeamLeader: "Charles John", Description: "Lead Design Team", CreatedDate: "2020-01-10", LastModifyDate: "2023-07-21", Members: selectRandomMembers(4) },
+        { TeamName: "team2", TeamLeader: "Dianne Russell", Description: "Project Management Team", CreatedDate: "2020-02-15", LastModifyDate: "2023-07-22", Members: selectRandomMembers(3) },
+        { TeamName: "team3", TeamLeader: "Anette Black", Description: "Research and Development Team", CreatedDate: "2021-03-20", LastModifyDate: "2023-07-23", Members: selectRandomMembers(6) },
+        { TeamName: "team4", TeamLeader: "Charles John", Description: "Quality Assurance Team", CreatedDate: "2021-04-25", LastModifyDate: "2023-07-24", Members: selectRandomMembers(4) },
+        { TeamName: "team5", TeamLeader: "Dianne Russell", Description: "Human Resources Team", CreatedDate: "2021-05-30", LastModifyDate: "2023-07-25", Members: selectRandomMembers(3) },
+        { TeamName: "team6", TeamLeader: "Anette Black", Description: "Marketing Team", CreatedDate: "2022-06-15", LastModifyDate: "2023-07-26", Members: selectRandomMembers(2) }
     ]);
 
     const [selectedTeam, setSelectedTeam] = useState(null);
@@ -269,14 +269,14 @@ const WorkTeamManagement = () => {
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
+                                        <th>numberId</th>
+                                        <th>firstName</th>
+                                        <th>lastName</th>
                                         <th>Email</th>
-                                        <th>Date of Birth</th>
-                                        <th>Country</th>
-                                        <th>Start Date</th>
-                                        <th>Type</th>
-                                        <th>Position</th>
-                                        <th>Status</th>
+                                        <th>mobile</th>
+                                        <th>paymentStatus</th>
+                                        <th>volubteerOrPay</th>
+                                        <th>teamType</th>
                                         {isEditing && <th>Actions</th>}
                                     </tr>
                                 </thead>

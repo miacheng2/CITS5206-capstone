@@ -8,10 +8,9 @@ const AdminUserManagement = ({ userProfile }) => {
         password: '',
         email: ''
     });
-    const [editProfile, setEditProfile] = useState({
-        username: userProfile?.username || '',
-        new_username: '',
-        email: userProfile?.email || ''
+    const [promoteLeader, setPromoteLeader] = useState({
+        username: '',
+        email: ''
     });
 
     const [passwordData, setPasswordData] = useState({
@@ -28,33 +27,29 @@ const AdminUserManagement = ({ userProfile }) => {
     const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
 
     useEffect(() => {
-        if (editProfile.username || editProfile.email) {
-            setEditErrorMessage(''); // 如果成功获取到用户名或邮箱，清除错误消息
-        }
-    }, [editProfile]);
-
-    const fetchProfile = async () => {
-        try {
-            const response = await axios.get('http://localhost:8000/api/get-profile/');
-            setEditProfile({
-                username: response.data.username,
-                email: response.data.email
-            });
+        if (promoteLeader.username || promoteLeader.email) {
             setEditErrorMessage('');
-        } catch (error) {
-            console.error('Failed to fetch profile:', error.response ? error.response.data : error.message);
-            setEditErrorMessage('Failed to load profile information.');
         }
-    };
+    }, [promoteLeader]);
+
+    // const fetchProfile = async () => {
+    //     try {
+    //         const response = await axios.get('http://localhost:8000/api/get-profile/');
+    //         setEditErrorMessage('');
+    //     } catch (error) {
+    //         console.error('Failed to fetch profile:', error.response ? error.response.data : error.message);
+    //         setEditErrorMessage('Failed to load profile information.');
+    //     }
+    // };
 
     const handleCreateInputChange = (event) => {
         const { name, value } = event.target;
         setCreateUser(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleEditProfileChange = (event) => {
+    const handlePromoteLeaderChange = (event) => {
         const { name, value } = event.target;
-        setEditProfile(prev => ({ ...prev, [name]: value }));
+        setPromoteLeader(prev => ({ ...prev, [name]: value }));
     };
     const handlePasswordChange = (event) => {
         const { name, value } = event.target;
@@ -78,19 +73,18 @@ const AdminUserManagement = ({ userProfile }) => {
         }
     };
 
-    const handleEditProfileSubmit = async (event) => {
+    const handlePromoteLeaderSubmit = async (event) => {
         event.preventDefault();
         try {
-            const response = await axios.put('http://localhost:8000/api/update-profile/', {
-                username: editProfile.username,
-                new_username: editProfile.new_username,
-                email: editProfile.email,
+            const response = await axios.put('http://localhost:8000/api/promote-leader/', {
+                username: promoteLeader.username,
+                email: promoteLeader.email,
             });
 
-            setEditSuccessMessage('Profile updated successfully');
+            setEditSuccessMessage('User Promoted successfully');
             setEditErrorMessage('');
         } catch (error) {
-            setEditErrorMessage('Failed to update profile. Please try again.');
+            setEditErrorMessage('Failed to promote. Please try again.');
             console.error('Error details:', error.response ? error.response.data : error.message);
         }
     };
@@ -102,13 +96,12 @@ const AdminUserManagement = ({ userProfile }) => {
         }
 
         try {
-            // 发送 PUT 请求到 /api/change-password/
             const response = await axios.put('http://localhost:8000/api/change-password/', {
-                username: userProfile.username,  // 提供当前用户名
+                username: userProfile.username,
                 current_password: passwordData.currentPassword,
                 new_password: passwordData.newPassword
             });
-    
+
             // 成功处理
             setPasswordSuccessMessage('Password updated successfully');
             setPasswordErrorMessage('');
@@ -157,35 +150,26 @@ const AdminUserManagement = ({ userProfile }) => {
                 {createErrorMessage && <p className={styles.errorMessage}>{createErrorMessage}</p>}
             </div>
 
-            {/* Edit Profile Section */}
+            {/* PromoteLeader Section */}
             <div className={styles.feature}>
-                <h2>Edit Profile</h2>
-                <form onSubmit={handleEditProfileSubmit} className={styles.form}>
+                <h2>Promote Leader</h2>
+                <form onSubmit={handlePromoteLeaderSubmit} className={styles.form}>
                     <input
                         name="username"
                         type="text"
-                        placeholder="Current Username"
-                        value={editProfile.username}
-                        onChange={handleEditProfileChange}
-                        disabled
+                        placeholder="Username"
+                        value={promoteLeader.username}
+                        onChange={handlePromoteLeaderChange}
                     />
-                    <input
-                        name="new_username"
-                        type="text"
-                        placeholder="New Username"
-                        value={editProfile.new_username || ''}
-                        onChange={handleEditProfileChange}
-                        required
-                    />
+                    <p>Or</p>
                     <input
                         name="email"
                         type="email"
                         placeholder="Email"
-                        value={editProfile.email}
-                        onChange={handleEditProfileChange}
-                        required
+                        value={promoteLeader.email}
+                        onChange={handlePromoteLeaderChange}
                     />
-                    <button type="submit">Update Profile</button>
+                    <button type="submit">Promote Team Leader</button>
                 </form>
                 {editSuccessMessage && <p className={styles.successMessage}>{editSuccessMessage}</p>}
                 {editErrorMessage && <p className={styles.errorMessage}>{editErrorMessage}</p>}
