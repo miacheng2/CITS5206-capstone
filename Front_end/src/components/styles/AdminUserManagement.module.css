@@ -6,7 +6,6 @@
     width: 60%;
     margin: 40px auto;
     font-family: 'Arial', sans-serif;
-    /* 更专业的字体 */
 }
 
 .feature {
@@ -27,12 +26,9 @@
     border-radius: 8px;
     cursor: pointer;
     width: auto;
-    /* 或许允许按钮大小根据内容自动调整 */
     display: inline-block;
-    /* 改进按钮的布局 */
     margin-top: 10px;
     transition: background-color 0.3s ease;
-    /* 平滑的颜色过渡 */
 }
 
 .button:hover {
@@ -43,7 +39,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    /* 增加表单元素之间的间距 */
 }
 
 input[type="text"],
@@ -52,13 +47,12 @@ input[type="email"] {
     padding: 10px;
     border-radius: 4px;
     border: 1px solid #ccc;
-    transition: border-color 0.3s ease; /* 输入框边框颜色过渡 */
-    width: 100%; /* 设置输入框宽度一致 */
-    box-sizing: border-box; /* 确保padding不会影响元素的宽度 */
+    transition: border-color 0.3s ease; 
+    width: 100%; 
+    box-sizing: border-box; 
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus {
     border-color: #4C49A2;
-    /* 输入焦点时边框颜色 */
 }

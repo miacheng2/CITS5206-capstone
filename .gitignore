@@ -30,3 +30,7 @@ yarn-error.log*
 
 # Ignore virtual environment
 venv/
+node_modules
+
+# Ignore the database file
+myproject/db.sqlite3

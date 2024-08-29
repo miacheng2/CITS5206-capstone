@@ -113,7 +113,7 @@ function TeamMemberList() {
     };
 
     const handleUploadClick = () => {
-        fileInputRef.current.click(); // 触发 file input 的点击事件
+        fileInputRef.current.click(); 
     };
 
     return (

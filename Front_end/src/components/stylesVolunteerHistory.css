@@ -1,0 +1,83 @@
+
+
+/* Container for Volunteer History */
+.volunteer-history-container {
+  padding: 20px;
+  margin-top: 20px; /* Ensure it is below the navbar */
+}
+
+/* Search Bar Styling */
+.search-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* Table Styling */
+.volunteer-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.volunteer-history-table th, 
+.volunteer-history-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.volunteer-history-table th {
+  background-color: #6b0c59;
+  color: white;
+}
+
+.volunteer-history-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Download Button Styling */
+.download-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #010634;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.download-btn:hover {
+  background-color: #8b2ec1;
+}
+
+
+.team-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.team-buttons button {
+  padding: 10px 15px;
+  background-color: #cb3679;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.team-buttons button:hover {
+  background-color: #8e0a73;
+}
+
+.team-buttons button:last-child {
+  background-color: #772581;
+}
+
+.team-buttons button:last-child:hover {
+  background-color: #45a049;
+}

@@ -37,17 +37,17 @@ function VolunteerPointsList() {
 
       {/* Cards Section */}
       <section className="cards-section">
-      <div className="card" onClick={() => navigate('/events')}>
+      <div className="card" onClick={() => navigate('/add-points')}>
           <h3>Add Volunteer Points</h3>
           <p>Log the volunteer hours and assign points.</p>
           <button className="learn-more">Learn more</button>
         </div>
-        <div className="card" onClick={() => navigate('/events')}>
+        <div className="card" onClick={() => navigate('/check-history')}>
           <h3>Check Volunteer History</h3>
           <p>View the detailed history of volunteer activities.</p>
           <button className="learn-more">Learn more</button>
         </div>
-        <div className="card" onClick={() => navigate('/events')}>
+        <div className="card" onClick={() => navigate('/reward-checkin')}>
           <h3>Reward Check-In</h3>
           <p>Check eligibility for rewards based on accumulated points.</p>
           <button className="learn-more">Learn more</button>

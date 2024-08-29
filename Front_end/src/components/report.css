@@ -1,0 +1,122 @@
+
+/* General Container Styles */
+.container {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    width: 80%;
+    padding-top: 100px; 
+}
+
+/* Home Section Styles */
+.report-section {
+    position: relative;
+    background-image: url('nycimg7.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100vh; 
+}
+
+.report-section .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.report-section .text-container {
+    text-align: center;
+    color: white;
+}
+
+
+.report-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    margin: 20px;
+  }
+  
+  .volunteer-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .volunteer-history-table th, .volunteer-history-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .volunteer-history-table th {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .charts-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+  }
+  
+  .leaderboard-section {
+    margin-top: 40px;
+  }
+  
+  .download-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .report-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+  }
+  
+  .toggle-buttons {
+    margin: 20px 0;
+    text-align: center;
+  }
+  
+  .toggle-buttons button {
+    margin: 0 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .toggle-buttons button:hover {
+    background-color: #45a049;
+  }
+    
+  .chart-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .chart-container {
+    width: 50%; /* Adjust the width as needed */
+    height: 300px; /* Adjust the height as needed */
+  }

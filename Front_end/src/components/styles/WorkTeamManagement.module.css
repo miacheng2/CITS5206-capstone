@@ -1,9 +1,17 @@
-/* WorkTeamManagement.module.css */
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+}
+
+/* Container Styles */
 .container {
     font-family: 'Helvetica Neue', Arial, sans-serif;
     background-color: #ffffff;
     color: #333;
-    min-width: 80%;
+    width: 80%;
     margin: 20px auto;
     padding: 20px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -15,6 +23,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Feature Box Styles */
 .feature {
     margin-top: 20px;
     padding: 15px;
@@ -47,15 +56,12 @@ td>button:last-child {
     color: #000;
 }
 
-
 .feature>div>div>button,
 td>button,
 .modalButtons>button {
     text-decoration: none;
     margin: 0 0.5em;
-    font-family: 'NunitoSans', sans-serif;
     font-weight: bold;
-    font-weight: normal;
     color: #fff;
     background-color: #4d48a4;
     border-color: #4d48a4;
@@ -71,16 +77,12 @@ td>button,
     color: #000;
 }
 
+/* Selected Row Style */
 .selectedRow {
     background-color: #e3dfb3 !important;
 }
 
-.container {
-    font-family: 'Arial', sans-serif;
-    color: #333;
-    margin: 20px auto;
-}
-
+/* Table Styles */
 .teamTable {
     width: 100%;
     margin-top: 20px;
@@ -106,6 +108,7 @@ td>button,
     border-bottom: none;
 }
 
+/* Modal Styles */
 .modal {
     position: fixed;
     top: 0;
@@ -140,15 +143,54 @@ td>button,
 
 .modalContent>form>label {
     margin: 0.5em;
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
 }
 
 .modalContent>form>label>input {
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
 }
 
 .modalButtons {
     margin-top: 20px;
     display: flex;
     justify-content: flex-end;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 768px) {
+    .container {
+        width: 90%;
+        padding: 10px;
+    }
+
+    .feature {
+        padding: 10px;
+    }
+
+    .teamTable th,
+    .teamTable td {
+        padding: 5px;
+        font-size: 12px;
+    }
+
+    .modalContent {
+        width: 90%;
+        max-width: 90%;
+    }
+
+    .modalContent>form>label {
+        width: 100%;
+    }
+
+    .modalContent>form>label>input {
+        width: 100%;
+    }
+
+    .navLinks {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
 }

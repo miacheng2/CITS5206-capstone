@@ -16,15 +16,16 @@ function Navbar({ logout }) {
                     <li><NavLink exact to="/" activeClassName={styles.active}><b>Home</b></NavLink></li>
                     <li><NavLink to="/memberManagement" activeClassName={styles.active}><b>Member Management</b></NavLink></li>
                     <li><NavLink to="/WorkTeamManagement" activeClassName={styles.active}><b>Team Member Management</b></NavLink></li>
-                    <li><NavLink to="/AdminUserManagement" activeClassName={styles.active}><b>Admin User Management</b></NavLink></li>
+                    <li><NavLink to="/AdminUserManagement" activeClassName={styles.active}><b>Admin Management</b></NavLink></li>
                     <li><NavLink to="/volunteer-points" activeClassName={styles.active}><b>Volunteer Points</b></NavLink></li>
                     <li><NavLink to="/events" activeClassName={styles.active}><b>Events</b></NavLink></li>
+                    <li><NavLink to="/reports" activeClassName={styles.active}><b>Reports</b></NavLink></li>
                 </ul>
             </nav>
             <div className={styles.leftDiv}>
                 <button 
                     className={styles.logoutButton} 
-                    onClick={logout}  // 简单地调用传递的 logout 函数
+                    onClick={logout}  
                 >
                     <b>Logout</b>
                 </button>
