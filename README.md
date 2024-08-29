@@ -118,11 +118,11 @@ python -m venv venv
 pip install -r requirements.txt
 
 # Step 5: Apply Database Migrations and Load Sample Data
+cd myproject
 python manage.py migrate
 python manage.py loaddata sample_data.json
 
 # Step 5:Run the backend/ Navigate to myproject directory
-cd myproject
 python manage.py runserver
 
 # Step 6:Run the frontend/open second terminal and Navigate to the Front_end/ directory.
