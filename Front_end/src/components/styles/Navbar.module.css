@@ -138,3 +138,12 @@ body {
 .dropdownItem:hover {
     background-color: #f1f1f1;
 }
+
+.navList {
+    list-style-type: none; /* Removes bullet points */
+    padding: 0; /* Removes default padding */
+    margin: 0; /* Removes default margin */
+    display: flex; /* Aligns items in a row */
+    align-items: center; /* Vertically aligns items */
+    justify-content: space-around; /* Adds spacing between items */
+}
