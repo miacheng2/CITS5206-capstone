@@ -80,6 +80,10 @@ function AddVolunteerPoints() {
 
   // fliter user by search query
   useEffect(() => {
+    console.log("Members data:", members);
+    console.log("Search query:", searchQuery);
+    console.log("Selected team:", selectedTeam);
+
     const filtered = members.filter((member) => {
       const nameMatches = member.name
         .toLowerCase()
@@ -88,9 +92,10 @@ function AddVolunteerPoints() {
         .toString()
         .includes(searchQuery);
 
-      // Check if the selected team is among the member's teams
+      // Check if selected team is among the member's teams
       const teamMatches =
-        selectedTeam === "" || member.team.includes(selectedTeam);
+        selectedTeam === "" ||
+        member.teams.some((team) => team.name === selectedTeam);
 
       // Return true if name or id matches, and if team matches
       return (nameMatches || idMatches) && teamMatches;
