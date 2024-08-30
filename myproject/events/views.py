@@ -3,10 +3,13 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
-from .models import TeamMember, Event, VolunteerPoints
+from .models import User, Team, TeamMember, Event, VolunteerPoints
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
+from django.db.models import Sum, F, IntegerField
+from django.db.models.functions import ExtractYear
 import logging
 
 logger = logging.getLogger(__name__)
@@ -117,7 +120,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     serializer_class = VolunteerPointsSerializer
     permission_classes = [AllowAny]
 
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 class UpdateProfileView(APIView):
     permission_classes = [AllowAny]
@@ -147,7 +150,7 @@ class UpdateProfileView(APIView):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 class ChangePasswordView(APIView):
     permission_classes = [AllowAny]  # Allow All for now
@@ -175,3 +178,54 @@ class ChangePasswordView(APIView):
             return Response({"detail": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class TeamViewSet(viewsets.ModelViewSet):
+    queryset = Team.objects.all()
+    serializer_class = TeamSerializer
+
+class TeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.all()
+    serializer_class = TeamMemberSerializer
+
+class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+
+class VolunteerPointsViewSet(viewsets.ModelViewSet):
+    queryset = VolunteerPoints.objects.all()
+    serializer_class = VolunteerPointsSerializer
+
+class AllMembersPointsAPIView(APIView):
+    def get(self, request):
+        # Aggregate points and hours by member and year
+        points_data = VolunteerPoints.objects.select_related('member').annotate(
+            year=ExtractYear('event__date')
+        ).values(
+            'member__name', 
+            'member__australian_sailing_number', 
+            'member__membership_category',
+            'member__teams',
+            'year'
+        ).annotate(
+            total_points=Sum('points'),
+            total_hours=Sum('hours', output_field=IntegerField())
+        ).order_by('member__name', 'year')
+        
+        # Convert the queryset to a list of dictionaries
+        results = []
+        for data in points_data:
+            results.append({
+                "name": data['member__name'],
+                "id": data['member__australian_sailing_number'],
+                "membership_category": data['member__membership_category'],
+                "teams":data['member__teams'],
+                "year": data['year'],
+                "total_points": data['total_points'],
+                "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
+            })
+        
+        return Response(results)
