@@ -82,105 +82,104 @@ td>button:last-child {
     background-color: #e3dfb3 !important;
 }
 
-<<<<<<< HEAD
 
 /* Table Styles */
 .teamTable {
     width: 100%;
     margin-top: 20px;
     border-collapse: collapse;
+}
 
-    =======.container {
-        font-family: 'Arial', sans-serif;
-        color: #333;
-        margin: 20px auto;
-    }
+.container {
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 20px auto;
+}
 
-    .teams {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-        gap: 1em;
-        >>>>>>>Xia_Front_End
-    }
+.teams {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1em;
+}
 
-    .teamCard {
-        min-width: 400px;
-        border-radius: 20px;
-        background-color: #fff;
-        padding: 1em;
-        margin: 1em;
-        transition: all 0.3s;
-        box-shadow: 5px 5px 15px #bcbcbc;
-    }
+.teamCard {
+    min-width: 400px;
+    border-radius: 20px;
+    background-color: #fff;
+    padding: 1em;
+    margin: 1em;
+    transition: all 0.3s;
+    box-shadow: 5px 5px 15px #bcbcbc;
+}
 
-    .teamCard:hover {
-        box-shadow: 10px 10px 20px #818181;
-    }
+.teamCard:hover {
+    box-shadow: 10px 10px 20px #818181;
+}
 
-    .teamCardUp {
-        padding: 0 1em;
-        border-radius: 20px;
-        background-color: #4d48a4;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        color: #fff;
-    }
+.teamCardUp {
+    padding: 0 1em;
+    border-radius: 20px;
+    background-color: #4d48a4;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #fff;
+}
 
-    .teamCardUp>button {
-        background-color: #eedc15;
-        color: #4d48a4;
-    }
+.teamCardUp>button {
+    background-color: #eedc15;
+    color: #4d48a4;
+}
 
-    .teamCardDown>div {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+.teamCardDown>div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-    .popupBack {
-        position: absolute;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: #33333368;
-    }
+.popupBack {
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #33333368;
+}
 
-    .popup {
-        border-radius: 20px;
-        background-color: #fff;
-        width: 1280px;
-        margin: 20em auto;
-        padding: 1em;
-    }
+.popup {
+    border-radius: 20px;
+    background-color: #fff;
+    width: 1280px;
+    margin: 20em auto;
+    padding: 1em;
+}
 
-    .popupContent {
-        padding: 1em;
-    }
+.popupContent {
+    padding: 1em;
+}
 
-    .popupContent:last-child * {
-        margin-top: 1em;
-    }
+.popupContent:last-child * {
+    margin-top: 1em;
+}
 
-    .teamAddMember {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
-    }
+.teamAddMember {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
 
-    .teamAddMember * {
-        margin: 1em;
-    }
+.teamAddMember * {
+    margin: 1em;
+}
 
-    .editTeam {
-        display: flex;
-        align-items: center;
-    }
+.editTeam {
+    display: flex;
+    align-items: center;
+}
 
-    .editTeam * {
-        margin: 1em 1em 0 0;
-    }
+.editTeam * {
+    margin: 1em 1em 0 0;
+}
 
-    table {
-        margin-bottom: 1em;
-    }
+table {
+    margin-bottom: 1em;
+}
