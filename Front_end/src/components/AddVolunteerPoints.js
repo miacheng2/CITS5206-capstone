@@ -12,33 +12,6 @@ function AddVolunteerPoints() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
 
-  // // Simulated list of admins and leaders
-  // const adminsAndLeaders = ["Admin1", "Leader1", "Admin2", "Leader2"];
-
-  // // List of maintenance teams and events
-  // const maintenanceTeams = [
-  //   "Grounds and Gardens",
-  //   "Support Boat Maintenance",
-  //   "Storage Maintenance",
-  //   "Sail Training Boat Maintenance",
-  // ];
-  // const maintenanceEvents = [
-  //   "Busy Bee",
-  //   "Repairs",
-  //   "Cleaning",
-  //   "F Shed Drain repairs",
-  // ];
-
-  // useEffect(() => {
-  //   // Simulated data for the demo
-  //   const demoMembers = [
-  //     { id: 1, firstName: 'John', lastName: 'Doe', team: 'Grounds and Gardens' },
-  //     { id: 2, firstName: 'Jane', lastName: 'Smith', team: 'Support Boat Maintenance' },
-  //     { id: 3, firstName: 'Bob', lastName: 'Brown', team: 'Storage Maintenance' },
-  //   ];
-  //   setMembers(demoMembers);
-  // }, []);
-  // Fetch users
   useEffect(() => {
     fetch("http://localhost:8000/api/users/")
       .then((response) => response.json())
@@ -80,10 +53,6 @@ function AddVolunteerPoints() {
 
   // fliter user by search query
   useEffect(() => {
-    console.log("Members data:", members);
-    console.log("Search query:", searchQuery);
-    console.log("Selected team:", selectedTeam);
-
     const filtered = members.filter((member) => {
       const nameMatches = member.name
         .toLowerCase()
@@ -104,11 +73,6 @@ function AddVolunteerPoints() {
   }, [searchQuery, members, selectedTeam]);
 
   const handleSelectMember = (member) => {
-    // Find the latest event or set a default date
-    // const latestEvent = maintenanceEvents.reduce((latest, event) => {
-    //   return new Date(event.date) > new Date(latest.date) ? event : latest;
-    // }, maintenanceEvents[0] || { date: "" });
-
     setSelectedMember({
       ...member,
       // volunteerDate: latestEvent.date || "",

@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
+from django.db.models import Sum, F, IntegerField
+from django.db.models.functions import ExtractYear
 import logging
 
 logger = logging.getLogger(__name__)
@@ -196,3 +198,34 @@ class EventViewSet(viewsets.ModelViewSet):
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
+
+class AllMembersPointsAPIView(APIView):
+    def get(self, request):
+        # Aggregate points and hours by member and year
+        points_data = VolunteerPoints.objects.select_related('member').annotate(
+            year=ExtractYear('event__date')
+        ).values(
+            'member__name', 
+            'member__australian_sailing_number', 
+            'member__membership_category',
+            'member__teams',
+            'year'
+        ).annotate(
+            total_points=Sum('points'),
+            total_hours=Sum('hours', output_field=IntegerField())
+        ).order_by('member__name', 'year')
+        
+        # Convert the queryset to a list of dictionaries
+        results = []
+        for data in points_data:
+            results.append({
+                "name": data['member__name'],
+                "id": data['member__australian_sailing_number'],
+                "membership_category": data['member__membership_category'],
+                "teams":data['member__teams'],
+                "year": data['year'],
+                "total_points": data['total_points'],
+                "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
+            })
+        
+        return Response(results)
