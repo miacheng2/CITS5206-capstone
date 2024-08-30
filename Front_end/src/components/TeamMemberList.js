@@ -1,147 +1,214 @@
-import React, { useEffect, useState, useRef } from 'react';
-import api from '../api';
-import styles from './styles/Membermanagement.module.css';
-import Papa from 'papaparse';
+import React, { useState } from 'react';
+import { saveAs } from 'file-saver';
 
-const membershipCategories = [
-    'Senior sailing membership',
-    'Senior crew membership',
-    'Junior sailing membership',
-    'Family membership',
-    'Non sailing membership',
-    'Provisional Membership',
-    'Pensioner/Student',
-];
+import styles from './styles/TeamMemberList.module.css';
 
-function TeamMemberList() {
-    const [members, setMembers] = useState([]);
-    const [currentMember, setCurrentMember] = useState({ id: null, name: '', email: '', membershipCategory: '' });
-    const [editMode, setEditMode] = useState(false);
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+const TeamMemberList = () => {
+    const [teamMembers, setTeamMembers] = useState([
+        { numberId: "683561", firstName: "Michael", lastName: "Roberts", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
+        { numberId: "683562", firstName: "Dianne", lastName: "Russell", email: "Russell@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Painting and building maintenance" },
+        { numberId: "68353", firstName: "Anette", lastName: "Black", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
+    ]);
 
-    const fileInputRef = useRef(null); // 创建引用
+    const generateTableHeaders = (data) => {
+        if (data.length > 0) {
+            return Object.keys(data[0]).map(key => {
+                const header = key.replace(/([A-Z])/g, ' $1').trim();
+                return header.charAt(0).toUpperCase() + header.slice(1);
+            });
+        }
+        return [];
+    };
 
-    useEffect(() => {
-        fetchMembers();
-    }, []);
+    const [selectedMembers, setSelectedMembers] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newMember, setNewMember] = useState({
+        numberId: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        mobile: '',
+        paymentStatus: '',
+        volubteerOrPay: '',
+        teamType: '',
+        status: ''
+    });
 
-    const fetchMembers = async () => {
-        try {
-            const response = await api.get('team-members/');
-            setMembers(response.data);
-        } catch (error) {
-            console.error("Error fetching the team members:", error);
-            setError('Failed to fetch team members');
+    const selectAll = () => {
+        const newSelection = {};
+        teamMembers.forEach(member => {
+            newSelection[member.email] = true;
+        });
+        setSelectedMembers(newSelection);
+    };
+
+    const unselectAll = () => {
+        setSelectedMembers({});
+    };
+
+    const exportSelected = () => {
+        const selectedData = teamMembers.filter(member => selectedMembers[member.email]);
+
+        if (selectedData.length > 0) {
+            const headers = Object.keys(selectedData[0]).join(',');
+            const csvContent = selectedData.reduce((acc, member) => {
+                const row = Object.values(member).join(',');
+                return acc + row + '\n';
+            }, headers + '\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, "selected-team-members.csv");
+        } else {
+            alert("No members selected for export.");
         }
     };
 
-    const handleMemberChange = (event) => {
-        const { name, value } = event.target;
-        setCurrentMember(prevMember => ({
+    const invertSelection = () => {
+        const newSelection = {};
+        teamMembers.forEach(member => {
+            newSelection[member.email] = !selectedMembers[member.email];
+        });
+        setSelectedMembers(newSelection);
+    };
+
+    const toggleSelection = (email) => {
+        setSelectedMembers(prev => ({
+            ...prev,
+            [email]: !prev[email]
+        }));
+    };
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setNewMember({
+            numberId: '',
+            firstName: '',
+            lastName: '',
+            email: '',
+            mobile: '',
+            paymentStatus: '',
+            volubteerOrPay: '',
+            teamType: '',
+            status: ''
+        });
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewMember(prevMember => ({
             ...prevMember,
             [name]: value
         }));
     };
 
-    const createOrUpdateMember = async () => {
-        if (editMode) {
-            try {
-                const response = await api.put(`team-members/${currentMember.id}/`, currentMember);
-                const updatedMembers = members.map(member => member.id === currentMember.id ? response.data : member);
-                setMembers(updatedMembers);
-                setMessage('Member updated successfully');
-            } catch (error) {
-                console.error('Error updating member:', error);
-                setError('Failed to update member');
-            }
-        } else {
-            try {
-                const response = await api.post('team-members/', currentMember);
-                setMembers([...members, response.data]);
-                setMessage('Member created successfully');
-            } catch (error) {
-                console.error('Error creating member:', error);
-                setError('Failed to create member');
-            }
-        }
-        resetForm();
-    };
-
-    const deleteMember = async (id) => {
-        try {
-            await api.delete(`team-members/${id}/`);
-            setMembers(members.filter(member => member.id !== id));
-            setMessage('Member deleted successfully');
-        } catch (error) {
-            console.error('Error deleting member:', error);
-            setError('Failed to delete member');
-        }
-    };
-
-    const editMember = (member) => {
-        setEditMode(true);
-        setCurrentMember({ ...member });
-    };
-
-    const viewMember = (member) => {
-        alert(`Name: ${member.name}\nEmail: ${member.email}\nCategory: ${member.membershipCategory}`);
-    };
-
-    const resetForm = () => {
-        setCurrentMember({ id: null, name: '', email: '', membershipCategory: '' });
-        setEditMode(false);
-        setError('');
-        setMessage('');
-    };
-
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        Papa.parse(file, {
-            header: true,
-            complete: function (results) {
-                results.data.forEach(member => {
-                    api.post('team-members/', member).then(response => {
-                        setMembers(prevMembers => [...prevMembers, response.data]);
-                    }).catch(error => {
-                        console.error('Error importing member:', error);
-                        setError('Failed to import members');
-                    });
-                });
-            }
-        });
-    };
-
-    const handleUploadClick = () => {
-        fileInputRef.current.click(); // 触发 file input 的点击事件
+    const addMember = () => {
+        setTeamMembers(prevMembers => [...prevMembers, newMember]);
+        closeModal();
     };
 
     return (
-        <div className={styles.teamMemberList}>
+        <div className={styles.container}>
             <h1>NYC Member Management</h1>
-            <ul>
-                {members.map(member => (
-                    <li key={member.id}>
-                        {member.name} ({member.email}) - {member.membershipCategory}
-                        <button onClick={() => editMember(member)}>Edit</button>
-                        <button onClick={() => deleteMember(member.id)}>Delete</button>
-                        <button onClick={() => viewMember(member)}>View</button>
-                    </li>
-                ))}
-            </ul>
-            <div className={styles.form}>
-                <h2>{editMode ? 'Edit' : 'Create'} Team Member</h2>
-                <input name="name" type="text" placeholder="Name" value={currentMember.name} onChange={handleMemberChange} />
-                <input name="email" type="email" placeholder="Email" value={currentMember.email} onChange={handleMemberChange} />
-                <input name="membershipCategory" type="text" placeholder="Membership Category" value={currentMember.membershipCategory} onChange={handleMemberChange} />
-                <button onClick={createOrUpdateMember}>{editMode ? 'Update' : 'Create'}</button>
-                <input id="csvUpload" type="file" onChange={handleFileUpload} ref={fileInputRef} style={{ display: 'none' }} />
-                <button className={styles.csvUploadBtn} onClick={handleUploadClick}>Upload CSV</button>
-                {message && <p className={styles.message + ' ' + (error ? styles.error : styles.success)}>{message || error}</p>}
-                {editMode && <button onClick={resetForm}>Cancel Edit</button>}
+            <div className={styles.feature}>
+                <div>
+                    <div>
+                        <button onClick={selectAll}>Select All</button>
+                        <button onClick={invertSelection}>Select Inverse</button>
+                        <button onClick={unselectAll}>Unselect All</button>
+                        <button onClick={exportSelected}>Export Selected to CSV</button>
+                    </div>
+                    <div>
+                        <button onClick={openModal}>Add +</button>
+                        <button>Import From CSV</button>
+                        <button>Export ALL To CSV</button>
+                    </div>
+                </div>
+                <table className={styles.teamTable}>
+                    <thead>
+                        <tr>
+                            <th>Select</th>
+                            {teamMembers.length > 0 && generateTableHeaders(teamMembers).map((header, index) => (
+                                <th key={index}>{header}</th>
+                            ))}
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {teamMembers.map(member => (
+                            <tr key={member.email}
+                                className={selectedMembers[member.email] ? styles.selectedRow : ''}
+                                onClick={() => toggleSelection(member.email)}>
+                                <td onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                        type='checkBox'
+                                        checked={!!selectedMembers[member.email]}
+                                        onChange={() => toggleSelection(member.email)}
+                                    />
+                                </td>
+                                {Object.values(member).map((value, index) => (
+                                    <td key={index}>{value}</td>
+                                ))}
+                                <td>
+                                    <button>Edit</button>
+                                    <button>Suspend</button>
+                                    <button>Delete</button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
+            {isModalOpen && (
+                <div className={styles.modal}>
+                    <div className={styles.modalContent}>
+                        <h2>Add New Member</h2>
+                        <form>
+                            <label>
+                                Name:
+                                <input type="text" name="name" value={newMember.name} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Email:
+                                <input type="text" name="email" value={newMember.email} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Date of Birth:
+                                <input type="text" name="dob" value={newMember.dob} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Country:
+                                <input type="text" name="country" value={newMember.country} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Start Date:
+                                <input type="text" name="startDate" value={newMember.startDate} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Type:
+                                <input type="text" name="type" value={newMember.type} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Position:
+                                <input type="text" name="position" value={newMember.position} onChange={handleInputChange} />
+                            </label>
+                            <label>
+                                Status:
+                                <input type="text" name="status" value={newMember.status} onChange={handleInputChange} />
+                            </label>
+                        </form>
+                        <div className={styles.modalButtons}>
+                            <button onClick={addMember}>Create</button>
+                            <button onClick={closeModal}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
-}
+};
 
 export default TeamMemberList;

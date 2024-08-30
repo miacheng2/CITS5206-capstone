@@ -1,4 +1,4 @@
-# CITS5206 Group Project -- Group Number-17 -- Project 4 -- NYC Volunteer Management System
+gi y# CITS5206 Group Project -- Group Number-17 -- Project 4 -- NYC Volunteer Management System
 
 ## Group Member Information Table
 
@@ -86,19 +86,19 @@ The Nedland Yacht Club (NYC) Volunteer Management System is designed to streamli
 
 ### Members
 
-- Fields: ID, User ID, Member Type, Join Date
+- Fields: australian_sailing_number, first_name, last_name, mobile, email_address, payment_status, volunteer_levy_status, volunteer_teams
 
 ### Teams
 
 - Fields: ID, Team Name, Team Description, Creation Date
 
-### Activities
+### Event
 
-- Fields: ID, Activity Name, Description, Location, Time
+- Fields: ID, Event Name, Event Type, Event date, Create By
 
-### Points
+### Volunteer Points
 
-- Fields: ID, User ID, Activity ID, Points Awarded, Date Awarded
+- Fields: ID, Member ID, Event ID, Points Awarded, Volunteer hours, Awarded by
 
 ## Getting Started
 
@@ -117,8 +117,12 @@ python -m venv venv
 # Step 4: Install Python Dependencies
 pip install -r requirements.txt
 
-# Step 5:Run the backend/ Navigate to myproject directory
+# Step 5: Apply Database Migrations and Load Sample Data
 cd myproject
+python manage.py migrate
+python manage.py loaddata sample_data.json
+
+# Step 5:Run the backend/ Navigate to myproject directory
 python manage.py runserver
 
 # Step 6:Run the frontend/open second terminal and Navigate to the Front_end/ directory.
