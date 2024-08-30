@@ -44,7 +44,8 @@
       "name": "Michael Roberts",
       "email": "michael.roberts@example.com",
       "membership_category": "Senior sailing membership",
-      "will_volunteer_or_pay_levy": "I will volunteer"
+      "will_volunteer_or_pay_levy": "I will volunteer",
+      "teams": [1, 2]
     }
   },
   {
@@ -54,7 +55,8 @@
       "name": "Jane Smith",
       "email": "jane.smith@example.com",
       "membership_category": "Family membership",
-      "will_volunteer_or_pay_levy": "I will pay the levy"
+      "will_volunteer_or_pay_levy": "I will pay the levy",
+      "teams": [1]
     }
   },
   {
@@ -64,7 +66,8 @@
       "name": "Emily Johnson",
       "email": "emily.johnson@example.com",
       "membership_category": "Non sailing membership",
-      "will_volunteer_or_pay_levy": null
+      "will_volunteer_or_pay_levy": null,
+      "teams": [2]
     }
   },
   {
