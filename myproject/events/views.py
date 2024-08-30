@@ -3,13 +3,19 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from .models import User, Team, TeamMember, Event, VolunteerPoints
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer
 from django.db.models import Sum, F, IntegerField
+from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.db import IntegrityError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,31 +26,66 @@ from .serializers import (
     VolunteerPointsSerializer,
     ChangePasswordSerializer,
 )
+
+User = get_user_model()
+
 class RegisterView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = []
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print(serializer.errors)  # 打印验证错误
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }, status=status.HTTP_200_OK)
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class CustomAuthToken(APIView):
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user:
+            if user.is_active:
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                })
+            else:
+                return Response({"detail": "Account is not active."}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({"detail": "No active account found with the given credentials."}, status=status.HTTP_401_UNAUTHORIZED)    
 
-      
-        if not username or not password:
-            return Response({'message': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        user = self.user  # super().validate(attrs) 会设置 self.user
 
-       
-        if User.objects.filter(username=username).exists():
-            return Response({'message': 'Username already exists'}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            # crate admin user
-            user = User.objects.create(
-                username=username,
-                password=make_password(password)  
-            )
-            return Response({'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
-        except Exception as e:
-         
-            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # 添加用户类型
+        data['user_type'] = user.user_type
         
+        # 添加其他自定义信息
+        data['email'] = user.email
+        data['is_admin'] = user.is_admin
+        data['last_login'] = user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else None
+        
+        return data
+
 
 class GetProfileView(APIView):
     permission_classes = [AllowAny] 
