@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
-from .models import TeamMember, Event, VolunteerPoints
+from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
 import logging
 
