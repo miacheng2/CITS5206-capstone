@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from .models import User, Team, TeamMember, Event, VolunteerPoints
@@ -120,7 +120,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     serializer_class = VolunteerPointsSerializer
     permission_classes = [AllowAny]
 
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 class UpdateProfileView(APIView):
     permission_classes = [AllowAny]
@@ -150,7 +150,7 @@ class UpdateProfileView(APIView):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 
 class ChangePasswordView(APIView):
     permission_classes = [AllowAny]  # 禁用认证

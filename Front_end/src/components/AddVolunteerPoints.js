@@ -12,10 +12,12 @@ function AddVolunteerPoints() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
 
+  // Fetch users
   useEffect(() => {
     fetch("http://localhost:8000/api/users/")
       .then((response) => response.json())
       .then((data) => {
+        console.log("Fetched user data:", data);
         setUser(data);
       })
       .catch((error) => console.error("Error fetching data:", error));
@@ -26,7 +28,6 @@ function AddVolunteerPoints() {
     fetch("http://localhost:8000/api/team-members/")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched members data:", data);
         setMembers(data);
       })
       .catch((error) => console.error("Error fetching data:", error));
@@ -344,8 +345,8 @@ function AddVolunteerPoints() {
                 >
                   <option value="">Select Name</option>
                   {adminsAndLeaders.map((user) => (
-                    <option key={user.name} value={user.name}>
-                      {user.name}
+                    <option key={user.username} value={user.username}>
+                      {user.username}
                     </option>
                   ))}
                 </select>
