@@ -1,13 +1,44 @@
 from rest_framework import serializers
-# from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from .models import User, Team, TeamMember, Event, VolunteerPoints
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','email', 'username', 'user_type']
+        fields = ['username', 'email', 'password', 'user_type']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
 
+    def validate_user_type(self, value):
+        if value not in ['admin', 'team_leader']:
+            raise serializers.ValidationError("Invalid user type")
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+class AuthTokenSerializer(serializers.Serializer):
+    username = serializers.CharField(label="Username")
+    password = serializers.CharField(
+        label="Password",
+        style={'input_type': 'password'},
+        trim_whitespace=False
+    )
+
+    def validate(self, attrs):
+        username = attrs.get('username')
+        password = attrs.get('password')
+
+        if username and password:
+            
+            return attrs
+        else:
+            raise serializers.ValidationError("Username and password are required.")
+        
 class TeamMemberUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember

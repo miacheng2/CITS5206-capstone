@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import TeamMemberList from './components/TeamMemberList';
 import WorkTeamManagement from './components/WorkTeamManagement';
 import AdminUserManagement from './components/AdminUserManagement';
@@ -9,6 +9,7 @@ import AddVolunteerPoints from './components/AddVolunteerPoints';
 import CheckVolunteerHistory from './components/CheckVolunteerHistory';
 import RewardCheckin from './components/RewardCheckin';
 import Login from './components/Login';
+import Register from './components/Register';
 import Navbar from './components/Navbar';
 import Report from './components/Report';
 import Home from './components/Home';
@@ -25,6 +26,7 @@ function App() {
             setToken(storedToken);
         }
     }, []);
+    
 
     const logout = () => {
         setToken(null);
@@ -36,13 +38,15 @@ function App() {
         <Router>
             {!token ? (
                 <Routes>
-                    <Route path="*" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
+                    <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
+                    <Route path="/register" element={<Register setToken={setToken} />} />
+                    <Route path="*" element={<Navigate replace to="/login" />} />
                 </Routes>
             ) : (
                 <>
-            
                     <Navbar setToken={setToken} logout={logout} />
                     <Routes>
+                     
                         <Route path="/" element={<Home setToken={setToken} userProfile={userProfile} />} />
                         <Route path="/memberManagement" element={<TeamMemberList />} />
                         <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
@@ -53,12 +57,13 @@ function App() {
                         <Route path="/reward-checkin" element={<RewardCheckin />} />
                         <Route path="/volunteer-points" element={<VolunteerPointsList />} />
                         <Route path="/reports" element={<Report />} />
-                        <Route path="/login" element={<Login setToken={setToken} setUserProfile={setUserProfile} />} />
+                    
+                        <Route path="/logout" element={<Navigate replace to="/login" />} />
+                     
+                        <Route path="*" element={<Navigate replace to="/" />} />
                     </Routes>
-                    </>
-                )}
-               
-            
+                </>
+            )}
         </Router>
     );
 }

@@ -1,23 +1,27 @@
+# models.py
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, username, user_type, password=None):
+    def create_user(self, username, email, user_type, password=None):
+        if not username:
+            raise ValueError('Users must have a username')
         if not email:
             raise ValueError('Users must have an email address')
         user = self.model(
-            email=self.normalize_email(email),
             username=username,
+            email=self.normalize_email(email),
             user_type=user_type,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, user_type='admin', password=None):
+    def create_superuser(self, username, email, user_type='admin', password=None):
         user = self.create_user(
-            email=email,
             username=username,
+            email=email,
             user_type=user_type,
             password=password,
         )
@@ -33,8 +37,8 @@ class User(AbstractBaseUser):
         (TEAM_LEADER, 'Team Leader'),
     ]
     
-    email = models.EmailField(unique=True)  # Email is unique but not the primary key
-    username = models.CharField(max_length=50)
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=50, unique=True)  
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     
     is_active = models.BooleanField(default=True)
@@ -42,11 +46,11 @@ class User(AbstractBaseUser):
     
     objects = UserManager()
     
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'user_type']
-    
+    USERNAME_FIELD = 'username' 
+    REQUIRED_FIELDS = ['email', 'user_type']
+
     def __str__(self):
-        return self.email
+        return self.username
     
     def has_perm(self, perm, obj=None):
         return True
