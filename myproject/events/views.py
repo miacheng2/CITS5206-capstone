@@ -9,6 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
+from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer
 from django.db.models import Sum, F, IntegerField
@@ -37,7 +38,7 @@ class RegisterView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)  # 打印验证错误
+        print(serializer.errors)  
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
@@ -74,12 +75,11 @@ class CustomAuthToken(APIView):
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
-        user = self.user  # super().validate(attrs) 会设置 self.user
+        user = self.user  # super().validate(attrs) self.user
 
-        # 添加用户类型
         data['user_type'] = user.user_type
         
-        # 添加其他自定义信息
+     
         data['email'] = user.email
         data['is_admin'] = user.is_admin
         data['last_login'] = user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else None
@@ -240,6 +240,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
 
+# get all members' point view
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
         # Aggregate points and hours by member and year
@@ -270,3 +271,13 @@ class AllMembersPointsAPIView(APIView):
             })
         
         return Response(results)
+
+
+# update volunteer point view
+@api_view(['POST'])
+def save_volunteer_points(request):
+    serializer = VolunteerPointsSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
