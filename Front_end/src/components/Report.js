@@ -1,318 +1,29 @@
-// import React, { useEffect, useState } from "react";
-// import { Bar, Line } from "react-chartjs-2";
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   LineElement,
-//   PointElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
-// import "./report.css"; // Import the CSS file
+import React, { useState, useEffect, useCallback } from "react";
+import { Bar, Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import "./report.css";
 
-// // Register the necessary elements with Chart.js
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   BarElement,
-//   LineElement,
-//   PointElement,
-//   Title,
-//   Tooltip,
-//   Legend
-// );
-
-// const Report = () => {
-//   const [volunteers, setVolunteers] = useState([]);
-//   const [filteredVolunteers, setFilteredVolunteers] = useState([]);
-//   const [groupedVolunteers, setGroupedVolunteers] = useState({});
-//   const [selectedTeam, setSelectedTeam] = useState("All Teams");
-//   const [searchQuery, setSearchQuery] = useState("");
-//   const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =
-//     useState(false);
-//   const [showVolunteerHoursGraph, setShowVolunteerHoursGraph] = useState(false);
-//   const [showTopPerformers, setShowTopPerformers] = useState(false);
-
-//   // Data for team performance comparison graph
-//   const teamPerformanceData = {
-//     labels: [
-//       "Grounds and Gardens",
-//       "Support Boat Maintenance",
-//       "Storage Maintenance",
-//       "Sail Training Boat Maintenance",
-//     ],
-//     datasets: [
-//       {
-//         label: "Total Points",
-//         data: [300, 450, 200, 350],
-//         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
-//       },
-//     ],
-//   };
-
-//   // Data for monthly volunteer hours graph
-//   const volunteerHoursData = {
-//     labels: ["January", "February", "March", "April", "May", "June", "July"],
-//     datasets: [
-//       {
-//         label: "Total Volunteering Hours",
-//         data: [100, 150, 200, 250, 300, 400, 450],
-//         fill: false,
-//         borderColor: "#4BC0C0",
-//       },
-//     ],
-//   };
-
-//   // Options for team performance graph
-//   const teamPerformanceOptions = {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         position: "top",
-//       },
-//       title: {
-//         display: true,
-//         text: "Team Performance Comparison",
-//       },
-//     },
-//   };
-
-//   // Options for volunteer hours graph
-//   const volunteerHoursOptions = {
-//     responsive: true,
-//     plugins: {
-//       legend: {
-//         position: "top",
-//       },
-//       title: {
-//         display: true,
-//         text: "Monthly Volunteer Hours",
-//       },
-//     },
-//   };
-
-//   useEffect(() => {
-//     const fetchVolunteers = async () => {
-//       // Simulated data fetch (replace with actual API call)
-//       const data = [
-//         {
-//           id: 1,
-//           name: "John Doe",
-//           team: "Grounds and Gardens",
-//           totalHours: 40,
-//           totalPoints: 150,
-//         },
-//         {
-//           id: 2,
-//           name: "Jane Smith",
-//           team: "Support Boat Maintenance",
-//           totalHours: 35,
-//           totalPoints: 120,
-//         },
-//         {
-//           id: 3,
-//           name: "Bob Brown",
-//           team: "Storage Maintenance",
-//           totalHours: 30,
-//           totalPoints: 100,
-//         },
-//         {
-//           id: 4,
-//           name: "Alice Johnson",
-//           team: "Sail Training Boat Maintenance",
-//           totalHours: 50,
-//           totalPoints: 200,
-//         },
-//         {
-//           id: 5,
-//           name: "Eve Davis",
-//           team: "Grounds and Gardens",
-//           totalHours: 20,
-//           totalPoints: 70,
-//         },
-//       ];
-
-//       setVolunteers(data);
-//       setFilteredVolunteers(data);
-
-//       // Group volunteers by team
-//       const grouped = data.reduce((acc, curr) => {
-//         if (!acc[curr.team]) {
-//           acc[curr.team] = [];
-//         }
-//         acc[curr.team].push(curr);
-//         return acc;
-//       }, {});
-
-//       // Sort volunteers within each team by total hours
-//       for (const team in grouped) {
-//         grouped[team].sort((a, b) => b.totalHours - a.totalHours);
-//       }
-
-//       setGroupedVolunteers(grouped);
-//     };
-
-//     fetchVolunteers();
-//   }, []);
-
-//   const handleSearch = (e) => {
-//     setSearchQuery(e.target.value);
-//     filterVolunteers(e.target.value, selectedTeam);
-//   };
-
-//   const handleTeamSelection = (team) => {
-//     setSelectedTeam(team);
-//     filterVolunteers(searchQuery, team);
-//   };
-
-//   const filterVolunteers = (query, team) => {
-//     let filtered = volunteers.filter(
-//       (volunteer) =>
-//         volunteer.name.toLowerCase().includes(query.toLowerCase()) &&
-//         (team === "All Teams" || volunteer.team === team)
-//     );
-//     setFilteredVolunteers(filtered);
-//   };
-
-//   return (
-//     <div className="report-container">
-//       <h1 style={{ color: "#333" }}>Volunteer Reports</h1>
-
-//       {/* Search Bar and Team Selection Buttons */}
-//       <div className="filter-section">
-//         <input
-//           type="text"
-//           placeholder="Search by Name"
-//           value={searchQuery}
-//           onChange={handleSearch}
-//           className="search-bar"
-//         />
-
-//         <div className="team-buttons">
-//           {[
-//             "Grounds and Gardens",
-//             "Support Boat Maintenance",
-//             "Storage Maintenance",
-//             "Sail Training Boat Maintenance",
-//             "All Teams",
-//           ].map((team) => (
-//             <button
-//               key={team}
-//               className={`team-button ${selectedTeam === team ? "active" : ""}`}
-//               onClick={() => handleTeamSelection(team)}
-//             >
-//               {team}
-//             </button>
-//           ))}
-//           <button className="add-team-button">Add New Team</button>
-//         </div>
-//       </div>
-
-//       {/* Volunteer Data Table */}
-//       <div className="table-section">
-//         <h2 style={{ color: "#333" }}>All Volunteer Data</h2>
-//         <table className="volunteer-table">
-//           <thead>
-//             <tr>
-//               <th>ID</th>
-//               <th>Name</th>
-//               <th>Team</th>
-//               <th>Total Hours</th>
-//               <th>Total Points</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {filteredVolunteers.map((volunteer) => (
-//               <tr key={volunteer.id}>
-//                 <td>{volunteer.id}</td>
-//                 <td>{volunteer.name}</td>
-//                 <td>{volunteer.team}</td>
-//                 <td>{volunteer.totalHours}</td>
-//                 <td>{volunteer.totalPoints}</td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {/* Toggle buttons for graphs and top performers */}
-//       <div className="toggle-buttons">
-//         <button
-//           onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
-//         >
-//           {showTeamPerformanceGraph
-//             ? "Hide Team Performance Graph"
-//             : "Show Team Performance Graph"}
-//         </button>
-//         <button
-//           onClick={() => setShowVolunteerHoursGraph(!showVolunteerHoursGraph)}
-//         >
-//           {showVolunteerHoursGraph
-//             ? "Hide Volunteer Hours Graph"
-//             : "Show Volunteer Hours Graph"}
-//         </button>
-//         <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
-//           {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
-//         </button>
-//       </div>
-
-//       {/* Section for top performers by team in table format */}
-//       {showTopPerformers && (
-//         <div className="grouped-volunteers-section">
-//           <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
-//           {Object.keys(groupedVolunteers).map((team) => (
-//             <div key={team}>
-//               <h3 style={{ color: "#333" }}>{team}</h3>
-//               <table className="volunteer-table">
-//                 <thead>
-//                   <tr>
-//                     <th>ID</th>
-//                     <th>Name</th>
-//                     <th>Total Hours</th>
-//                     <th>Total Points</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   {groupedVolunteers[team].slice(0, 3).map((volunteer) => (
-//                     <tr key={volunteer.id}>
-//                       <td>{volunteer.id}</td>
-//                       <td>{volunteer.name}</td>
-//                       <td>{volunteer.totalHours}</td>
-//                       <td>{volunteer.totalPoints}</td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-
-//       {/* Section for graphs */}
-//       <div className="chart-section">
-//         {showVolunteerHoursGraph && (
-//           <div className="chart-container">
-//             <Line data={volunteerHoursData} options={volunteerHoursOptions} />
-//           </div>
-//         )}
-//         {showTeamPerformanceGraph && (
-//           <div className="chart-container">
-//             <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Report;
-
-import React, { useState, useEffect } from "react";
-import "./stylesVolunteerHistory.css";
-import { Link } from "react-router-dom";
+// Register the necessary elements with Chart.js
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 function VolunteerHistory() {
   const [members, setMembers] = useState([]); // To store members data
@@ -320,23 +31,48 @@ function VolunteerHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedTeamId, setSelectedTeamId] = useState(""); // Default to show all teams
+  const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] = useState(false);
+  const [showVolunteerHoursGraph, setShowVolunteerHoursGraph] = useState(false);
+  const [showTopPerformers, setShowTopPerformers] = useState(false);
+  const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]); // To store volunteer hours per month
+  const [topPerformers, setTopPerformers] = useState({}); // To store top performers by team
 
-  // Fetch members
+  // Memoized function to calculate top performers by team
+  const calculateTopPerformers = useCallback((data) => {
+    const performersByTeam = {};
+
+    maintenanceTeams.forEach((team) => {
+      const teamPerformers = data
+        .filter((member) => member.teams === team.id)
+        .sort((a, b) => b.total_hours - a.total_hours) // Sort by total hours descending
+        .slice(0, 3); // Get top 3 performers
+
+      performersByTeam[team.id] = teamPerformers;
+    });
+
+    console.log("Calculated Top Performers by Team:", performersByTeam);
+    setTopPerformers(performersByTeam);
+  }, [maintenanceTeams]);
+
+  // Fetch members and calculate initial data
   useEffect(() => {
     fetch("http://localhost:8000/api/members-points-all/")
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched members data:", data);
         setMembers(data);
+        calculateMonthlyVolunteerHours(data);
+        calculateTopPerformers(data); // Calculate top performers after fetching data
       })
       .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+  }, [calculateTopPerformers]); // Include calculateTopPerformers as a dependency
 
   // Fetch teams
   useEffect(() => {
     fetch("http://localhost:8000/api/teams/")
       .then((response) => response.json())
       .then((data) => {
+        console.log("Fetched teams data:", data);
         setTeams(data);
       })
       .catch((error) => console.error("Error fetching teams:", error));
@@ -403,6 +139,82 @@ function VolunteerHistory() {
     document.body.removeChild(link);
   };
 
+  // Function to calculate volunteer hours per month
+  const calculateMonthlyVolunteerHours = (data) => {
+    const monthlyHours = Array(12).fill(0); // Initialize an array for 12 months
+
+    data.forEach((member) => {
+      if (member.volunteer_dates) {
+        member.volunteer_dates.forEach((entry) => {
+          const date = new Date(entry.date); // Assuming each entry has a 'date' field
+          const month = date.getMonth(); // Get month (0 = January, 1 = February, etc.)
+          monthlyHours[month] += entry.hours; // Sum up hours for each month
+        });
+      }
+    });
+
+    console.log("Calculated Monthly Volunteer Hours:", monthlyHours);
+    setMonthlyVolunteerHours(monthlyHours);
+  };
+
+  // Prepare data for volunteer hours graph
+  const volunteerHoursData = {
+    labels: [
+      "January", "February", "March", "April", "May", "June", 
+      "July", "August", "September", "October", "November", "December"
+    ],
+    datasets: [
+      {
+        label: "Total Volunteering Hours",
+        data: monthlyVolunteerHours,
+        fill: false,
+        borderColor: "#4BC0C0",
+        backgroundColor: "#4BC0C0",
+        tension: 0.1
+      },
+    ],
+  };
+
+  const teamPerformanceData = {
+    labels: maintenanceTeams.map((team) => team.name),
+    datasets: [
+      {
+        label: "Total Points",
+        data: maintenanceTeams.map((team) => {
+          const teamMembers = members.filter((member) => member.teams === team.id);
+          return teamMembers.reduce((total, member) => total + member.total_points, 0);
+        }),
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+      },
+    ],
+  };
+
+  const teamPerformanceOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Team Performance Comparison",
+      },
+    },
+  };
+
+  const volunteerHoursOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Monthly Volunteer Hours",
+      },
+    },
+  };
+
   return (
     <div className="volunteer-history-container">
       {/* Team Buttons */}
@@ -413,7 +225,6 @@ function VolunteerHistory() {
           </button>
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
-        {/* <button>Add New Team</button> */}
       </div>
 
       {/* Search Bar */}
@@ -459,6 +270,73 @@ function VolunteerHistory() {
       <button className="download-btn" onClick={downloadCSV}>
         Download CSV
       </button>
+
+      {/* Toggle buttons for graphs and top performers */}
+      <div className="toggle-buttons">
+        <button
+          onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
+        >
+          {showTeamPerformanceGraph
+            ? "Hide Team Performance Graph"
+            : "Show Team Performance Graph"}
+        </button>
+        <button
+          onClick={() => setShowVolunteerHoursGraph(!showVolunteerHoursGraph)}
+        >
+          {showVolunteerHoursGraph
+            ? "Hide Volunteer Hours Graph"
+            : "Show Volunteer Hours Graph"}
+        </button>
+        <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
+          {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
+        </button>
+      </div>
+
+      {/* Section for top performers by team in table format */}
+      {showTopPerformers && (
+        <div className="grouped-volunteers-section">
+          <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
+          {Object.keys(topPerformers).map((teamId) => (
+            <div key={teamId}>
+              <h3 style={{ color: "#333" }}>{maintenanceTeams.find(team => team.id === parseInt(teamId))?.name}</h3>
+              <table className="volunteer-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Total Hours</th>
+                    <th>Total Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topPerformers[teamId]?.map((volunteer) => (
+                    <tr key={volunteer.id}>
+                      <td>{volunteer.id}</td>
+                      <td>{volunteer.name}</td>
+                      <td>{volunteer.total_hours}</td>
+                      <td>{volunteer.total_points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Section for graphs */}
+      <div className="chart-section">
+        {showVolunteerHoursGraph && (
+          <div className="chart-container">
+            <Line data={volunteerHoursData} options={volunteerHoursOptions} />
+          </div>
+        )}
+        {showTeamPerformanceGraph && (
+          <div className="chart-container">
+            <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
