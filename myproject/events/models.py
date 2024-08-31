@@ -38,7 +38,7 @@ class User(AbstractBaseUser):
     ]
     
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=50, unique=True)  # 确保用户名唯一
+    username = models.CharField(max_length=50, unique=True)  
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
     
     is_active = models.BooleanField(default=True)

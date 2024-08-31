@@ -133,8 +133,8 @@ class CreateAdminUserView(APIView):
                 username=username,
                 password=make_password(password),
                 email=email,
-                is_staff=True,
-                is_superuser=True
+                user_type='admin',
+                is_admin=True
             )
             logger.debug(f"Admin user created: {user.username}")
         
@@ -191,34 +191,25 @@ class UpdateProfileView(APIView):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.hashers import check_password
 # from django.contrib.auth.models import User
 
 class ChangePasswordView(APIView):
-    permission_classes = [AllowAny]  # Allow All for now
+    permission_classes = [AllowAny] # Allow All for now
 
     def put(self, request):
-        try:
-            username = request.data.get('username')
-            current_password = request.data.get('current_password')
-            new_password = request.data.get('new_password')
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
 
-         
-            user = User.objects.get(username=username)
+        user = request.user
 
-          
-            if not user.check_password(current_password):
-                return Response({"detail": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+        if not check_password(current_password, user.password):
+            return Response({"detail": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
 
-         
-            user.set_password(new_password)
-            user.save()
+        user.set_password(new_password)
+        user.save()
 
-            return Response({"detail": "Password updated successfully"}, status=status.HTTP_200_OK)
-        
-        except User.DoesNotExist:
-            return Response({"detail": "User does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({"detail": "Password updated successfully"}, status=status.HTTP_200_OK)
         
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

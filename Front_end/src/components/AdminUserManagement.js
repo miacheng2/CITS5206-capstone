@@ -56,8 +56,8 @@ const AdminUserManagement = ({ userProfile }) => {
         setPasswordData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleCreateSubmit = async (event) => {
-        event.preventDefault();
+    const handleCreateSubmit = async (e) => {
+        e.preventDefault();
         try {
             const response = await axios.post('http://localhost:8000/api/create-admin/', {
                 username: createUser.username,
@@ -65,11 +65,15 @@ const AdminUserManagement = ({ userProfile }) => {
                 email: createUser.email,
             });
 
-            setCreateSuccessMessage(`Admin account created successfully for ${response.data.username}`);
-            setCreateErrorMessage('');
+            if (response.status === 201) {
+                setCreateSuccessMessage('Admin user created successfully!');
+                setCreateErrorMessage('');
+                setCreateUser({ username: '', password: '', email: '' }); // Clear form fields
+            }
         } catch (error) {
-            setCreateErrorMessage('Failed to create admin account. Please try again.');
-            console.error('Error details:', error.response ? error.response.data : error.message);
+            setCreateSuccessMessage('');
+            setCreateErrorMessage('Failed to create admin user. Please try again.');
+            console.error('Error:', error.response ? error.response.data : error.message);
         }
     };
 
@@ -97,17 +101,21 @@ const AdminUserManagement = ({ userProfile }) => {
 
         try {
             const response = await axios.put('http://localhost:8000/api/change-password/', {
-                username: userProfile.username,
                 current_password: passwordData.currentPassword,
                 new_password: passwordData.newPassword
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                }
             });
-
-            // 成功处理
-            setPasswordSuccessMessage('Password updated successfully');
-            setPasswordErrorMessage('');
+    
+            if (response.status === 200) {
+                setPasswordSuccessMessage("Password changed successfully.");
+                setPasswordErrorMessage('');
+            }
         } catch (error) {
-            setPasswordErrorMessage('Failed to update password. Please try again.');
-            console.error('Error details:', error.response ? error.response.data : error.message);
+            setPasswordErrorMessage("Failed to change password. Please check your current password and try again.");
+            console.error('Error:', error.response ? error.response.data : error.message);
         }
     };
 
