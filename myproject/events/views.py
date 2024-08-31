@@ -6,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 # from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
+from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer
 from django.db.models import Sum, F, IntegerField
@@ -199,6 +200,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
 
+# get all members' point view
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
         # Aggregate points and hours by member and year
@@ -229,3 +231,13 @@ class AllMembersPointsAPIView(APIView):
             })
         
         return Response(results)
+
+
+# update volunteer point view
+@api_view(['POST'])
+def save_volunteer_points(request):
+    serializer = VolunteerPointsSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
