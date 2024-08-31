@@ -17,7 +17,6 @@ function AddVolunteerPoints() {
     fetch("http://localhost:8000/api/users/")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched user data:", data);
         setUser(data);
       })
       .catch((error) => console.error("Error fetching data:", error));
@@ -115,8 +114,48 @@ function AddVolunteerPoints() {
         ...prevState,
         editTime: new Date().toLocaleString(),
       }));
-      console.log("Saving details for:", selectedMember);
-      // Here, you'd typically send this data to your backend for saving
+      const editorName = selectedMember.editorName.replace(/\s+/g, " ").trim();
+      const selectedAdmin = adminsAndLeaders.find(
+        (user) => user.username.trim().toLowerCase() == editorName.toLowerCase()
+      );
+
+      if (!selectedAdmin) {
+        console.error(
+          "Error: No matching admin found for editorName:",
+          editorName
+        );
+        alert("Error: No matching admin found for editorName.");
+        return;
+      }
+
+      const data = {
+        member: selectedMember.australian_sailing_number,
+        event: maintenanceEvents.find(
+          (event) => event.name === selectedMember.maintenanceEvent
+        ).id,
+        points: selectedMember.volunteerPoints,
+        hours: selectedMember.volunteerHours,
+        created_by: selectedAdmin.id,
+      };
+
+      console.log("data:", data);
+
+      fetch("http://localhost:8000/api/save-volunteer-points/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Saved details:", data);
+          alert("Volunteer points saved successfully!");
+        })
+        .catch((error) => {
+          console.error("Error saving data:", error);
+          alert("Failed to save volunteer points.");
+        });
     } else {
       console.log("Please select a member");
     }

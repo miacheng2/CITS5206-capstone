@@ -6,7 +6,7 @@ from .models import User, Team, TeamMember, Event, VolunteerPoints
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'username', 'user_type']
+        fields = ['id','email', 'username', 'user_type']
 
 class TeamMemberUpdateSerializer(serializers.ModelSerializer):
     class Meta:
