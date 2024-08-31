@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class VolunteerTeam(models.Model):
-    team_name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=True)
 
 class Member(models.Model):
     australian_sailing_number = models.CharField(max_length=10, unique=True)
