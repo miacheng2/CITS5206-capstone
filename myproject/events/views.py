@@ -215,6 +215,29 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+class PromoteLeaderView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        
+        try:
+            if username:
+                user = User.objects.get(username=username)
+            elif email:
+                user = User.objects.get(email=email)
+            else:
+                return Response({"error": "Username or Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.user_type = User.TEAM_LEADER
+            user.save()
+            
+            return Response({"message": f"{user.username} has been promoted to Team Leader."}, status=status.HTTP_200_OK)
+        
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer

@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,
-CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points) 
+CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,PromoteLeaderView) 
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -17,6 +17,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
+    path('api/promote-leader/', PromoteLeaderView.as_view(), name='promote_leader'),
     path('api/update-profile/', UpdateProfileView.as_view(), name='update-profile'),
     path('api/create-admin/', CreateAdminUserView.as_view(), name='create-admin'),
    

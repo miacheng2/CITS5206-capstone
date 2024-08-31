@@ -77,21 +77,18 @@ const AdminUserManagement = ({ userProfile }) => {
         }
     };
 
-    const handlePromoteLeaderSubmit = async (event) => {
-        event.preventDefault();
+    const handlePromoteLeaderSubmit = async (e) => {
+        e.preventDefault();
         try {
-            const response = await axios.put('http://localhost:8000/api/promote-leader/', {
-                username: promoteLeader.username,
-                email: promoteLeader.email,
-            });
-
-            setEditSuccessMessage('User Promoted successfully');
+            const response = await axios.post('http://localhost:8000/api/promote-leader/', promoteLeader);
+            setEditSuccessMessage(response.data.message);
             setEditErrorMessage('');
         } catch (error) {
-            setEditErrorMessage('Failed to promote. Please try again.');
-            console.error('Error details:', error.response ? error.response.data : error.message);
+            setEditErrorMessage(error.response.data.error || 'An error occurred');
+            setEditSuccessMessage('');
         }
     };
+
     const handlePasswordSubmit = async (event) => {
         event.preventDefault();
         if (passwordData.newPassword !== passwordData.confirmPassword) {
