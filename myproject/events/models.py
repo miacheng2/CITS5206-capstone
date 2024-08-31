@@ -133,8 +133,8 @@ class VolunteerPoints(models.Model):
 
     def save(self, *args, **kwargs):
         if self.event.event_type == 'off_water' and self.hours:
-            self.points = self.hours * 10  # Example: 10 points per hour
+            self.points = self.hours * 20/3  # 20 points for 3 hour
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
-            self.points = 20  # Example: Fixed points
+            self.points = 20  # Fixed points
         super().save(*args, **kwargs)
