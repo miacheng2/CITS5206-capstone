@@ -35,9 +35,11 @@ node_modules
 # Ignore the database file
 myproject/db.sqlite3
 
+
 # Byte-compiled files
 __pycache__/
-*.py[cod]
+
+
 
 # Cython debug symbols
 cython_debug/
