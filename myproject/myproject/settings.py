@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'events',
     'corsheaders',
-    'upload_csv.apps.UploadCsvConfig',
+    'upload_csv',
 
 ]
 
