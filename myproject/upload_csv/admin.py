@@ -30,4 +30,4 @@ class MemberAdmin(admin.ModelAdmin):
         return render(request, "admin/csv_upload.html", data)
 
 """            
-admin.site.register(Member, MemberAdmin)
+# admin.site.register(Member, MemberAdmin)
