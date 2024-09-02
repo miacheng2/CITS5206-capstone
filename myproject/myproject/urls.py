@@ -23,5 +23,6 @@ urlpatterns = [
     path('api/get-profile/', GetProfileView.as_view(), name='get-profile'),
     path('api/members-points-all/', AllMembersPointsAPIView.as_view(), name='all-members-points'),
     path('api/save-volunteer-points/', save_volunteer_points, name='save-volunteer-points'),
+    path('upload_csv/', include('upload_csv.urls'), name='upload_csv'),
 ]
 
