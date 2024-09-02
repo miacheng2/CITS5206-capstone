@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { saveAs } from 'file-saver';
-
 import styles from './styles/TeamMemberList.module.css';
+import Papa from 'papaparse';
 
 const TeamMemberList = () => {
     const [teamMembers, setTeamMembers] = useState([
@@ -33,6 +33,34 @@ const TeamMemberList = () => {
         teamType: '',
         status: ''
     });
+
+    const [fileInput, setFileInput] = useState(null);
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            Papa.parse(file, {
+                complete: (results) => {
+                    const parsedData = results.data.slice(1).map(row => {
+                        return {
+                            numberId: row[0],  // "Australian Sailing Number"
+                            firstName: row[1], // "First name"
+                            lastName: row[2],  // "Last name"
+                            mobile: row[3],    //  "Mobile"
+                            email: row[4],     // "Email address"
+                            paymentStatus: row[5], //  "Payment status"
+                            volunteeringOrPay: row[6], //  "Volunteering or pay the levy"
+                            team: row[7]       //  "Which volunteer team do you want to join"
+                        };
+                    });
+    
+                    setTeamMembers(prevMembers => [...prevMembers, ...parsedData]);
+                },
+                header: false,
+                skipEmptyLines: true,  
+            });
+        }
+    };
 
     const selectAll = () => {
         const newSelection = {};
@@ -123,7 +151,14 @@ const TeamMemberList = () => {
                     </div>
                     <div>
                         <button onClick={openModal}>Add +</button>
-                        <button>Import From CSV</button>
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileChange}
+                            style={{ display: 'none' }}
+                            ref={(input) => setFileInput(input)}
+                        />
+                        <button onClick={() => fileInput && fileInput.click()}>Import From CSV</button>
                         <button>Export ALL To CSV</button>
                     </div>
                 </div>
