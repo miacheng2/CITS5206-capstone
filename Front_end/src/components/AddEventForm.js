@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import api from "../api"; // assuming you have this setup to interact with your API
 
 function AddEventForm() {
   const [users, setUsers] = useState([]); // To store users data

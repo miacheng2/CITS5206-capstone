@@ -10,9 +10,7 @@ function AddVolunteerPoints() {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
-  const [message, setMessage] = useState(''); // For displaying messages
-  
-  
+  const [message, setMessage] = useState(""); // For displaying messages
 
   useEffect(() => {
     // Fetch users
@@ -54,8 +52,12 @@ function AddVolunteerPoints() {
 
   useEffect(() => {
     const filtered = members.filter((member) => {
-      const nameMatches = member.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const idMatches = member.australian_sailing_number.toString().includes(searchQuery);
+      const nameMatches = member.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const idMatches = member.australian_sailing_number
+        .toString()
+        .includes(searchQuery);
 
       const teamMatches =
         selectedTeam === "" ||
@@ -103,20 +105,24 @@ function AddVolunteerPoints() {
   const handleSave = () => {
     if (selectedMember) {
       const confirmationMessage = `${selectedMember.firstName} ${selectedMember.lastName} worked ${selectedMember.volunteerHours} hours and earned ${selectedMember.volunteerPoints} points.`;
-      if (window.confirm(`${confirmationMessage} Do you want to save these details?`)) {
-        setMessage('Details saved successfully!');
-        console.log('Saving details for:', selectedMember);
+      if (
+        window.confirm(
+          `${confirmationMessage} Do you want to save these details?`
+        )
+      ) {
+        setMessage("Details saved successfully!");
+        console.log("Saving details for:", selectedMember);
 
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
 
         setSelectedMember(null);
       } else {
-        setMessage('Save action was cancelled.');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+        setMessage("Save action was cancelled.");
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
       }
     } else {
-      setMessage('Please select a member.');
-      setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+      setMessage("Please select a member.");
+      setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
     }
   };
 
@@ -126,30 +132,33 @@ function AddVolunteerPoints() {
 
   const handleDelete = () => {
     if (selectedMember) {
-      if (window.confirm('Are you sure you want to delete the entered data for this member?')) {
+      if (
+        window.confirm(
+          "Are you sure you want to delete the entered data for this member?"
+        )
+      ) {
         setSelectedMember((prevState) => ({
           ...prevState,
-          volunteerDate: '',
+          volunteerDate: "",
           maintenanceTeam: selectedMember.team,
-          maintenanceEvent: '',
-          startTime: '',
-          endTime: '',
-          volunteerHours: '',
-          volunteerPoints: '',
-          comments: '',
-          editorName: '',
+          maintenanceEvent: "",
+          startTime: "",
+          endTime: "",
+          volunteerHours: "",
+          volunteerPoints: "",
+          comments: "",
+          editorName: "",
         }));
-        setMessage('Entry cleared for the selected member.');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
-        console.log('Cleared entry for member with ID:', selectedMember.id);
+        setMessage("Entry cleared for the selected member.");
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
+        console.log("Cleared entry for member with ID:", selectedMember.id);
       }
     } else {
-      setMessage('No member selected to delete data.');
-      setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+      setMessage("No member selected to delete data.");
+      setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
     }
   };
 
-  
   const handleTeamFilter = (team) => {
     setSelectedTeam(team);
   };
@@ -167,10 +176,8 @@ function AddVolunteerPoints() {
           </button>
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
-    
       </div>
 
-      
       {/* Search Bar */}
       <input
         type="text"
