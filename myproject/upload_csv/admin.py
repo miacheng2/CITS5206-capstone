@@ -1,9 +1,10 @@
 from django.contrib import admin
-from django.urls import path
-from django.shortcuts import render
-from .models import Member
-from django import forms
+# from django.urls import path
+# from django.shortcuts import render
+from .models import Member, VolunteerTeam
+# from django import forms
 
+"""
 class CsvImportForm(forms.Form):
     csv_upload = forms.FileField()
 
@@ -27,5 +28,6 @@ class MemberAdmin(admin.ModelAdmin):
         form = CsvImportForm()
         data = {"form": form}
         return render(request, "admin/csv_upload.html", data)
-    
+
+"""            
 admin.site.register(Member, MemberAdmin)
