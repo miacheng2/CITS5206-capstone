@@ -1,13 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Team, TeamMember, Event, VolunteerPoints
-
+from .models import User, Team, TeamMember, Event, VolunteerPoints,Activity
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'user_type']
+        fields = ['id','username', 'email', 'password', 'user_type']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -49,10 +48,26 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = ['id', 'name', 'description', 'creation_date']
 
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = ['id', 'name']
+
 class EventSerializer(serializers.ModelSerializer):
+    activities = ActivitySerializer(many=True, required=False)  # activities is optional
+
     class Meta:
         model = Event
-        fields = ['id', 'name', 'event_type', 'date', 'created_by']
+        fields = ['id', 'name', 'event_type', 'date', 'created_by', 'activities']
+
+    def create(self, validated_data):
+        activities_data = validated_data.pop('activities', [])
+        event = Event.objects.create(**validated_data)
+        if activities_data:  # Check if activities_data is not empty
+            for activity_data in activities_data:
+                activity, created = Activity.objects.get_or_create(name=activity_data['name'])
+                event.activities.add(activity)
+        return event
 
 class VolunteerPointsSerializer(serializers.ModelSerializer):
     class Meta:

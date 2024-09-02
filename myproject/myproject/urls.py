@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,
-CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,PromoteLeaderView) 
+CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,PromoteLeaderView,addEvent) 
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/get-profile/', GetProfileView.as_view(), name='get-profile'),
     path('api/members-points-all/', AllMembersPointsAPIView.as_view(), name='all-members-points'),
     path('api/save-volunteer-points/', save_volunteer_points, name='save-volunteer-points'),
+    path('api/add-event/', addEvent, name='add-event'),
 ]
 
