@@ -1,12 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Team, TeamMember, Event, VolunteerPoints,Activity
+from .models import User, Team, TeamMember, Event, VolunteerPoints,Member,VolunteerTeam
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username', 'email', 'password', 'user_type']
+        fields = ['username', 'email', 'password', 'user_type']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -48,39 +49,26 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = ['id', 'name', 'description', 'creation_date']
 
-class ActivitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Activity
-        fields = ['id', 'name']
-
 class EventSerializer(serializers.ModelSerializer):
-    activities = ActivitySerializer(many=True, required=False)  # activities is optional
-
     class Meta:
         model = Event
-        fields = ['id', 'name', 'event_type', 'date', 'created_by', 'activities']
-
-    def create(self, validated_data):
-        activities_data = validated_data.pop('activities', [])
-        event = Event.objects.create(**validated_data)
-        if activities_data:  # Check if activities_data is not empty
-            for activity_data in activities_data:
-                activity, created = Activity.objects.get_or_create(name=activity_data['name'])
-                event.activities.add(activity)
-        return event
+        fields = ['id', 'name', 'event_type', 'date', 'created_by']
 
 class VolunteerPointsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VolunteerPoints
         fields = ['member', 'event', 'points', 'hours', 'created_by']
 
-class TeamMemberSerializer(serializers.ModelSerializer):
-    teams = TeamSerializer(many=True, read_only=True)
-
+class VolunteerTeamSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TeamMember
-        fields = ['australian_sailing_number', 'name', 'email', 'membership_category', 'will_volunteer_or_pay_levy', 'teams']
+        model = VolunteerTeam
+        fields = ['name']
 
+class MemberSerializer(serializers.ModelSerializer):
+    volunteer_teams = VolunteerTeamSerializer(many=True, read_only=True)
+    class Meta:
+        model = Member
+        fields = ['australian_sailing_number', 'first_name', 'last_name','email_address', 'mobile', 'payment_status', 'volunteer_levy', 'volunteer_teams']
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
