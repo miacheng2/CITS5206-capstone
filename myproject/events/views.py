@@ -10,18 +10,19 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
-from .models import User, Team, TeamMember, Event, VolunteerPoints
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer
+from .models import User, Team, TeamMember, Event, VolunteerPoints,Member, VolunteerTeam
+from .serializers import UserSerializer, TeamSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer,MemberSerializer
 from django.db.models import Sum, F, IntegerField
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 import logging
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 from .serializers import (
-    TeamMemberSerializer, 
+  
     TeamMemberUpdateSerializer,
     EventSerializer, 
     VolunteerPointsSerializer,
@@ -145,7 +146,7 @@ class CreateAdminUserView(APIView):
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
-    serializer_class = TeamMemberSerializer
+    #serializer_class = TeamMemberSerializer
     permission_classes = [AllowAny]
 
     def list(self, request, *args, **kwargs):
@@ -160,6 +161,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
     permission_classes = [AllowAny]
+
 
 # from django.contrib.auth.models import User
 
@@ -242,10 +244,27 @@ class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
 
-class TeamMemberViewSet(viewsets.ModelViewSet):
-    queryset = TeamMember.objects.all()
-    serializer_class = TeamMemberSerializer
+    
 
+class MemberViewSet(viewsets.ModelViewSet):
+    queryset = Member.objects.all()
+    serializer_class = MemberSerializer
+    lookup_field = 'australian_sailing_number'
+    permission_classes = [AllowAny]
+    @action(detail=True, methods=['put'])
+    def update_member(self, request, pk=None):
+        member = self.get_object()
+        serializer = MemberSerializer(member, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['delete'])
+    def delete_member(self, request, pk=None):
+        member = self.get_object()
+        member.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -304,3 +323,95 @@ def addEvent(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+import os
+import csv
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+from .models import Member, VolunteerTeam
+from django.utils.timezone import now
+from django.core.exceptions import ValidationError
+
+@csrf_exempt
+def import_csv(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+
+        # Validate file extension
+        if not file.name.endswith('.csv'):
+            return JsonResponse({'status': 'error', 'message': 'Only CSV files are allowed.'}, status=400)
+
+        fs = FileSystemStorage()
+        filename = fs.save(file.name, file)
+        file_path = fs.path(filename)
+
+        new_records = 0
+        updated_records = 0
+        unchanged_records = 0
+
+        try:
+            with open(file_path, newline='', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                
+                next(reader, None)
+
+                for row in reader:
+                    
+                    asn = row[0].strip()
+                    first_name = row[1].strip()
+                    last_name = row[2].strip()
+                    mobile = row[3].strip()
+                    email = row[4].strip()
+                    payment_status = row[5].strip()
+                    volunteer_levy = row[6].strip()
+                    volunteer_teams = row[7].split(',')
+
+                    member, created = Member.objects.get_or_create(australian_sailing_number=asn)
+
+                    if created:
+                        new_records += 1
+                        for team_name in volunteer_teams:
+                            team_name = team_name.strip()
+                            if team_name:
+                                team, _ = VolunteerTeam.objects.get_or_create(name=team_name)
+                                member.volunteer_teams.add(team)
+
+                    if (
+                        member.first_name == first_name and
+                        member.last_name == last_name and
+                        member.mobile == mobile and
+                        member.email_address == email and
+                        member.payment_status == payment_status and
+                        member.volunteer_levy == volunteer_levy
+                    ):
+                        unchanged_records += 1
+                    else:
+                        updated_records += 1
+                        member.first_name = first_name
+                        member.last_name = last_name
+                        member.mobile = mobile
+                        member.email_address = email
+                        member.payment_status = payment_status
+                        member.volunteer_levy = volunteer_levy
+                        member.save()
+
+            return JsonResponse({
+                'status': 'success',
+                'new_records': new_records,
+                'updated_records': updated_records,
+                'unchanged_records': unchanged_records
+            })
+
+        except csv.Error as e:
+            return JsonResponse({'status': 'error', 'message': f'CSV parsing error: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}, status=400)
+        finally:
+            
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
