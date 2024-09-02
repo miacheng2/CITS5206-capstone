@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
 
 function AddVolunteerPoints() {
-  const [adminsAndLeaders, setAdminsAndLeaders] = useState([]); // To store users data
+  const [adminsAndLeaders, setUser] = useState([]); // To store users data
   const [members, setMembers] = useState([]); // To store members data
   const [maintenanceTeams, setTeams] = useState([]); // To store teams data
   const [maintenanceEvents, setEvents] = useState([]); // To store events data
@@ -10,23 +10,19 @@ function AddVolunteerPoints() {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
-  const [message, setMessage] = useState(''); // For displaying messages
-  
-  
 
+  // Fetch users
   useEffect(() => {
-    // Fetch users
     fetch("http://localhost:8000/api/users/")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched user data:", data);
-        setAdminsAndLeaders(data);
+        setUser(data);
       })
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
+  // Fetch members
   useEffect(() => {
-    // Fetch members
     fetch("http://localhost:8000/api/team-members/")
       .then((response) => response.json())
       .then((data) => {
@@ -35,8 +31,9 @@ function AddVolunteerPoints() {
       .catch((error) => console.error("Error fetching data:", error));
   }, []);
 
+  // Fetch teams and events
   useEffect(() => {
-    // Fetch teams and events
+    // Fetch teams
     fetch("http://localhost:8000/api/teams/")
       .then((response) => response.json())
       .then((data) => {
@@ -44,6 +41,7 @@ function AddVolunteerPoints() {
       })
       .catch((error) => console.error("Error fetching teams:", error));
 
+    // Fetch events
     fetch("http://localhost:8000/api/events/")
       .then((response) => response.json())
       .then((data) => {
@@ -52,15 +50,22 @@ function AddVolunteerPoints() {
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
 
+  // fliter user by search query
   useEffect(() => {
     const filtered = members.filter((member) => {
-      const nameMatches = member.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const idMatches = member.australian_sailing_number.toString().includes(searchQuery);
+      const nameMatches = member.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const idMatches = member.australian_sailing_number
+        .toString()
+        .includes(searchQuery);
 
+      // Check if selected team is among the member's teams
       const teamMatches =
         selectedTeam === "" ||
         member.teams.some((team) => team.name === selectedTeam);
 
+      // Return true if name or id matches, and if team matches
       return (nameMatches || idMatches) && teamMatches;
     });
     setFilteredMembers(filtered);
@@ -69,6 +74,7 @@ function AddVolunteerPoints() {
   const handleSelectMember = (member) => {
     setSelectedMember({
       ...member,
+      // volunteerDate: latestEvent.date || "",
       volunteerDate: "",
       maintenanceTeam: member.team,
       maintenanceEvent: "",
@@ -82,11 +88,6 @@ function AddVolunteerPoints() {
   };
 
   const handleInputChange = (field, value) => {
-    setSelectedMember((prevState) => ({
-      ...prevState,
-      [field]: value,
-    }));
-
     if (field === "startTime" || field === "endTime") {
       const start = new Date(`1970-01-01T${selectedMember.startTime}`);
       const end = new Date(`1970-01-01T${selectedMember.endTime}`);
@@ -94,71 +95,93 @@ function AddVolunteerPoints() {
       const points = Math.floor(hours * (20 / 3)); // Example: 20 points for 3 hours
       setSelectedMember((prevState) => ({
         ...prevState,
+        [field]: value,
         volunteerHours: hours,
         volunteerPoints: points,
+      }));
+    } else {
+      setSelectedMember((prevState) => ({
+        ...prevState,
+        [field]: value,
       }));
     }
   };
 
   const handleSave = () => {
     if (selectedMember) {
-      const confirmationMessage = `${selectedMember.firstName} ${selectedMember.lastName} worked ${selectedMember.volunteerHours} hours and earned ${selectedMember.volunteerPoints} points.`;
-      if (window.confirm(`${confirmationMessage} Do you want to save these details?`)) {
-        setMessage('Details saved successfully!');
-        console.log('Saving details for:', selectedMember);
+      setSelectedMember((prevState) => ({
+        ...prevState,
+        editTime: new Date().toLocaleString(),
+      }));
+      const editorName = selectedMember.editorName.replace(/\s+/g, " ").trim();
+      const selectedAdmin = adminsAndLeaders.find(
+        (user) => user.username.trim().toLowerCase() == editorName.toLowerCase()
+      );
 
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
-
-        setSelectedMember(null);
-      } else {
-        setMessage('Save action was cancelled.');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+      if (!selectedAdmin) {
+        console.error(
+          "Error: No matching admin found for editorName:",
+          editorName
+        );
+        alert("Error: No matching admin found for editorName.");
+        return;
       }
+
+      const data = {
+        member: selectedMember.australian_sailing_number,
+        event: maintenanceEvents.find(
+          (event) => event.name === selectedMember.maintenanceEvent
+        ).id,
+        points: selectedMember.volunteerPoints,
+        hours: selectedMember.volunteerHours,
+        created_by: selectedAdmin.id,
+      };
+
+      console.log("data:", data);
+
+      fetch("http://localhost:8000/api/save-volunteer-points/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Saved details:", data);
+          alert("Volunteer points saved successfully!");
+        })
+        .catch((error) => {
+          console.error("Error saving data:", error);
+          alert("Failed to save volunteer points.");
+        });
     } else {
-      setMessage('Please select a member.');
-      setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+      console.log("Please select a member");
     }
   };
 
   const handleEdit = (member) => {
     console.log("Editing:", member);
+    // Logic to handle edit, populate fields with member's data
   };
 
-  const handleDelete = () => {
-    if (selectedMember) {
-      if (window.confirm('Are you sure you want to delete the entered data for this member?')) {
-        setSelectedMember((prevState) => ({
-          ...prevState,
-          volunteerDate: '',
-          maintenanceTeam: selectedMember.team,
-          maintenanceEvent: '',
-          startTime: '',
-          endTime: '',
-          volunteerHours: '',
-          volunteerPoints: '',
-          comments: '',
-          editorName: '',
-        }));
-        setMessage('Entry cleared for the selected member.');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
-        console.log('Cleared entry for member with ID:', selectedMember.id);
-      }
-    } else {
-      setMessage('No member selected to delete data.');
-      setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+  const handleDelete = (memberId) => {
+    if (window.confirm("Are you sure you want to delete this entry?")) {
+      setFilteredMembers(
+        filteredMembers.filter(
+          (member) => member.australian_sailing_number !== memberId
+        )
+      );
+      console.log("Deleted member with ID:", memberId);
     }
   };
 
-  
   const handleTeamFilter = (team) => {
     setSelectedTeam(team);
   };
 
   return (
     <div className="add-volunteer-container">
-      {/* Message Display */}
-      {message && <div className="message">{message}</div>}
-
       {/* Team Buttons */}
       <div className="team-buttons">
         {maintenanceTeams.map((team) => (
@@ -167,10 +190,8 @@ function AddVolunteerPoints() {
           </button>
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
-    
       </div>
 
-      
       {/* Search Bar */}
       <input
         type="text"
