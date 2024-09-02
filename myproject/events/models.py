@@ -112,6 +112,12 @@ class TeamMember(models.Model):
     def __str__(self):
         return f"{self.name} - {self.australian_sailing_number}"
 
+class Activity(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Event(models.Model):
     EVENT_TYPE_CHOICES = (
         ('on_water', 'On-Water'),
@@ -120,16 +126,19 @@ class Event(models.Model):
     name = models.CharField(max_length=100)
     event_type = models.CharField(max_length=10, choices=EVENT_TYPE_CHOICES)
     date = models.DateField()
-    # allow null for now, will change it later
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    activities = models.ManyToManyField(Activity, related_name='events', blank=True)
 
+    def __str__(self):
+        return self.name
+    
 class VolunteerPoints(models.Model):
     member = models.ForeignKey(TeamMember, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     points = models.IntegerField()
     hours = models.IntegerField(null=True, blank=True)  # Only for off-water events
-    # allow null for now, will change it later
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.event.event_type == 'off_water' and self.hours:

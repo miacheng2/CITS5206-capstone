@@ -1,40 +1,37 @@
-// EventDetailsModal.js
-import React from 'react';
-import './EventDetailsModal.css';  // Ensure proper CSS styling
+import React from "react";
+import Modal from "./Modal";
 
-const EventDetailsModal = ({ isOpen, onClose, events }) => {
-    if (!isOpen) return null;
-
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="close-button">&times;</button>
-                <h2>Event History</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Event Name</th>
-                            <th>Date</th>
-                            <th>Team Leader</th>
-                            <th>Volunteers Needed</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {events.map(event => (
-                            <tr key={event.id}>
-                                <td>{event.id}</td>
-                                <td>{event.name}</td>
-                                <td>{event.date}</td>
-                                <td>{event.leader}</td>
-                                <td>{event.volunteers}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
+function EventDetailsModal({ isOpen, onClose, events, onEdit, onDelete }) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <h2>Event History</h2>
+      {events.length > 0 ? (
+        <ul>
+          {events.map((event) => (
+            <li key={event.id}>
+              <h3>{event.name}</h3>
+              <p>Date: {event.date}</p>
+              <p>Leader: {event.leader}</p>
+              <p>Volunteers: {event.volunteers}</p>
+              {event.activities.length > 0 ? (
+                <ul>
+                  {event.activities.map((activity) => (
+                    <li key={activity.id}>{activity.name}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No activities for this event.</p>
+              )}
+              <button onClick={() => onEdit(event)}>Edit</button>
+              <button onClick={() => onDelete(event.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No events found.</p>
+      )}
+    </Modal>
+  );
+}
 
 export default EventDetailsModal;

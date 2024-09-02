@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
 
-
 function AddVolunteerPoints() {
   const [adminsAndLeaders, setUser] = useState([]); // To store users data
   const [members, setMembers] = useState([]); // To store members data
@@ -191,7 +190,6 @@ function AddVolunteerPoints() {
           </button>
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
-        <button>Add New Team</button>
       </div>
 
       {/* Search Bar */}
