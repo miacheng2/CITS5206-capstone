@@ -73,34 +73,17 @@ class Team(models.Model):
 class TeamMember(models.Model):
     I_WILL_VOLUNTEER = 'I will volunteer'
     I_WILL_PAY_LEVY = 'I will pay the levy'
-
-    SENIOR_SAILING = 'Senior sailing membership'
-    SENIOR_CREW = 'Senior crew membership'
-    JUNIOR_SAILING = 'Junior sailing membership'
-    FAMILY = 'Family membership'
-    NON_SAILING = 'Non sailing membership'
-    PROVISIONAL = 'Provisional Membership'
-    PENSIONER_STUDENT = 'Pensioner/Student'
     
     VOLUNTEER_OR_LEVY_CHOICES = [
         (I_WILL_VOLUNTEER, 'I will volunteer'),
         (I_WILL_PAY_LEVY, 'I will pay the levy'),
     ]
-    
-    MEMBERSHIP_CATEGORY_CHOICES = [
-        (SENIOR_SAILING, 'Senior sailing membership – A senior sailor is any member over the age of 18 with full member privileges'),
-        (SENIOR_CREW, 'Senior crew membership – A senior crew is any member over the age of 18 but does not own a boat within the club'),
-        (JUNIOR_SAILING, 'Junior sailing membership – Any sailing member under the age of 18'),
-        (FAMILY, 'Family membership – This membership is for families consisting of two adult members over the age of 18 with dependents under the age of 18'),
-        (NON_SAILING, 'Non sailing membership – for members that want to be part of the club that do not sail a boat'),
-        (PROVISIONAL, 'Provisional Membership – A person who is a full member of a kindred water sports club'),
-        (PENSIONER_STUDENT, 'Pensioner/Student – (see concession information below)'),
-    ]
-    
+
     australian_sailing_number = models.IntegerField(primary_key=True)
-    name = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100,default='DEFAULT VALUE')
+    last_name = models.CharField(max_length=100,default='DEFAULT VALUE')
     email = models.EmailField()
-    membership_category = models.CharField(max_length=50, choices=MEMBERSHIP_CATEGORY_CHOICES)
+    membership_category = models.CharField(max_length=50)
     will_volunteer_or_pay_levy = models.CharField(
         max_length=50, 
         choices=VOLUNTEER_OR_LEVY_CHOICES, 
@@ -108,6 +91,10 @@ class TeamMember(models.Model):
         null=True,
     )
     teams = models.ManyToManyField(Team, related_name='members', blank=True)
+
+    @property
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
     
     def __str__(self):
         return f"{self.name} - {self.australian_sailing_number}"

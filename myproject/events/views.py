@@ -12,9 +12,9 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer
-from django.db.models import Sum, F, IntegerField
+from django.db.models import Sum, F, IntegerField,Value
 from django.contrib.auth import get_user_model
-from django.db.models.functions import ExtractYear
+from django.db.models.functions import ExtractYear,Concat
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 import logging
@@ -259,9 +259,10 @@ class AllMembersPointsAPIView(APIView):
     def get(self, request):
         # Aggregate points and hours by member and year
         points_data = VolunteerPoints.objects.select_related('member').annotate(
-            year=ExtractYear('event__date')
+            year=ExtractYear('event__date'),
+            name=Concat(F('member__first_name'), Value(' '), F('member__last_name'))  # Concatenate first and last names
         ).values(
-            'member__name', 
+            'name',  # Use the newly annotated 'name' field
             'member__australian_sailing_number', 
             'member__membership_category',
             'member__teams',
@@ -269,16 +270,17 @@ class AllMembersPointsAPIView(APIView):
         ).annotate(
             total_points=Sum('points'),
             total_hours=Sum('hours', output_field=IntegerField())
-        ).order_by('member__name', 'year')
+        ).order_by('name', 'year')
         
         # Convert the queryset to a list of dictionaries
         results = []
         for data in points_data:
             results.append({
-                "name": data['member__name'],
-                "id": data['member__australian_sailing_number'],
+                "name": data['name'],
+                "id": f"{data['member__australian_sailing_number']}__{data['year']}",
+                "uid": data['member__australian_sailing_number'],
                 "membership_category": data['member__membership_category'],
-                "teams":data['member__teams'],
+                "teams": data['member__teams'],
                 "year": data['year'],
                 "total_points": data['total_points'],
                 "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
