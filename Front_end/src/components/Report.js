@@ -26,33 +26,42 @@ ChartJS.register(
 );
 
 function VolunteerHistory() {
-  const [members, setMembers] = useState([]); // To store members data
-  const [maintenanceTeams, setTeams] = useState([]); // To store teams data
+  const [members, setMembers] = useState([]);
+  const [maintenanceTeams, setTeams] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState([]);
-  const [selectedTeamId, setSelectedTeamId] = useState(""); // Default to show all teams
-  const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] = useState(false);
+  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(""); // State for selected Member Category
+  const [selectedYear, setSelectedYear] = useState(""); // State for selected Year
+  const [selectedTotalPoints, setSelectedTotalPoints] = useState(""); // State for selected Total Points filter
+  const [selectedMembers, setSelectedMembers] = useState(new Set()); // State for selected members
+  const [selectAll, setSelectAll] = useState(false); // State for "Select All"
+  const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =
+    useState(false);
   const [showVolunteerHoursGraph, setShowVolunteerHoursGraph] = useState(false);
   const [showTopPerformers, setShowTopPerformers] = useState(false);
-  const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]); // To store volunteer hours per month
-  const [topPerformers, setTopPerformers] = useState({}); // To store top performers by team
+  const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]);
+  const [topPerformers, setTopPerformers] = useState({});
 
   // Memoized function to calculate top performers by team
-  const calculateTopPerformers = useCallback((data) => {
-    const performersByTeam = {};
+  const calculateTopPerformers = useCallback(
+    (data) => {
+      const performersByTeam = {};
 
-    maintenanceTeams.forEach((team) => {
-      const teamPerformers = data
-        .filter((member) => member.teams === team.id)
-        .sort((a, b) => b.total_hours - a.total_hours) // Sort by total hours descending
-        .slice(0, 3); // Get top 3 performers
+      maintenanceTeams.forEach((team) => {
+        const teamPerformers = data
+          .filter((member) => member.teams === team.id)
+          .sort((a, b) => b.total_hours - a.total_hours) // Sort by total hours descending
+          .slice(0, 3); // Get top 3 performers
 
-      performersByTeam[team.id] = teamPerformers;
-    });
+        performersByTeam[team.id] = teamPerformers;
+      });
 
-    console.log("Calculated Top Performers by Team:", performersByTeam);
-    setTopPerformers(performersByTeam);
-  }, [maintenanceTeams]);
+      console.log("Calculated Top Performers by Team:", performersByTeam);
+      setTopPerformers(performersByTeam);
+    },
+    [maintenanceTeams]
+  );
 
   // Fetch members and calculate initial data
   useEffect(() => {
@@ -72,7 +81,6 @@ function VolunteerHistory() {
     fetch("http://localhost:8000/api/teams/")
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched teams data:", data);
         setTeams(data);
       })
       .catch((error) => console.error("Error fetching teams:", error));
@@ -81,14 +89,34 @@ function VolunteerHistory() {
   useEffect(() => {
     const uniqueMembers = new Set();
     const filtered = members.filter((member) => {
+      console.log("selectedMemeber", member);
+      console.log("selectedYear", selectedYear);
+      console.log("selectedPoint", selectedTotalPoints);
       const matchesSearchQuery =
         member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.id.toString().includes(searchQuery);
       const matchesTeam =
         selectedTeamId === "" || member.teams === selectedTeamId;
+      const matchesCategory =
+        selectedCategory === "" ||
+        member.membership_category === selectedCategory;
+      const matchesYear =
+        selectedYear === "" || member.year.toString() === selectedYear;
+      const matchesTotalPoints =
+        selectedTotalPoints === "" ||
+        (selectedTotalPoints === ">=200" &&
+          Number(member.total_points) >= 200) ||
+        (selectedTotalPoints === "<200" && Number(member.total_points) < 200);
 
-      if (matchesSearchQuery && matchesTeam) {
+      if (
+        matchesSearchQuery &&
+        matchesTeam &&
+        matchesCategory &&
+        matchesYear &&
+        matchesTotalPoints
+      ) {
         if (!uniqueMembers.has(member.id)) {
+          console.log(uniqueMembers);
           uniqueMembers.add(member.id);
           return true;
         }
@@ -98,10 +126,43 @@ function VolunteerHistory() {
     });
 
     setFilteredMembers(filtered);
-  }, [searchQuery, selectedTeamId, members]);
+  }, [searchQuery, selectedTeamId, selectedCategory, selectedYear, members]);
 
   const handleTeamFilter = (teamId) => {
     setSelectedTeamId(teamId);
+  };
+
+  const handleCategoryFilter = (category) => {
+    setSelectedCategory(category);
+  };
+
+  const handleYearFilter = (year) => {
+    setSelectedYear(year);
+  };
+
+  const handleTotalPointsFilter = (pointsFilter) => {
+    setSelectedTotalPoints(pointsFilter);
+  };
+
+  const handleMemberSelect = (memberId) => {
+    setSelectedMembers((prevSelected) => {
+      const updatedSelection = new Set(prevSelected);
+      if (updatedSelection.has(memberId)) {
+        updatedSelection.delete(memberId);
+      } else {
+        updatedSelection.add(memberId);
+      }
+      return updatedSelection;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedMembers(new Set());
+    } else {
+      setSelectedMembers(new Set(filteredMembers.map((member) => member.id)));
+    }
+    setSelectAll(!selectAll);
   };
 
   const downloadCSV = () => {
@@ -116,17 +177,19 @@ function VolunteerHistory() {
     ];
     csvRows.push(headers.join(","));
 
-    filteredMembers.forEach((member) => {
-      const values = [
-        member.id,
-        member.name,
-        member.membership_category,
-        member.year,
-        member.total_hours,
-        member.total_points,
-      ];
-      csvRows.push(values.join(","));
-    });
+    filteredMembers
+      .filter((member) => selectedMembers.has(member.id))
+      .forEach((member) => {
+        const values = [
+          member.id,
+          member.name,
+          member.membership_category,
+          member.year,
+          member.total_hours,
+          member.total_points,
+        ];
+        csvRows.push(values.join(","));
+      });
 
     const csvContent = csvRows.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -160,8 +223,18 @@ function VolunteerHistory() {
   // Prepare data for volunteer hours graph
   const volunteerHoursData = {
     labels: [
-      "January", "February", "March", "April", "May", "June", 
-      "July", "August", "September", "October", "November", "December"
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ],
     datasets: [
       {
@@ -170,7 +243,7 @@ function VolunteerHistory() {
         fill: false,
         borderColor: "#4BC0C0",
         backgroundColor: "#4BC0C0",
-        tension: 0.1
+        tension: 0.1,
       },
     ],
   };
@@ -181,8 +254,13 @@ function VolunteerHistory() {
       {
         label: "Total Points",
         data: maintenanceTeams.map((team) => {
-          const teamMembers = members.filter((member) => member.teams === team.id);
-          return teamMembers.reduce((total, member) => total + member.total_points, 0);
+          const teamMembers = members.filter(
+            (member) => member.teams === team.id
+          );
+          return teamMembers.reduce(
+            (total, member) => total + member.total_points,
+            0
+          );
         }),
         backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
       },
@@ -215,6 +293,11 @@ function VolunteerHistory() {
     },
   };
 
+  const uniqueCategories = [
+    ...new Set(members.map((member) => member.membership_category)),
+  ];
+  const uniqueYears = [...new Set(members.map((member) => member.year))];
+
   return (
     <div className="volunteer-history-container">
       {/* Team Buttons */}
@@ -225,6 +308,49 @@ function VolunteerHistory() {
           </button>
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
+      </div>
+      {/* Dropdown for Member Category */}
+      <div className="filter-dropdowns">
+        <label htmlFor="category-filter">Filter by Category:</label>
+        <select
+          id="category-filter"
+          onChange={(e) => handleCategoryFilter(e.target.value)}
+          value={selectedCategory}
+        >
+          <option value="">All Categories</option>
+          {uniqueCategories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+
+        {/* Dropdown for Year */}
+        <label htmlFor="year-filter">Filter by Year:</label>
+        <select
+          id="year-filter"
+          onChange={(e) => handleYearFilter(e.target.value)}
+          value={selectedYear}
+        >
+          <option value="">All Years</option>
+          {uniqueYears.map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+
+        {/* Dropdown for Total Points */}
+        <label htmlFor="points-filter">Filter by Total Points:</label>
+        <select
+          id="points-filter"
+          onChange={(e) => handleTotalPointsFilter(e.target.value)}
+          value={selectedTotalPoints}
+        >
+          <option value="">All Points</option>
+          <option value=">=200">Points &gt= 200</option>
+          <option value="<200">Points &lt 200</option>
+        </select>
       </div>
 
       {/* Search Bar */}
@@ -240,7 +366,13 @@ function VolunteerHistory() {
       <table className="volunteer-history-table">
         <thead>
           <tr>
-            <th>Select</th>
+            <th>
+              <input
+                type="checkbox"
+                checked={selectAll}
+                onChange={handleSelectAll}
+              />
+            </th>
             <th>Member ID</th>
             <th>Name</th>
             <th>Member Category</th>
@@ -253,9 +385,13 @@ function VolunteerHistory() {
           {filteredMembers.map((member) => (
             <tr key={member.id}>
               <td>
-                <input type="radio" name="selectedMember" />
+                <input
+                  type="checkbox"
+                  checked={selectedMembers.has(member.id)}
+                  onChange={() => handleMemberSelect(member.id)}
+                />
               </td>
-              <td>{member.id}</td>
+              <td>{member.uid}</td>
               <td>{member.name}</td>
               <td>{member.membership_category}</td>
               <td>{member.year}</td>
@@ -298,7 +434,12 @@ function VolunteerHistory() {
           <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
           {Object.keys(topPerformers).map((teamId) => (
             <div key={teamId}>
-              <h3 style={{ color: "#333" }}>{maintenanceTeams.find(team => team.id === parseInt(teamId))?.name}</h3>
+              <h3 style={{ color: "#333" }}>
+                {
+                  maintenanceTeams.find((team) => team.id === parseInt(teamId))
+                    ?.name
+                }
+              </h3>
               <table className="volunteer-table">
                 <thead>
                   <tr>
@@ -311,7 +452,7 @@ function VolunteerHistory() {
                 <tbody>
                   {topPerformers[teamId]?.map((volunteer) => (
                     <tr key={volunteer.id}>
-                      <td>{volunteer.id}</td>
+                      <td>{volunteer.uid}</td>
                       <td>{volunteer.name}</td>
                       <td>{volunteer.total_hours}</td>
                       <td>{volunteer.total_points}</td>
