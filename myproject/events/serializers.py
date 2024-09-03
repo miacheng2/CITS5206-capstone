@@ -76,7 +76,6 @@ class VolunteerPointsSerializer(serializers.ModelSerializer):
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     teams = TeamSerializer(many=True, read_only=True)
-    name = serializers.CharField(source='name', read_only=True)
 
     class Meta:
         model = TeamMember
