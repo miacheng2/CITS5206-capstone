@@ -43,6 +43,7 @@
     "fields": {
       "first_name": "Michael",
       "last_name": "Roberts",
+      "mobile": 412619556,
       "email": "michael.roberts@example.com",
       "membership_category": "Senior sailing membership",
       "will_volunteer_or_pay_levy": "I will volunteer",
@@ -55,6 +56,7 @@
     "fields": {
       "first_name": "Jane",
       "last_name": "Smith",
+      "mobile": 412619554,
       "email": "jane.smith@example.com",
       "membership_category": "Family membership",
       "will_volunteer_or_pay_levy": "I will pay the levy",
@@ -67,6 +69,7 @@
     "fields": {
       "first_name": "Emily",
       "last_name": "Johnson",
+      "mobile": 412619550,
       "email": "emily.johnson@example.com",
       "membership_category": "Non sailing membership",
       "will_volunteer_or_pay_levy": null,
