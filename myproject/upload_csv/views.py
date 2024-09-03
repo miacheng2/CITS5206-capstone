@@ -1,3 +1,4 @@
+"""
 import os
 import csv
 from django.http import JsonResponse
@@ -87,3 +88,4 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+"""
