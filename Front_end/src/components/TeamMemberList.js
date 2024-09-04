@@ -1,14 +1,148 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
-
 import styles from './styles/TeamMemberList.module.css';
 
 const TeamMemberList = () => {
-    const [teamMembers, setTeamMembers] = useState([
-        { numberId: "683561", firstName: "Michael", lastName: "Roberts", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
-        { numberId: "683562", firstName: "Dianne", lastName: "Russell", email: "Russell@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Painting and building maintenance" },
-        { numberId: "68353", firstName: "Anette", lastName: "Black", email: "michael@gmail.com", mobile: "0412619556", PaymentStatus: "2024/25 Senior Sailing ", volunteeringOrPay: "I will volunteer", team: "Grounds and Gardens" },
-    ]);
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [selectedMembers, setSelectedMembers] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingMember, setEditingMember] = useState(null); 
+    const [fileInput, setFileInput] = useState(null);
+    const [newMember, setNewMember] = useState({
+        australian_sailing_number: '',
+        first_name: '',
+        last_name: '',
+        email: '',
+        mobile: '',
+        membership_category: '',
+        will_volunteer_or_pay_levy: '',
+        teams: '', 
+    });
+
+    useEffect(() => {
+        fetchTeamMembers();
+    }, []);
+
+    const fetchTeamMembers = async () => {
+        try {
+            const response = await fetch('http://localhost:8000/api/team-members/'); 
+            const data = await response.json();
+            console.log('Fetched team members:', data);
+            setTeamMembers(data);
+        } catch (error) {
+            console.error('Error fetching team members:', error);
+        }
+    };
+
+    const exportAllToCSV = () => {
+        if (teamMembers.length === 0) {
+            alert("No data to export.");
+            return;
+        }
+
+        const headers = ["Australian Sailing Number", "First Name", "Last Name", "Email", "Mobile", "Membership Category", "Volunteer or Pay Levy", "Teams"];
+        const csvRows = [
+            headers.join(','),
+            ...teamMembers.map(member => [
+                member.australian_sailing_number,
+                member.first_name,
+                member.last_name,
+                member.email,
+                member.mobile,
+                member.membership_category,
+                member.will_volunteer_or_pay_levy,
+                member.teams.map(team => team.name).join('; ')  
+            ].join(','))
+        ];
+
+        const csvContent = csvRows.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, "all-team-members.csv");
+    };
+
+    const handleFileUpload = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+    
+        try {
+            const response = await fetch('http://localhost:8000/api/import-csv/', {
+                method: 'POST',
+                body: formData,
+            });
+    
+            const result = await response.json();
+    
+            if (response.ok) {
+                alert(`Data imported successfully!\nNew records: ${result.new_records}\nUpdated records: ${result.updated_records}\nUnchanged records: ${result.unchanged_records}`);
+                fetchTeamMembers(); // Refresh the list to show updated data
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('An error occurred while uploading the file.');
+        }
+    };
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            handleFileUpload(file);
+        }
+    };
+
+    const handleEditClick = (member) => {
+        setEditingMember(member);
+        setIsModalOpen(true); 
+    };
+
+    const handleEditSubmit = async () => {
+        const { australian_sailing_number } = editingMember;
+        try {
+            const response = await fetch(`http://localhost:8000/api/team-members/${australian_sailing_number}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(editingMember),
+            });
+
+            if (response.ok) {
+                alert('Member updated successfully!');
+                fetchTeamMembers();
+                setIsModalOpen(false);
+                setEditingMember(null);
+            } else {
+                alert('Failed to update member.');
+            }
+        } catch (error) {
+            console.error('Error updating member:', error);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditingMember(prevMember => ({
+            ...prevMember,
+            [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+        }));
+    };
+
+    const handleDeleteClick = async (numberId) => {
+        try {
+            const response = await fetch(`http://localhost:8000/api/team-members/${numberId}/`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                alert('Member deleted successfully!');
+                fetchTeamMembers();
+            } else {
+                alert('Failed to delete member.');
+            }
+        } catch (error) {
+            console.error('Error deleting member:', error);
+        }
+    };
 
     const generateTableHeaders = (data) => {
         if (data.length > 0) {
@@ -20,24 +154,74 @@ const TeamMemberList = () => {
         return [];
     };
 
-    const [selectedMembers, setSelectedMembers] = useState({});
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newMember, setNewMember] = useState({
-        numberId: '',
-        firstName: '',
-        lastName: '',
-        email: '',
-        mobile: '',
-        paymentStatus: '',
-        volubteerOrPay: '',
-        teamType: '',
-        status: ''
-    });
+    const handleAddSubmit = async () => {
+        
+        const teamsArray = typeof newMember.teams === 'string' && newMember.teams.length > 0
+            ? newMember.teams.split(',').map(team => team.trim())
+            : []; 
+
+        const payload = {
+            ...newMember,
+            teams: teamsArray,  
+            membership_category: newMember.membership_category || '',  
+            will_volunteer_or_pay_levy: newMember.will_volunteer_or_pay_levy || ''  
+        };
+
+        try {
+            const response = await fetch('http://localhost:8000/api/team-members/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                alert('New member added successfully!');
+                fetchTeamMembers();
+                setIsModalOpen(false);
+                setNewMember({
+                    australian_sailing_number: '',
+                    first_name: '',
+                    last_name: '',
+                    email: '',
+                    mobile: '',
+                    membership_category: '',
+                    will_volunteer_or_pay_levy: '',
+                    teams: '', 
+                });
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to add new member: ${JSON.stringify(errorData)}`);
+                console.log('Error details:', errorData);
+            }
+        } catch (error) {
+            console.error('Error adding new member:', error);
+        }
+    };
+
+
+    const handleAddInputChange = (e) => {
+        const { name, value } = e.target;
+        if (editingMember) {
+            setEditingMember(prevMember => ({
+                ...prevMember,
+                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+            }));
+        } else {
+            setNewMember(prevMember => ({
+                ...prevMember,
+                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+            }));
+        }
+    };
+
+  
 
     const selectAll = () => {
         const newSelection = {};
         teamMembers.forEach(member => {
-            newSelection[member.email] = true;
+            newSelection[member.australian_sailing_number] = true; 
         });
         setSelectedMembers(newSelection);
     };
@@ -47,67 +231,47 @@ const TeamMemberList = () => {
     };
 
     const exportSelected = () => {
-        const selectedData = teamMembers.filter(member => selectedMembers[member.email]);
-
+        
+        const selectedData = teamMembers.filter(member => selectedMembers[member.australian_sailing_number]);
+    
         if (selectedData.length > 0) {
-            const headers = Object.keys(selectedData[0]).join(',');
-            const csvContent = selectedData.reduce((acc, member) => {
-                const row = Object.values(member).join(',');
-                return acc + row + '\n';
-            }, headers + '\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            saveAs(blob, "selected-team-members.csv");
+           
+            const headers = ["Australian Sailing Number", "First Name", "Last Name", "Email", "Mobile", "Membership Category", "Volunteer or Pay Levy", "Teams"];
+            const csvRows = [
+                headers.join(','),  
+                ...selectedData.map(member => [
+                    member.australian_sailing_number,
+                    member.first_name,
+                    member.last_name,
+                    member.email,
+                    member.mobile,
+                    member.membership_category,
+                    member.will_volunteer_or_pay_levy,
+                    member.teams.map(team => team.name).join('; ') 
+                ].join(','))
+            ];
+    
+            const csvContent = csvRows.join('\n'); 
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); 
+            saveAs(blob, "selected-team-members.csv"); 
         } else {
-            alert("No members selected for export.");
+            alert("No members selected for export."); 
         }
     };
 
     const invertSelection = () => {
         const newSelection = {};
         teamMembers.forEach(member => {
-            newSelection[member.email] = !selectedMembers[member.email];
+            newSelection[member.australian_sailing_number] = !selectedMembers[member.australian_sailing_number];
         });
         setSelectedMembers(newSelection);
     };
 
-    const toggleSelection = (email) => {
+    const toggleSelection = (australian_sailing_number) => {
         setSelectedMembers(prev => ({
             ...prev,
-            [email]: !prev[email]
+            [australian_sailing_number]: !prev[australian_sailing_number]
         }));
-    };
-
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setNewMember({
-            numberId: '',
-            firstName: '',
-            lastName: '',
-            email: '',
-            mobile: '',
-            paymentStatus: '',
-            volubteerOrPay: '',
-            teamType: '',
-            status: ''
-        });
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewMember(prevMember => ({
-            ...prevMember,
-            [name]: value
-        }));
-    };
-
-    const addMember = () => {
-        setTeamMembers(prevMembers => [...prevMembers, newMember]);
-        closeModal();
     };
 
     return (
@@ -122,9 +286,16 @@ const TeamMemberList = () => {
                         <button onClick={exportSelected}>Export Selected to CSV</button>
                     </div>
                     <div>
-                        <button onClick={openModal}>Add +</button>
-                        <button>Import From CSV</button>
-                        <button>Export ALL To CSV</button>
+                
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileChange}
+                            style={{ display: 'none' }}
+                            ref={(input) => setFileInput(input)}
+                        />
+                        <button onClick={() => fileInput && fileInput.click()}>Import From CSV</button>
+                        <button onClick={exportAllToCSV}>Export ALL To CSV</button>
                     </div>
                 </div>
                 <table className={styles.teamTable}>
@@ -139,23 +310,31 @@ const TeamMemberList = () => {
                     </thead>
                     <tbody>
                         {teamMembers.map(member => (
-                            <tr key={member.email}
-                                className={selectedMembers[member.email] ? styles.selectedRow : ''}
-                                onClick={() => toggleSelection(member.email)}>
-                                <td onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type='checkBox'
-                                        checked={!!selectedMembers[member.email]}
-                                        onChange={() => toggleSelection(member.email)}
-                                    />
+                            <tr key={member.australian_sailing_number}  // Use australian_sailing_number as key
+                            className={selectedMembers[member.australian_sailing_number] ? styles.selectedRow : ''}
+                            onClick={() => toggleSelection(member.australian_sailing_number)}>
+                            <td onClick={(e) => e.stopPropagation()}>
+                                <input
+                                    type='checkbox'
+                                    checked={!!selectedMembers[member.australian_sailing_number]}  // Use australian_sailing_number 
+                                    onChange={() => toggleSelection(member.australian_sailing_number)}
+                                />
                                 </td>
-                                {Object.values(member).map((value, index) => (
-                                    <td key={index}>{value}</td>
-                                ))}
+                                <td>{member.australian_sailing_number}</td>
+                                <td>{member.first_name}</td>
+                                <td>{member.last_name}</td>
+                                <td>{member.email}</td>
+                                <td>{member.mobile}</td>
+                                <td>{member.membership_category}</td>
+                                <td>{member.will_volunteer_or_pay_levy}</td>
                                 <td>
-                                    <button>Edit</button>
-                                    <button>Suspend</button>
-                                    <button>Delete</button>
+                                    {member.teams.map((team, index) => (
+                                        <span key={index}>{team.name}{index < member.teams.length - 1 ? ', ' : ''}</span>
+                                    ))}
+                                </td>
+                                <td>
+                                    <button onClick={() => handleEditClick(member)}>Edit</button>
+                                    <button onClick={() => handleDeleteClick(member.australian_sailing_number)}>Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -165,44 +344,50 @@ const TeamMemberList = () => {
             {isModalOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
-                        <h2>Add New Member</h2>
+                        <h2>{editingMember ? 'Edit Member' : 'Add New Member'}</h2>
                         <form>
                             <label>
-                                Name:
-                                <input type="text" name="name" value={newMember.name} onChange={handleInputChange} />
+                                Australian Sailing Number:
+                                <input type="text" name="australian_sailing_number" value={editingMember ? editingMember.australian_sailing_number : newMember.australian_sailing_number} onChange={editingMember ? handleInputChange : handleAddInputChange} />
+                            </label>
+                            <label>
+                                First Name:
+                                <input type="text" name="first_name" value={editingMember ? editingMember.first_name : newMember.first_name} onChange={editingMember ? handleInputChange : handleAddInputChange} />
+                            </label>
+                            <label>
+                                Last Name:
+                                <input type="text" name="last_name" value={editingMember ? editingMember.last_name : newMember.last_name} onChange={editingMember ? handleInputChange : handleAddInputChange} />
                             </label>
                             <label>
                                 Email:
-                                <input type="text" name="email" value={newMember.email} onChange={handleInputChange} />
+                                <input type="text" name="email" value={editingMember ? editingMember.email : newMember.email} onChange={editingMember ? handleInputChange : handleAddInputChange} />
                             </label>
                             <label>
-                                Date of Birth:
-                                <input type="text" name="dob" value={newMember.dob} onChange={handleInputChange} />
+                                Mobile:
+                                <input type="text" name="mobile" value={editingMember ? editingMember.mobile : newMember.mobile} onChange={editingMember ? handleInputChange : handleAddInputChange} />
                             </label>
                             <label>
-                                Country:
-                                <input type="text" name="country" value={newMember.country} onChange={handleInputChange} />
+                                Membership Category:
+                                <input type="text" name="membership_category" value={editingMember ? editingMember.membership_category : newMember.membership_category} onChange={editingMember ? handleInputChange : handleAddInputChange} />
                             </label>
                             <label>
-                                Start Date:
-                                <input type="text" name="startDate" value={newMember.startDate} onChange={handleInputChange} />
+                                Volunteer or Pay Levy:
+                                <select name="will_volunteer_or_pay_levy" value={editingMember ? editingMember.will_volunteer_or_pay_levy : newMember.will_volunteer_or_pay_levy} onChange={editingMember ? handleInputChange : handleAddInputChange}>
+                                    <option value="">Select an option</option>
+                                    <option value="I will volunteer">I will volunteer</option>
+                                    <option value="I will pay the levy">I will pay the levy</option>
+                                </select>
                             </label>
                             <label>
-                                Type:
-                                <input type="text" name="type" value={newMember.type} onChange={handleInputChange} />
-                            </label>
-                            <label>
-                                Position:
-                                <input type="text" name="position" value={newMember.position} onChange={handleInputChange} />
-                            </label>
-                            <label>
-                                Status:
-                                <input type="text" name="status" value={newMember.status} onChange={handleInputChange} />
+                                Teams:
+                                <input type="text" name="teams" value={editingMember ? editingMember.teams.map(team => team.name).join(', ') : newMember.teams} onChange={editingMember ? handleInputChange : handleAddInputChange} />
                             </label>
                         </form>
                         <div className={styles.modalButtons}>
-                            <button onClick={addMember}>Create</button>
-                            <button onClick={closeModal}>Cancel</button>
+                            <button onClick={editingMember ? handleEditSubmit : handleAddSubmit}>
+                                {editingMember ? 'Update' : 'Add'}
+                            </button>
+                            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
                         </div>
                     </div>
                 </div>

@@ -48,6 +48,19 @@ class TeamSerializer(serializers.ModelSerializer):
         model = Team
         fields = ['id', 'name', 'description', 'creation_date']
 
+class TeamMemberSerializer(serializers.ModelSerializer):
+    teams = TeamSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = TeamMember
+        fields = ['australian_sailing_number', 'first_name', 'last_name', 'email', 'mobile', 'membership_category', 'will_volunteer_or_pay_levy', 'teams']
+        extra_kwargs = {
+            'email': {'required': True},
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+            'australian_sailing_number': {'required': True},
+        }
+
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
@@ -74,12 +87,9 @@ class VolunteerPointsSerializer(serializers.ModelSerializer):
         model = VolunteerPoints
         fields = ['member', 'event', 'points', 'hours', 'created_by']
 
-class TeamMemberSerializer(serializers.ModelSerializer):
-    teams = TeamSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = TeamMember
-        fields = ['australian_sailing_number', 'name', 'email', 'membership_category', 'will_volunteer_or_pay_levy', 'teams']
+
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
