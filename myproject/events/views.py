@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.views.decorators.csrf import csrf_exempt
+from django.core.files.storage import FileSystemStorage
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -18,6 +20,11 @@ from django.db.models.functions import ExtractYear,Concat
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db import IntegrityError
 import logging
+import csv
+import os
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 logger = logging.getLogger(__name__)
 from .serializers import (
@@ -146,11 +153,16 @@ class CreateAdminUserView(APIView):
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
     serializer_class = TeamMemberSerializer
+    lookup_field = 'australian_sailing_number'
     permission_classes = [AllowAny]
+    
 
-    def list(self, request, *args, **kwargs):
-        logger.debug(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
-        return super().list(request, *args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -242,9 +254,7 @@ class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
 
-class TeamMemberViewSet(viewsets.ModelViewSet):
-    queryset = TeamMember.objects.all()
-    serializer_class = TeamMemberSerializer
+
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -306,3 +316,89 @@ def addEvent(request):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+def import_csv(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+
+        if not file.name.endswith('.csv'):
+            return JsonResponse({'status': 'error', 'message': 'Only CSV files are allowed.'}, status=400)
+
+        fs = FileSystemStorage()
+        filename = fs.save(file.name, file)
+        file_path = fs.path(filename)
+
+        new_records = 0
+        updated_records = 0
+        unchanged_records = 0
+
+        try:
+            with open(file_path, newline='', encoding='utf-8') as csvfile:
+                reader = csv.reader(csvfile)
+                next(reader, None)  # Skip the header
+
+                for row in reader:
+                    asn = row[0].strip()
+                    first_name = row[1].strip()
+                    last_name = row[2].strip()
+                    email = row[4].strip()
+                    mobile = row[3].strip()
+                    membership_category = row[5].strip()
+                    will_volunteer_or_pay_levy = row[6].strip()
+                    team_names = row[7].split(',')
+
+                    teammember, created = TeamMember.objects.get_or_create(
+                        australian_sailing_number=asn,
+                        defaults={
+                            'first_name': first_name,
+                            'last_name': last_name,
+                            'email': email,
+                            'mobile': mobile,
+                            'membership_category': membership_category,
+                            'will_volunteer_or_pay_levy': will_volunteer_or_pay_levy,
+                        }
+                    )
+
+                    if created:
+                        new_records += 1
+                    else:
+                        if (teammember.first_name != first_name or
+                            teammember.last_name != last_name or
+                            teammember.email != email or
+                            teammember.mobile != mobile or
+                            teammember.membership_category != membership_category or
+                            teammember.will_volunteer_or_pay_levy != will_volunteer_or_pay_levy):
+                            teammember.first_name = first_name
+                            teammember.last_name = last_name
+                            teammember.email = email
+                            teammember.mobile = mobile
+                            teammember.membership_category = membership_category
+                            teammember.will_volunteer_or_pay_levy = will_volunteer_or_pay_levy
+                            teammember.save()
+                            updated_records += 1
+                        else:
+                            unchanged_records += 1
+
+                    for team_name in team_names:
+                        team_name = team_name.strip()
+                        if team_name:
+                            team, _ = Team.objects.get_or_create(name=team_name)
+                            teammember.teams.add(team)
+
+            return JsonResponse({
+                'status': 'success',
+                'new_records': new_records,
+                'updated_records': updated_records,
+                'unchanged_records': unchanged_records
+            })
+
+        except csv.Error as e:
+            return JsonResponse({'status': 'error', 'message': f'CSV parsing error: {str(e)}'}, status=400)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'An unexpected error occurred: {str(e)}'}, status=400)
+        finally:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
