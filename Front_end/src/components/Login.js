@@ -14,12 +14,12 @@ function Login({ setToken }) {
     const login = async () => {
         try {
             const response = await axios.post('http://localhost:8000/api/login/', { username, password });
-            const token = response.data.access; 
+            const token = response.data.access;
             if (token) {
                 setToken(token);
                 localStorage.setItem('token', token);
                 console.log('Login successful, token:', token);
-                navigate('/');  
+                navigate('/');
             } else {
                 setErrorMessage('Token not found in response');
                 console.error('Token not found in response:', response.data);
@@ -29,24 +29,25 @@ function Login({ setToken }) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
     };
-    
-    
+
+
 
     return (
         <div className={style.login_container}>
             <div className={style.login_form}>
-                <h2>Login</h2>
-                <input 
-                    type="text" 
-                    placeholder="Username" 
-                    value={username} 
-                    onChange={(e) => setUsername(e.target.value)} 
+                <img src="/pic/NYC.jpg" alt="Nedlands Yacht Club Logo" /> 
+                
+                <input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                 />
-                <input 
-                    type="password" 
-                    placeholder="Password" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                 />
                 <button onClick={login}>Login</button>
                 {errorMessage && <p className={style.error_message}>{errorMessage}</p>}

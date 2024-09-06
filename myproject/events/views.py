@@ -1,3 +1,4 @@
+from time import timezone
 from rest_framework import viewsets  # viewsets
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
@@ -149,6 +150,22 @@ class CreateAdminUserView(APIView):
         except Exception as e:
             logger.error(f"Failed to create admin user: {str(e)}")
             return Response({"error": "Failed to create admin user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+@api_view(['GET'])
+def team_with_members(request):
+    teams = Team.objects.prefetch_related('members').select_related('team_leader').all()
+    data = []
+    for team in teams:
+        members = TeamMemberSerializer(team.members.all(), many=True).data
+        data.append({
+            'id': team.id,
+            'name': team.name,
+            'description': team.description,
+            'team_leader': team.team_leader.username if team.team_leader else None,  # Fetch the username
+            'members': members
+        })
+    return Response(data)
+
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
@@ -226,7 +243,11 @@ class ChangePasswordView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
+@api_view(['GET'])
+def get_team_leaders(request):
+    team_leaders = User.objects.filter(user_type='team_leader')  # select team_leader 
+    serializer = UserSerializer(team_leaders, many=True)
+    return Response(serializer.data)
 class PromoteLeaderView(APIView):
     def post(self, request):
         username = request.data.get('username')
@@ -253,8 +274,79 @@ class PromoteLeaderView(APIView):
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
+    permission_classes = [AllowAny] 
+
+@api_view(['POST'])
+def create_team(request):
+    team_leader_id = request.data.get('team_leader')
+    description = request.data.get('description')
+
+    # pass team_leader ID
+    team_leader = None
+    if team_leader_id:
+        try:
+            team_leader = User.objects.get(id=team_leader_id)
+        except User.DoesNotExist:
+            return Response({"error": "Team leader not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+    team = Team.objects.create(
+        name=request.data.get('name'),
+        description=description or "No description available",
+        creation_date=timezone.now().date()
+    )
+
+    
+    if team_leader:
+        team.team_leader = team_leader
+        team.save()
+
+    serializer = TeamSerializer(team)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(['DELETE'])
+def delete_team(request, team_id):
+    try:
+        team = Team.objects.get(id=team_id)
+        team.delete()
+        return Response({"message": "Team deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['DELETE'])
+def delete_multiple_teams(request):
+    team_names = request.data.get('team_names', [])  
+    if not team_names:
+        return Response({"error": "No team names provided"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    teams_to_delete = Team.objects.filter(name__in=team_names) 
+    
+    if not teams_to_delete.exists():
+        return Response({"error": "Teams not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    teams_to_delete.delete()
+    return Response({"message": "Teams deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 
+    
+
+@api_view(['POST'])
+def add_member_to_team(request, pk):
+    try:
+        team = Team.objects.get(pk=pk)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    member_ids = request.data.get('members', [])
+    for member_id in member_ids:
+        try:
+            member = TeamMember.objects.get(australian_sailing_number=member_id)
+            team.members.add(member) 
+        except TeamMember.DoesNotExist:
+            return Response({"error": f"Member with ID {member_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    team.save()
+    serializer = TeamSerializer(team)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
@@ -347,6 +439,7 @@ def import_csv(request):
                     membership_category = row[5].strip()
                     will_volunteer_or_pay_levy = row[6].strip()
                     team_names = row[7].split(',')
+                    
 
                     teammember, created = TeamMember.objects.get_or_create(
                         australian_sailing_number=asn,

@@ -1,54 +1,115 @@
+/* Login.module.css */
 .login_container {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-image: url('../nycimg5.jpg'); 
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('../nycimg5.jpg');
     background-size: cover;
     background-position: center;
+    background-attachment: fixed;
+    position: relative;
 }
 
-
 .login_form {
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9); 
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 350px;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.login_form:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
 
 .login_form h2 {
-    text-align: center;
     margin-bottom: 20px;
-    color: #333; 
+    color: #333;
+    font-size: 24px;
+    font-weight: bold;
 }
 
 .login_form img {
-    width: 100px; 
+    width: 120px;  /* 设置宽度 */
+    height: 120px; /* 确保高度与宽度一致，保持圆形 */
     margin-bottom: 20px;
+    margin-top: 40px; /* 让图片再往下移动 */
+    border-radius: 50%; /* 使图片呈现圆形 */
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    object-fit: contain; /* 确保图片内容保持完整并自适应尺寸 */
+    background-color: white; /* 可选，防止背景色干扰 */
 }
+
+
 .login_form input {
-    width: 80%;
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 85%;
+    margin: 15px 0;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    font-size: 16px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login_form input:focus {
+    border-color: #4d48a4;
+    box-shadow: 0 0 10px rgba(77, 72, 164, 0.2);
+    outline: none;
 }
 
 .login_form button {
     width: 90%;
-    padding: 10px;
+    padding: 12px;
     background-color: #4d48a4;
     color: white;
     border: none;
+    border-radius: 30px;
+    font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 10px;
 }
+
+.login_form button:hover {
+    background-color: #37328c;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
 .error_message {
     color: rgb(213, 47, 47);
     margin-top: 10px;
+    font-size: 14px;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+}
+
+.registerLink {
+    margin-top: 15px;
+    color: #4d48a4;
+    font-size: 14px;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.registerLink:hover {
+    color: #37328c;
+    text-decoration: underline;
 }
