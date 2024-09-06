@@ -63,13 +63,15 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 class Team(models.Model):
-    name = models.CharField(max_length=100)
-    description = models.TextField(null=True, blank=True)  
+    name = models.CharField(max_length=255)
+    description = models.TextField()
     creation_date = models.DateField(auto_now_add=True)
-    
+    last_modified_date = models.DateField(auto_now=True)
+    team_leader = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+
     def __str__(self):
         return self.name
-
 class TeamMember(models.Model):
     I_WILL_VOLUNTEER = 'I will volunteer'
     I_WILL_PAY_LEVY = 'I will pay the levy'
