@@ -25,7 +25,7 @@ const TeamMemberList = () => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/team-members/'); 
+            const response = await fetch('http://localhost:8000/api/detailed-team-members/'); 
             const data = await response.json();
             console.log('Fetched team members:', data);
             setTeamMembers(data);
@@ -98,7 +98,7 @@ const TeamMemberList = () => {
     const handleEditSubmit = async () => {
         const { australian_sailing_number } = editingMember;
         try {
-            const response = await fetch(`http://localhost:8000/api/team-members/${australian_sailing_number}/`, {
+            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ const TeamMemberList = () => {
 
     const handleDeleteClick = async (numberId) => {
         try {
-            const response = await fetch(`http://localhost:8000/api/team-members/${numberId}/`, {
+            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${numberId}/`, {
                 method: 'DELETE',
             });
 
@@ -168,7 +168,7 @@ const TeamMemberList = () => {
         };
 
         try {
-            const response = await fetch('http://localhost:8000/api/team-members/', {
+            const response = await fetch('http://localhost:8000/api/detailed-team-members/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

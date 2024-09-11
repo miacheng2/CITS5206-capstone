@@ -47,7 +47,9 @@ class TeamMemberUpdateSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'membership_category']
 
 
-class TeamSerializer(serializers.ModelSerializer):
+
+
+class DetailedTeamSerializer(serializers.ModelSerializer):
     total_members = serializers.SerializerMethodField()
     team_leader_name = serializers.SerializerMethodField()
     members = serializers.PrimaryKeyRelatedField(queryset=TeamMember.objects.all(), many=True) 
@@ -89,8 +91,9 @@ class TeamSerializer(serializers.ModelSerializer):
             instance.members.set(members_data)
 
         return instance
-class TeamMemberSerializer(serializers.ModelSerializer):
-    teams = TeamSerializer(many=True, read_only=True)
+    
+class DetailedTeamMemberSerializer(serializers.ModelSerializer):
+    teams = DetailedTeamSerializer(many=True, read_only=True)
 
     class Meta:
         model = TeamMember
@@ -109,8 +112,20 @@ class TeamMemberSerializer(serializers.ModelSerializer):
             team_member.teams.add(team)
         return team_member
     
+class TeamSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Team
+        fields = ['id', 'name', 'description', 'creation_date']
 
-    
+class TeamMemberSerializer(serializers.ModelSerializer):
+    teams = TeamSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = TeamMember
+        fields = ['australian_sailing_number', 'name', 'email', 'membership_category', 'will_volunteer_or_pay_levy', 'teams'] 
+
+
+
 
 
 
