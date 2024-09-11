@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,AuthTokenSerializer
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer
 from django.db.models import Sum, F, IntegerField,Value
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear,Concat
@@ -31,7 +31,6 @@ logger = logging.getLogger(__name__)
 from .serializers import (
     TeamMemberSerializer, 
     TeamMemberUpdateSerializer,
-    EventSerializer, 
     VolunteerPointsSerializer,
     ChangePasswordSerializer,
 )
@@ -156,7 +155,7 @@ def team_with_members(request):
     teams = Team.objects.prefetch_related('members').select_related('team_leader').all()
     data = []
     for team in teams:
-        members = TeamMemberSerializer(team.members.all(), many=True).data
+        members = DetailedTeamMemberSerializer(team.members.all(), many=True).data
         data.append({
             'id': team.id,
             'name': team.name,
@@ -170,6 +169,18 @@ def team_with_members(request):
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
     serializer_class = TeamMemberSerializer
+    permission_classes = [AllowAny]
+    
+    def list(self, request, *args, **kwargs):
+        logger.debug(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
+        return super().list(request, *args, **kwargs)
+
+
+
+
+class DetailedTeamMemberViewSet(viewsets.ModelViewSet):
+    queryset = TeamMember.objects.all()
+    serializer_class = DetailedTeamMemberSerializer
     lookup_field = 'australian_sailing_number'
     permission_classes = [AllowAny]
     
@@ -180,6 +191,10 @@ class TeamMemberViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+
+
+
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -274,6 +289,11 @@ class PromoteLeaderView(APIView):
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
+
+
+class DetailedTeamViewSet(viewsets.ModelViewSet):
+    queryset = Team.objects.all()
+    serializer_class = DetailedTeamSerializer
     permission_classes = [AllowAny] 
 
 @api_view(['POST'])
@@ -300,7 +320,7 @@ def create_team(request):
         team.team_leader = team_leader
         team.save()
 
-    serializer = TeamSerializer(team)
+    serializer = DetailedTeamSerializer(team)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['DELETE'])
@@ -345,7 +365,7 @@ def add_member_to_team(request, pk):
             return Response({"error": f"Member with ID {member_id} not found"}, status=status.HTTP_404_NOT_FOUND)
 
     team.save()
-    serializer = TeamSerializer(team)
+    serializer = DetailedTeamSerializer(team)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 class EventViewSet(viewsets.ModelViewSet):

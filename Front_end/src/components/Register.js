@@ -22,7 +22,15 @@ function Register({ setToken }) {
             const token = response.data.token;
             setToken(token);
             localStorage.setItem('token', token);
-            navigate('/');
+
+            alert('Registration successful! You will be redirected to the home page.');
+
+         
+            setTimeout(() => {
+                navigate('/');
+            }, 2000);
+            
+            setErrorMessage(''); 
         } catch (error) {
             setErrorMessage('Registration failed: ' + (error.response?.data.detail || 'Unknown Error'));
             console.error('Error:', error.response ? error.response.data : error.message);

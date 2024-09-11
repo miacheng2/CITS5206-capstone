@@ -35,7 +35,7 @@ const WorkTeamManagement = () => {
     useEffect(() => {
         const fetchTeamMembers = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/team-members/');
+                const response = await fetch('http://localhost:8000/api/detailed-team-members/');
                 const data = await response.json();
                 setTeamMembers(data || []);  
             } catch (error) {
@@ -309,7 +309,7 @@ const handleAddMember = async () => {
         if (existingTeam) {
           
             try {
-                const response = await fetch(`http://localhost:8000/api/teams/${existingTeam.id}/`, {
+                const response = await fetch(`http://localhost:8000/api/detailed-teams/${existingTeam.id}/`, {
                     method: 'PUT',  
                     headers: {
                         'Content-Type': 'application/json',
@@ -338,7 +338,7 @@ const handleAddMember = async () => {
             }
         } else {
             try {
-                const response = await fetch('http://localhost:8000/api/teams/', {
+                const response = await fetch('http://localhost:8000/api/detailed-teams/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
