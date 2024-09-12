@@ -7,7 +7,6 @@ import styles from './styles/WorkTeamManagement.module.css';
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
-    const navigate = useNavigate();
 
 
     const [teams, setTeams] = useState([]);
