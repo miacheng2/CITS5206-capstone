@@ -334,20 +334,22 @@ def delete_team(request, team_id):
     
 @api_view(['DELETE'])
 def delete_multiple_teams(request):
+    print("DELETE request received")
     team_names = request.data.get('team_names', [])  
+    print(f"Team names to delete: {team_names}") 
     if not team_names:
         return Response({"error": "No team names provided"}, status=status.HTTP_400_BAD_REQUEST)
-    
-    teams_to_delete = Team.objects.filter(name__in=team_names) 
-    
+
+    teams_to_delete = Team.objects.filter(name__in=team_names)  
     if not teams_to_delete.exists():
         return Response({"error": "Teams not found"}, status=status.HTTP_404_NOT_FOUND)
-    
+
+    deleted_team_names = [team.name for team in teams_to_delete]
     teams_to_delete.delete()
-    return Response({"message": "Teams deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+    return Response({"message": "Teams deleted successfully", "deleted_team_names": deleted_team_names}, status=status.HTTP_200_OK)
 
 
-    
 
 @api_view(['POST'])
 def add_member_to_team(request, pk):
