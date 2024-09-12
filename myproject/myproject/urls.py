@@ -19,6 +19,8 @@ urlpatterns = [
     path('api/login/', LoginView.as_view(), name='login'),
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/detailed-teams/delete-multiple/', delete_multiple_teams, name='delete-multiple-teams'),
+
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('api/promote-leader/', PromoteLeaderView.as_view(), name='promote_leader'),
     path('api/update-profile/', UpdateProfileView.as_view(), name='update-profile'),
@@ -33,8 +35,9 @@ urlpatterns = [
     path('api/get-profile/', GetProfileView.as_view(), name='get-profile'),
     path('api/members-points-all/', AllMembersPointsAPIView.as_view(), name='all-members-points'),
     path('api/save-volunteer-points/', save_volunteer_points, name='save-volunteer-points'),
-    
+
     path('api/teams/<int:pk>/add-member/', add_member_to_team, name='add_member_to_team'),
+
 
     path('api/teams-with-members/', team_with_members, name='team-with-members'),
 
