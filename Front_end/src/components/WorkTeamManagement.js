@@ -9,6 +9,7 @@ const WorkTeamManagement = () => {
     const [teamMembers, setTeamMembers] = useState([]);
 
 
+
     const [teams, setTeams] = useState([]);
     const [selectedTeams, setSelectedTeams] = useState([]);
 
@@ -88,17 +89,17 @@ const WorkTeamManagement = () => {
 
 
     const handleSelectAll = () => {
-        setSelectedTeams([...teams.map(team => team.TeamName)]);
+        setSelectedTeams([...teams]);  
     };
-
+    
 
     const handleSelectInverse = () => {
-        const unselectedTeams = teams
-            .filter(team => !selectedTeams.includes(team.TeamName))
-            .map(team => team.TeamName);
-        setSelectedTeams(unselectedTeams);
+        const unselectedTeams = teams.filter(team => 
+            !selectedTeams.some(selected => selected.id === team.id) 
+        );
+        setSelectedTeams(unselectedTeams);  
     };
-
+    
 
     const handleUnselectAll = () => {
         setSelectedTeams([]);
@@ -356,6 +357,7 @@ const WorkTeamManagement = () => {
                         TeamLeader: '',
                         Description: ''
                     });
+                    handleClosePopup();
                     
                     
                 } else {
