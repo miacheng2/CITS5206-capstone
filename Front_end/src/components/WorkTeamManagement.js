@@ -16,7 +16,7 @@ const WorkTeamManagement = () => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");  // New state for search
-    
+
 
 
 
@@ -110,16 +110,16 @@ const WorkTeamManagement = () => {
             alert('Please select at least one team to export.');
             return;
         }
-    
+
         const allMembersData = selectedTeams.flatMap(team => team.members);
-    
+
         if (allMembersData.length === 0) {
             alert('No members available for the selected teams.');
             return;
         }
-    
+
         const csvContent = convertToCSV(allMembersData);
-    
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -129,7 +129,7 @@ const WorkTeamManagement = () => {
         link.click();
         document.body.removeChild(link);
     };
-    
+
 
 
     const convertToCSV = (data) => {
@@ -149,7 +149,7 @@ const WorkTeamManagement = () => {
 
         const csvRows = [
             headers.join(','),
-            ...rows.map(row => row.join(','))  
+            ...rows.map(row => row.join(','))
         ];
 
         return csvRows.join('\n');
@@ -160,23 +160,23 @@ const WorkTeamManagement = () => {
             console.error("Invalid team or team ID:", team);
             return;
         }
-    
+
         console.log("Selected team:", team);
-    
-     
+
+
         const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
-    
+
         if (isAlreadySelected) {
-            
+
             setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
-            console.log("Deleting team with ID:", team.id); 
+            console.log("Deleting team with ID:", team.id);
         } else {
-            
+
             setSelectedTeams([...selectedTeams, team]);
             console.log("Adding team with ID:", team.id);
         }
     };
-    
+
 
 
     const handleClosePopup = () => {
@@ -198,7 +198,7 @@ const WorkTeamManagement = () => {
         }));
     };
 
-    
+
 
 
     const handleAddMember = async () => {
@@ -221,7 +221,7 @@ const WorkTeamManagement = () => {
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-                
+
                 alert('Member added successfully!');
                 handleClosePopup();
             } else {
@@ -292,24 +292,24 @@ const WorkTeamManagement = () => {
             alert('Please select at least one team to delete.');
             return;
         }
-    
+
         const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
         if (!confirmDelete) return;
-    
+
         try {
             // Iterate over all selected teams and send delete requests
             for (const team of selectedTeams) {
                 const response = await fetch(`http://localhost:8000/api/teams/${team.id}/`, {
                     method: 'DELETE'
                 });
-    
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
-    
+
             alert('Selected teams have been successfully deleted!');
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
@@ -318,7 +318,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the teams.');
         }
     };
-    
+
 
 
 
@@ -356,8 +356,8 @@ const WorkTeamManagement = () => {
                         TeamLeader: '',
                         Description: ''
                     });
-                    
-                    
+
+
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to update team: ${JSON.stringify(errorData)}`);
@@ -428,7 +428,7 @@ const WorkTeamManagement = () => {
                                 <div
                                     key={team.id}
                                     className={`${styles.teamCard} ${selectedTeams.some(t => t.id === team.id) ? styles.selected : ''}`}
-                                    onClick={() => handleTeamCardClick(team)}  
+                                    onClick={() => handleTeamCardClick(team)}
                                 >
                                     <div className={styles.teamCardUp}>
                                         <input

@@ -30,11 +30,6 @@ yarn-error.log*
 
 # Ignore virtual environment
 venv/
-<<<<<<< HEAD
-# Ignore Python compiled files
-__pycache__/
-*.pyc
-=======
 node_modules
 
 # Ignore the database file
@@ -51,4 +46,3 @@ cython_debug/
 
 # Migrations folder
 myproject/myapp/migrations/__pycache__/
->>>>>>> main

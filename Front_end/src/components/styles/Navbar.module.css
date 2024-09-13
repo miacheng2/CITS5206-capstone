@@ -13,17 +13,17 @@ body {
     background-color: #00004D;
     align-items: center;
     position: relative;
-    
+
 }
 
 .rightDiv {
     display: flex;
     align-items: center;
-    
+
 }
 
-.rightDiv h1 {
-    font-size: 24px;
+.rightDiv h2 {
+    font-size: 20px;
     color: white;
     margin: 0;
     font-weight: bold;
@@ -81,7 +81,7 @@ body {
     display: flex;
     align-items: center;
     gap: 20px;
- 
+
 }
 
 .navList li {
@@ -97,14 +97,17 @@ body {
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
-  
+
 }
 
-.navList li>a:hover {
+.navList li:hover {
     background-color: #f7fc00;
     color: #00004D;
     text-decoration: none;
- 
+}
+
+.navList li:hover>a {
+    color: #000;
 }
 
 .dropdownContent {
@@ -134,10 +137,16 @@ body {
 }
 
 .navList {
-    list-style-type: none; /* Removes bullet points */
-    padding: 0; /* Removes default padding */
-    margin: 0; /* Removes default margin */
-    display: flex; /* Aligns items in a row */
-    align-items: center; /* Vertically aligns items */
-    justify-content: space-around; /* Adds spacing between items */
+    list-style-type: none;
+    /* Removes bullet points */
+    padding: 0;
+    /* Removes default padding */
+    margin: 0;
+    /* Removes default margin */
+    display: flex;
+    /* Aligns items in a row */
+    align-items: center;
+    /* Vertically aligns items */
+    justify-content: space-around;
+    /* Adds spacing between items */
 }

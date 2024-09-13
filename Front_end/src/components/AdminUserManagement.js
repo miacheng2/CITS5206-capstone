@@ -102,10 +102,10 @@ const AdminUserManagement = ({ userProfile }) => {
                 new_password: passwordData.newPassword
             }, {
                 headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-    
+
             if (response.status === 200) {
                 setPasswordSuccessMessage("Password changed successfully.");
                 setPasswordErrorMessage('');
@@ -120,7 +120,6 @@ const AdminUserManagement = ({ userProfile }) => {
         <div className={styles.container}>
             <h2>Admin Management</h2>
 
-            {/* Create Admin User Section */}
             <div className={styles.feature}>
                 <h2>Create Admin User</h2>
                 <form onSubmit={handleCreateSubmit} className={styles.form}>
