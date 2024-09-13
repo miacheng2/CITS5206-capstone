@@ -7,42 +7,39 @@ body {
 
 .navbarOutter {
     height: 70px;
-    /* 固定高度 */
     display: flex;
     width: 100%;
     justify-content: space-between;
     background-color: #00004D;
     align-items: center;
     position: relative;
-    /* 确保它在布局中的位置是相对的 */
+    
 }
 
 .rightDiv {
     display: flex;
     align-items: center;
-    /* 确保 logo 和标题垂直居中对齐 */
+    
 }
 
 .rightDiv h1 {
     font-size: 24px;
     color: white;
-    /* 标题颜色 */
     margin: 0;
     font-weight: bold;
 }
 
 .logo {
     height: 50px;
-    /* 调整 logo 大小 */
     margin-right: 15px;
-    /* 确保 logo 和标题之间有足够的间距 */
     vertical-align: middle;
-    /* 确保 logo 在容器中居中 */
 }
 
 .leftDiv {
     display: flex;
     align-items: center;
+    margin-left: auto;
+    margin-right: 20px;
 }
 
 .leftDiv>button {
@@ -55,6 +52,7 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin-left: 40px;
 }
 
 .leftDiv>button:hover {
@@ -68,25 +66,27 @@ body {
     align-items: center;
     justify-content: space-between;
     background-color: #00004D;
-    /* 深蓝色背景 */
+
     color: white;
     height: 50px;
-    /* 根据需要调整高度 */
+
 }
 
 .navList {
-    list-style: none;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
     padding: 0;
     margin: 0;
     display: flex;
     align-items: center;
     gap: 20px;
-    /* 增加导航链接之间的间距 */
+ 
 }
 
 .navList li {
-    padding: 10px 10px;
-    color: #333;
+    color: white;
+    padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
 }
@@ -94,20 +94,17 @@ body {
 .navList li>a,
 .leftDiv>button {
     color: white;
-    /* 将字体颜色改为白色 */
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
-    /* 移除下划线 */
+  
 }
-
-
 
 .navList li>a:hover {
     background-color: #f7fc00;
     color: #00004D;
     text-decoration: none;
-    /* 移除悬停时的下划线 */
+ 
 }
 
 .dropdownContent {
@@ -134,4 +131,13 @@ body {
 
 .dropdownItem:hover {
     background-color: #f1f1f1;
+}
+
+.navList {
+    list-style-type: none; /* Removes bullet points */
+    padding: 0; /* Removes default padding */
+    margin: 0; /* Removes default margin */
+    display: flex; /* Aligns items in a row */
+    align-items: center; /* Vertically aligns items */
+    justify-content: space-around; /* Adds spacing between items */
 }

@@ -1,0 +1,163 @@
+/* Navbar Styles */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Distribute space between items */
+  padding: 15px;
+  background-color: #010634;
+  color: white;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.logo {
+  width: 50px;
+  margin-right: 20px;
+}
+
+.navLinks {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  margin-left: auto;
+}
+
+.navLinks li {
+  padding: 5px 10px;
+}
+
+.navLinks a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navLinks a:hover {
+  text-decoration: none;
+}
+
+/* General Container Styles */
+.container {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  width: 80%;
+  max-width: 1200px; /* 设置最大宽度 */
+  padding-top: 100px;
+}
+
+/* Add Volunteer Container */
+.add-volunteer-container {
+  padding: 20px; /* Adds padding to avoid overlap with the navbar */
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Search Bar Styles */
+.search-bar {
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%; /* Use full width */
+  max-width: 600px; /* Optional max width */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+/* Table Styles */
+.volunteer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.volunteer-table th, .volunteer-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.volunteer-table th {
+  background-color: #6b0c59;
+  color: white;
+}
+
+.volunteer-table select,
+.volunteer-table input[type="number"],
+.volunteer-table input[type="text"],
+.volunteer-table input[type="date"] {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.volunteer-table button {
+  background-color: #258178;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.volunteer-table button:hover {
+  background-color: #45a049;
+}
+
+/* Team Buttons */
+.team-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Wrap buttons to new lines on smaller screens */
+}
+
+.team-buttons button {
+  padding: 10px 15px;
+  background-color: #cb3679;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.team-buttons button:hover {
+  background-color: #8e0a73;
+}
+
+.team-buttons button:last-child {
+  background-color: #772581;
+}
+
+.team-buttons button:last-child:hover {
+  background-color: #45a049;
+}
+
+/* Responsive adjustments */
+@media only screen and (max-width: 768px) {
+  .container {
+    width: 90%; /* Increase width for smaller screens */
+    padding-top: 80px; /* Adjust top padding for smaller screens */
+  }
+
+  .navLinks {
+    flex-direction: column; /* Stack links vertically on small screens */
+    gap: 10px;
+  }
+
+  .add-volunteer-container, .volunteer-table, .team-buttons {
+    width: 100%;
+  }
+
+  .card, .volunteer-table, .team-buttons button {
+    width: 100%; /* Full width on smaller screens */
+  }
+}
