@@ -30,3 +30,6 @@ yarn-error.log*
 
 # Ignore virtual environment
 venv/
+# Ignore Python compiled files
+__pycache__/
+*.pyc
