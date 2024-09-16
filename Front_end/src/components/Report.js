@@ -89,7 +89,7 @@ function VolunteerHistory() {
   useEffect(() => {
     const uniqueMembers = new Set();
     const filtered = members.filter((member) => {
-      console.log("selectedMemeber", member);
+      console.log("selectedMember", member);
       console.log("selectedYear", selectedYear);
       console.log("selectedPoint", selectedTotalPoints);
       const matchesSearchQuery =
@@ -116,7 +116,6 @@ function VolunteerHistory() {
         matchesTotalPoints
       ) {
         if (!uniqueMembers.has(member.id)) {
-          console.log(uniqueMembers);
           uniqueMembers.add(member.id);
           return true;
         }
@@ -126,7 +125,14 @@ function VolunteerHistory() {
     });
 
     setFilteredMembers(filtered);
-  }, [searchQuery, selectedTeamId, selectedCategory, selectedYear, members]);
+  }, [
+    searchQuery,
+    selectedTeamId,
+    selectedCategory,
+    selectedYear,
+    selectedTotalPoints, // Add this dependency
+    members,
+  ]);
 
   const handleTeamFilter = (teamId) => {
     setSelectedTeamId(teamId);
@@ -348,8 +354,8 @@ function VolunteerHistory() {
           value={selectedTotalPoints}
         >
           <option value="">All Points</option>
-          <option value=">=200">Points &gt= 200</option>
-          <option value="<200">Points &lt 200</option>
+          <option value=">=200">Points &gt;= 200</option>
+          <option value="<200">Points &lt; 200</option>
         </select>
       </div>
 
