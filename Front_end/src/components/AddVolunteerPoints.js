@@ -234,17 +234,13 @@ function AddVolunteerPoints() {
             <th>Select</th>
             <th>Member ID</th>
             <th>Name</th>
-            <th>Date</th>
-            <th>Maintenance Team</th>
             <th>Maintenance Event</th>
             <th>Activity</th>
             <th>Start Time</th>
             <th>End Time</th>
             <th>Volunteering Hours</th>
             <th>Points</th>
-            <th>Comments</th>
             <th>Edited By</th>
-            <th>Edit Time</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -260,48 +256,7 @@ function AddVolunteerPoints() {
               </td>
               <td>{member.australian_sailing_number}</td>
               <td>{member.name}</td>
-              <td>
-                <input
-                  type="date"
-                  value={
-                    selectedMember?.australian_sailing_number ===
-                    member.australian_sailing_number
-                      ? selectedMember.volunteerDate
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("volunteerDate", e.target.value)
-                  }
-                  disabled={
-                    selectedMember?.australian_sailing_number !==
-                    member.australian_sailing_number
-                  }
-                />
-              </td>
-              <td>
-                <select
-                  value={
-                    selectedMember?.australian_sailing_number ===
-                    member.australian_sailing_number
-                      ? selectedMember.maintenanceTeam
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("maintenanceTeam", e.target.value)
-                  }
-                  disabled={
-                    selectedMember?.australian_sailing_number !==
-                    member.australian_sailing_number
-                  }
-                >
-                  <option value="">Select Team</option>
-                  {maintenanceTeams.map((team) => (
-                    <option key={team.name} value={team.name}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
-              </td>
+
               <td>
                 <select
                   value={
@@ -400,25 +355,7 @@ function AddVolunteerPoints() {
                   ? selectedMember.volunteerPoints
                   : ""}
               </td>
-              <td>
-                <input
-                  type="text"
-                  placeholder="Comments"
-                  value={
-                    selectedMember?.australian_sailing_number ===
-                    member.australian_sailing_number
-                      ? selectedMember.comments
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("comments", e.target.value)
-                  }
-                  disabled={
-                    selectedMember?.australian_sailing_number !==
-                    member.australian_sailing_number
-                  }
-                />
-              </td>
+
               <td>
                 <select
                   value={
@@ -442,12 +379,6 @@ function AddVolunteerPoints() {
                     </option>
                   ))}
                 </select>
-              </td>
-              <td>
-                {selectedMember?.australian_sailing_number ===
-                member.australian_sailing_number
-                  ? selectedMember.editTime
-                  : ""}
               </td>
               <td>
                 <button
