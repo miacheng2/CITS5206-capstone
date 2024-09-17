@@ -88,24 +88,30 @@ function AddVolunteerPoints() {
   };
 
   const handleInputChange = (field, value) => {
-    if (field === "startTime" || field === "endTime") {
-      const start = new Date(`1970-01-01T${selectedMember.startTime}`);
-      const end = new Date(`1970-01-01T${selectedMember.endTime}`);
-      const hours = (end - start) / (1000 * 60 * 60);
-      const points = Math.floor(hours * (20 / 3)); // Example: 20 points for 3 hours
-      setSelectedMember((prevState) => ({
+    setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
-        volunteerHours: hours,
-        volunteerPoints: points,
-      }));
-    } else {
-      setSelectedMember((prevState) => ({
-        ...prevState,
-        [field]: value,
-      }));
+    }));
+
+    if (field === "endTime" || field === "startTime") {
+        const start = selectedMember.startTime ? new Date(`1970-01-01T${selectedMember.startTime}`) : new Date();
+        const end = field === "endTime" ? new Date(`1970-01-01T${value}`) : new Date(`1970-01-01T${selectedMember.endTime}`);
+
+        if (end < start) {
+            end.setDate(end.getDate() + 1); // handles crossing over to the next day
+        }
+
+        const hours = (end - start) / (1000 * 60 * 60);
+        const points = Math.floor(hours * (20 / 3)); // Example: 20 points for 3 hours
+
+        setSelectedMember((prevState) => ({
+            ...prevState,
+            volunteerHours: hours.toFixed(2),
+            volunteerPoints: points,
+        }));
     }
-  };
+};
+
 
   const handleSave = () => {
     if (selectedMember) {
@@ -115,7 +121,7 @@ function AddVolunteerPoints() {
       }));
       const editorName = selectedMember.editorName.replace(/\s+/g, " ").trim();
       const selectedAdmin = adminsAndLeaders.find(
-        (user) => user.username.trim().toLowerCase() == editorName.toLowerCase()
+        (user) => user.username.trim().toLowerCase() === editorName.toLowerCase()
       );
 
       if (!selectedAdmin) {
@@ -160,21 +166,7 @@ function AddVolunteerPoints() {
     }
   };
 
-  const handleEdit = (member) => {
-    console.log("Editing:", member);
-    // Logic to handle edit, populate fields with member's data
-  };
-
-  const handleDelete = (memberId) => {
-    if (window.confirm("Are you sure you want to delete this entry?")) {
-      setFilteredMembers(
-        filteredMembers.filter(
-          (member) => member.australian_sailing_number !== memberId
-        )
-      );
-      console.log("Deleted member with ID:", memberId);
-    }
-  };
+  
 
   const handleTeamFilter = (team) => {
     setSelectedTeam(team);
@@ -395,7 +387,7 @@ function AddVolunteerPoints() {
                   : ""}
               </td>
               <td>
-                <button onClick={() => handleEdit(member)}>Edit</button>
+                
                 <button
                   onClick={handleSave}
                   disabled={
@@ -405,11 +397,7 @@ function AddVolunteerPoints() {
                 >
                   Save
                 </button>
-                <button
-                  onClick={() => handleDelete(member.australian_sailing_number)}
-                >
-                  Delete
-                </button>
+                
               </td>
             </tr>
           ))}
