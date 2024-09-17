@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -26,6 +27,7 @@ ChartJS.register(
 );
 
 function VolunteerHistory() {
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [maintenanceTeams, setTeams] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +44,9 @@ function VolunteerHistory() {
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]);
   const [topPerformers, setTopPerformers] = useState({});
+  const handleMemberClick = (uid) => {
+    navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
+  };
 
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
@@ -398,7 +403,12 @@ function VolunteerHistory() {
                 />
               </td>
               <td>{member.uid}</td>
-              <td>{member.name}</td>
+              <td
+                className="clickable-name" // Add a class for styling clickable names
+                onClick={() => handleMemberClick(member.uid)}
+              >
+                {member.name}
+              </td>
               <td>{member.membership_category}</td>
               <td>{member.year}</td>
               <td>{member.total_hours}</td>

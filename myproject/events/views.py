@@ -417,6 +417,21 @@ class AllMembersPointsAPIView(APIView):
         
         return Response(results)
 
+# One member's history view
+class MemberVolunteerHistoryAPIView(APIView):
+    def get(self, request, uid):
+        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
+        history = [
+            {
+                "event_name": point.event.name,
+                "event_date": point.event.date,
+                "activity": point.activity.name if point.activity else None,
+                "points": point.points,
+                "hours": point.hours
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # update volunteer point view
 @api_view(['POST'])
