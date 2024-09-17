@@ -36,13 +36,12 @@ function VolunteerHistory() {
   const [selectedTotalPoints, setSelectedTotalPoints] = useState(""); // State for selected Total Points filter
   const [selectedMembers, setSelectedMembers] = useState(new Set()); // State for selected members
   const [selectAll, setSelectAll] = useState(false); // State for "Select All"
-  const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =
-    useState(false);
+  const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =useState(false);
   const [showVolunteerHoursGraph, setShowVolunteerHoursGraph] = useState(false);
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]);
   const [topPerformers, setTopPerformers] = useState({});
-
+  
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
     (data) => {
@@ -254,7 +253,7 @@ function VolunteerHistory() {
       {
         label: "Total Points",
         data: maintenanceTeams.map((team) => {
-          const teamMembers = members.filter(
+          const teamMembers = filteredMembers.filter(
             (member) => member.teams === team.id
           );
           return teamMembers.reduce(
@@ -266,6 +265,7 @@ function VolunteerHistory() {
       },
     ],
   };
+  
 
   const teamPerformanceOptions = {
     responsive: true,
@@ -292,6 +292,7 @@ function VolunteerHistory() {
       },
     },
   };
+  
 
   const uniqueCategories = [
     ...new Set(members.map((member) => member.membership_category)),
