@@ -6,49 +6,45 @@ function AddVolunteerPoints() {
   const [members, setMembers] = useState([]); // To store members data
   const [maintenanceTeams, setTeams] = useState([]); // To store teams data
   const [maintenanceEvents, setEvents] = useState([]); // To store events data
+  const [activities, setActivities] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
 
-  // Fetch users
+  // Fetch users, members, teams, and events
   useEffect(() => {
     fetch("http://localhost:8000/api/users/")
       .then((response) => response.json())
-      .then((data) => {
-        setUser(data);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+      .then((data) => setUser(data))
+      .catch((error) => console.error("Error fetching users:", error));
 
-  // Fetch members
-  useEffect(() => {
     fetch("http://localhost:8000/api/team-members/")
       .then((response) => response.json())
-      .then((data) => {
-        setMembers(data);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
+      .then((data) => setMembers(data))
+      .catch((error) => console.error("Error fetching members:", error));
 
-  // Fetch teams and events
-  useEffect(() => {
-    // Fetch teams
     fetch("http://localhost:8000/api/teams/")
       .then((response) => response.json())
-      .then((data) => {
-        setTeams(data);
-      })
+      .then((data) => setTeams(data))
       .catch((error) => console.error("Error fetching teams:", error));
 
-    // Fetch events
     fetch("http://localhost:8000/api/events/")
       .then((response) => response.json())
-      .then((data) => {
-        setEvents(data);
-      })
+      .then((data) => setEvents(data))
       .catch((error) => console.error("Error fetching events:", error));
   }, []);
+
+  // Fetch activities for selected event
+  const fetchActivitiesForEvent = (eventId) => {
+    fetch(`http://localhost:8000/api/events/${eventId}/activities/`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Fetched activities:", data);
+        setActivities(data);
+      })
+      .catch((error) => console.error("Error fetching activities:", error));
+  };
 
   // fliter user by search query
   useEffect(() => {
@@ -78,6 +74,7 @@ function AddVolunteerPoints() {
       volunteerDate: "",
       maintenanceTeam: member.team,
       maintenanceEvent: "",
+      selectedActivity: "",
       startTime: "",
       endTime: "",
       volunteerHours: "",
@@ -92,12 +89,54 @@ function AddVolunteerPoints() {
       const start = new Date(`1970-01-01T${selectedMember.startTime}`);
       const end = new Date(`1970-01-01T${selectedMember.endTime}`);
       const hours = (end - start) / (1000 * 60 * 60);
-      const points = Math.floor(hours * (20 / 3)); // Example: 20 points for 3 hours
+
+      // Get the selected event to determine points and hours
+      const selectedEvent = maintenanceEvents.find(
+        (event) => event.name === selectedMember.maintenanceEvent
+      );
+
+      if (selectedEvent) {
+        const isOnWaterEvent = selectedEvent.event_type === "on_water";
+        const points = isOnWaterEvent ? 20 : Math.floor(hours * (20 / 3)); // 20 points for 3 hours for off-water
+        const hoursToSet = isOnWaterEvent ? 0 : hours; // Set hours to 0 for on-water events
+
+        setSelectedMember((prevState) => ({
+          ...prevState,
+          [field]: value,
+          volunteerHours:
+            field === "startTime" || field === "endTime"
+              ? hoursToSet
+              : prevState.volunteerHours,
+          volunteerPoints: points,
+        }));
+      } else {
+        console.error("No event selected or event not found");
+      }
+    } else if (field === "maintenanceEvent") {
+      const selectedEvent = maintenanceEvents.find(
+        (event) => event.name === value
+      );
+      fetchActivitiesForEvent(selectedEvent.id);
+
+      // Reset activity, points, and hours when event changes
       setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
-        volunteerHours: hours,
-        volunteerPoints: points,
+        selectedActivity: "", // Reset selected activity
+        volunteerPoints:
+          selectedEvent?.event_type === "on_water"
+            ? 20
+            : prevState.volunteerPoints,
+        volunteerHours:
+          selectedEvent?.event_type === "on_water"
+            ? 0
+            : prevState.volunteerHours,
+      }));
+    } else if (field === "selectedActivity") {
+      // Assuming the logic for activity selection is handled elsewhere
+      setSelectedMember((prevState) => ({
+        ...prevState,
+        [field]: value,
       }));
     } else {
       setSelectedMember((prevState) => ({
@@ -119,13 +158,15 @@ function AddVolunteerPoints() {
       );
 
       if (!selectedAdmin) {
-        console.error(
-          "Error: No matching admin found for editorName:",
-          editorName
-        );
         alert("Error: No matching admin found for editorName.");
         return;
       }
+
+      // Map selected activity name to ID
+      const selectedActivity = activities.find(
+        (activity) => activity.name === selectedMember.selectedActivity
+      );
+      console.log(selectedMember.selectedActivity);
 
       const data = {
         member: selectedMember.australian_sailing_number,
@@ -134,6 +175,7 @@ function AddVolunteerPoints() {
         ).id,
         points: selectedMember.volunteerPoints,
         hours: selectedMember.volunteerHours,
+        activity: selectedActivity ? selectedActivity.id : null, // Use activity ID or null
         created_by: selectedAdmin.id,
       };
 
@@ -195,6 +237,7 @@ function AddVolunteerPoints() {
             <th>Date</th>
             <th>Maintenance Team</th>
             <th>Maintenance Event</th>
+            <th>Activity</th>
             <th>Start Time</th>
             <th>End Time</th>
             <th>Volunteering Hours</th>
@@ -281,6 +324,34 @@ function AddVolunteerPoints() {
                       {event.name}
                     </option>
                   ))}
+                </select>
+              </td>
+              <td>
+                <select
+                  value={
+                    selectedMember?.australian_sailing_number ===
+                    member.australian_sailing_number
+                      ? selectedMember.selectedActivity
+                      : ""
+                  }
+                  onChange={(e) =>
+                    handleInputChange("selectedActivity", e.target.value)
+                  }
+                  disabled={
+                    selectedMember?.australian_sailing_number !==
+                    member.australian_sailing_number
+                  }
+                >
+                  <option value="">Select Activity</option>
+                  {activities.length > 0 ? (
+                    activities.map((activity) => (
+                      <option key={activity.name} value={activity.name}>
+                        {activity.name}
+                      </option>
+                    ))
+                  ) : (
+                    <option>No activities available</option>
+                  )}
                 </select>
               </td>
               <td>

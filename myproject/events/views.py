@@ -13,8 +13,8 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
-from .models import User, Team, TeamMember, Event, VolunteerPoints
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer
+from .models import User, Team, TeamMember, Event, VolunteerPoints, Activity
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer,ActivitySerializer
 from django.db.models import Sum, F, IntegerField,Value,Case, When, ExpressionWrapper
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear,Concat
@@ -564,3 +564,14 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@api_view(['GET'])
+def get_activities_for_event(request, event_id):
+    print(event_id)
+    event = get_object_or_404(Event, id=event_id)
+    print("event:",event)
+    activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity
+    print("activities:",activities)
+    serializer = ActivitySerializer(activities, many=True)
+    print(serializer.data)
+    return Response(serializer.data)
