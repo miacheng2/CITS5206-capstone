@@ -26,6 +26,7 @@ import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 from .serializers import (
@@ -378,6 +379,31 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
 
+    def update(self, request, *args, **kwargs):
+        """Update points and hours for a specific volunteer entry."""
+        try:
+            instance = self.get_object()
+        except VolunteerPoints.DoesNotExist:
+            return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
+        print("request data:",request.data)
+        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            print("serializer:",serializer.data)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """Delete a specific volunteer entry."""
+        try:
+            instance = VolunteerPoints.objects.get(pk=pk)
+        except VolunteerPoints.DoesNotExist:
+            return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 # get all members' point view
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
@@ -423,6 +449,7 @@ class MemberVolunteerHistoryAPIView(APIView):
         points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
         history = [
             {
+                 "id": point.id,
                 "event_name": point.event.name,
                 "event_date": point.event.date,
                 "activity": point.activity.name if point.activity else None,
