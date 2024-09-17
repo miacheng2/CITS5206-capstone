@@ -265,7 +265,7 @@ function VolunteerHistory() {
       {
         label: "Total Points",
         data: maintenanceTeams.map((team) => {
-          const teamMembers = members.filter(
+          const teamMembers = filteredMembers.filter(
             (member) => member.teams === team.id
           );
           return teamMembers.reduce(
@@ -320,59 +320,72 @@ function VolunteerHistory() {
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
       </div>
-      {/* Dropdown for Member Category */}
-      <div className="filter-dropdowns">
-        <label htmlFor="category-filter">Filter by Category:</label>
-        <select
-          id="category-filter"
-          onChange={(e) => handleCategoryFilter(e.target.value)}
-          value={selectedCategory}
-        >
-          <option value="">All Categories</option>
-          {uniqueCategories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+      {/* Filter section */}
+      <div className="filter-dropdowns-container">
+        <div className="filter-group">
+          <label htmlFor="category-filter" className="filter-label">
+            Category:
+          </label>
+          <select
+            id="category-filter"
+            className="filter-select"
+            value={selectedCategory}
+            onChange={(e) => handleCategoryFilter(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {uniqueCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {/* Dropdown for Year */}
-        <label htmlFor="year-filter">Filter by Year:</label>
-        <select
-          id="year-filter"
-          onChange={(e) => handleYearFilter(e.target.value)}
-          value={selectedYear}
-        >
-          <option value="">All Years</option>
-          {uniqueYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <div className="filter-group">
+          <label htmlFor="year-filter" className="filter-label">
+            Year:
+          </label>
+          <select
+            id="year-filter"
+            className="filter-select"
+            value={selectedYear}
+            onChange={(e) => handleYearFilter(e.target.value)}
+          >
+            <option value="">All Years</option>
+            {uniqueYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {/* Dropdown for Total Points */}
-        <label htmlFor="points-filter">Filter by Total Points:</label>
-        <select
-          id="points-filter"
-          onChange={(e) => handleTotalPointsFilter(e.target.value)}
-          value={selectedTotalPoints}
-        >
-          <option value="">All Points</option>
-          <option value=">=200">Points &gt;= 200</option>
-          <option value="<200">Points &lt; 200</option>
-        </select>
+        <div className="filter-group">
+          <label htmlFor="points-filter" className="filter-label">
+            Points:
+          </label>
+          <select
+            id="points-filter"
+            className="filter-select"
+            value={selectedTotalPoints}
+            onChange={(e) => handleTotalPointsFilter(e.target.value)}
+          >
+            <option value="">All Points</option>
+            <option value=">=200">Points &gt= 200</option>
+            <option value="<200">Points &lt 200</option>
+          </select>
+        </div>
+
+        <div className="search-group">
+          <input
+            type="text"
+            placeholder="Search by ID or Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
       </div>
-
-      {/* Search Bar */}
-      <input
-        type="text"
-        placeholder="Search by ID or Name"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-bar"
-      />
-
       {/* Volunteer History Table */}
       <table className="volunteer-history-table">
         <thead>

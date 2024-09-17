@@ -126,6 +126,62 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+/* Main container for filter section */
+.filter-dropdowns-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Individual filter groups */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  margin-right: 20px;
+  min-width: 150px;
+}
+
+/* Label styling */
+.filter-label {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Select input styling */
+.filter-select,
+.search-input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 16px;
+}
+
+/* Hover and focus effects for better user experience */
+.filter-select:hover,
+.search-input:hover,
+.filter-select:focus,
+.search-input:focus {
+  border-color: #663399; /* Dark purple, similar to header */
+  box-shadow: 0 0 8px rgba(102, 51, 153, 0.2);
+}
+
+/* Search input specific styling */
+.search-group {
+  flex-grow: 1;
+  max-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+}
+
 .clickable-name {
   cursor: pointer;
   color: blue; /* Optional: make it look like a link */

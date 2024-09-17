@@ -153,7 +153,8 @@ function AddVolunteerPoints() {
       }));
       const editorName = selectedMember.editorName.replace(/\s+/g, " ").trim();
       const selectedAdmin = adminsAndLeaders.find(
-        (user) => user.username.trim().toLowerCase() == editorName.toLowerCase()
+        (user) =>
+          user.username.trim().toLowerCase() === editorName.toLowerCase()
       );
 
       if (!selectedAdmin) {
