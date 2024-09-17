@@ -1,6 +1,6 @@
 /* General Container Styles */
 .container {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   color: #333;
   margin: 20px auto;
   padding: 20px;
@@ -13,12 +13,12 @@
 /* Home Section Styles */
 .report-section {
   position: relative;
-  background-image: url('nycimg7.jpg'); 
+  background-image: url("nycimg7.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   width: 100%;
-  height: 100vh; 
+  height: 100vh;
 }
 
 .report-section .overlay {
@@ -51,7 +51,8 @@
   margin-top: 20px;
 }
 
-.volunteer-history-table th, .volunteer-history-table td {
+.volunteer-history-table th,
+.volunteer-history-table td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
@@ -133,7 +134,7 @@
   padding: 10px;
   background-color: #f5f5f5;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
@@ -153,7 +154,8 @@
 }
 
 /* Select input styling */
-.filter-select, .search-input {
+.filter-select,
+.search-input {
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -162,8 +164,10 @@
 }
 
 /* Hover and focus effects for better user experience */
-.filter-select:hover, .search-input:hover,
-.filter-select:focus, .search-input:focus {
+.filter-select:hover,
+.search-input:hover,
+.filter-select:focus,
+.search-input:focus {
   border-color: #663399; /* Dark purple, similar to header */
   box-shadow: 0 0 8px rgba(102, 51, 153, 0.2);
 }
@@ -178,3 +182,12 @@
   width: 100%;
 }
 
+.clickable-name {
+  cursor: pointer;
+  color: blue; /* Optional: make it look like a link */
+  text-decoration: underline; /* Optional */
+}
+
+.clickable-name:hover {
+  color: darkblue; /* Optional: change color on hover */
+}

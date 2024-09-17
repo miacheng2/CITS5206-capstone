@@ -136,4 +136,5 @@ class VolunteerPoints(models.Model):
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
             self.points = 20  # Fixed points
+            self.hours = 0   # Set hours to zero for on-water events
         super().save(*args, **kwargs)

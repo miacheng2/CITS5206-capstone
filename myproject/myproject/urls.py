@@ -4,14 +4,16 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,
                           PromoteLeaderView,addEvent, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
-                          DetailedTeamViewSet, DetailedTeamMemberViewSet)
+                          DetailedTeamViewSet, DetailedTeamMemberViewSet,MemberVolunteerHistoryAPIView,
+                          get_activities_for_event
+                          )
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'teams', TeamViewSet)
 router.register(r'team-members', TeamMemberViewSet)
 router.register(r'events', EventViewSet)
-router.register(r'volunteer-points', VolunteerPointsViewSet)
+router.register(r'volunteer-points', VolunteerPointsViewSet, basename='volunteer-points')
 router.register(r'detailed-teams', DetailedTeamViewSet, basename='detailed-team')
 router.register(r'detailed-team-members', DetailedTeamMemberViewSet, basename='detailed-team-member')
 
@@ -44,5 +46,7 @@ urlpatterns = [
 
     path('api/import-csv/', import_csv, name='import_csv'), 
     path('api/add-event/', addEvent, name='add-event'),
+    path('api/member-volunteer-history/<str:uid>/', MemberVolunteerHistoryAPIView.as_view(), name='member-volunteer-history'),
+    path('api/events/<int:event_id>/activities/', get_activities_for_event, name='event-activities'),
 ]
 

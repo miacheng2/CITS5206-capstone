@@ -19,6 +19,7 @@ import Navbar from "./components/Navbar";
 import Report from "./components/Report";
 import Home from "./components/Home";
 import CheckEventHistory from "./components/CheckEventHistory";
+import MemberVolunteerHistory from "./components/MemberVolunteerHistory";
 
 import "./assets/fonts/fonts.css";
 
@@ -80,6 +81,10 @@ function App() {
             <Route path="/event-history" element={<CheckEventHistory />} />
 
             <Route path="*" element={<Navigate replace to="/" />} />
+            <Route
+              path="/volunteer-history/:uid"
+              element={<MemberVolunteerHistory />}
+            />
           </Routes>
         </>
       )}
