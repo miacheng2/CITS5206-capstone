@@ -160,22 +160,6 @@ function AddVolunteerPoints() {
     }
   };
 
-  const handleEdit = (member) => {
-    console.log("Editing:", member);
-    // Logic to handle edit, populate fields with member's data
-  };
-
-  const handleDelete = (memberId) => {
-    if (window.confirm("Are you sure you want to delete this entry?")) {
-      setFilteredMembers(
-        filteredMembers.filter(
-          (member) => member.australian_sailing_number !== memberId
-        )
-      );
-      console.log("Deleted member with ID:", memberId);
-    }
-  };
-
   const handleTeamFilter = (team) => {
     setSelectedTeam(team);
   };
@@ -395,7 +379,6 @@ function AddVolunteerPoints() {
                   : ""}
               </td>
               <td>
-                <button onClick={() => handleEdit(member)}>Edit</button>
                 <button
                   onClick={handleSave}
                   disabled={
@@ -404,11 +387,6 @@ function AddVolunteerPoints() {
                   }
                 >
                   Save
-                </button>
-                <button
-                  onClick={() => handleDelete(member.australian_sailing_number)}
-                >
-                  Delete
                 </button>
               </td>
             </tr>
