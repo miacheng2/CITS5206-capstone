@@ -382,7 +382,7 @@ function VolunteerHistory() {
             <th>Member ID</th>
             <th>Name</th>
             <th>Member Category</th>
-            <th>Year</th>
+            <th>Financial Year</th>
             <th>Total Volunteering Hours</th>
             <th>Total Points</th>
           </tr>

@@ -15,7 +15,7 @@ from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer
-from django.db.models import Sum, F, IntegerField,Value
+from django.db.models import Sum, F, IntegerField,Value,Case, When, ExpressionWrapper
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear,Concat
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -381,31 +381,36 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
 # get all members' point view
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
-        # Aggregate points and hours by member and year
+        # Custom annotation to get the financial year
         points_data = VolunteerPoints.objects.select_related('member').annotate(
-            year=ExtractYear('event__date'),
+            event_year=ExtractYear('event__date'),
+            financial_year=Case(
+                When(event__date__month__gte=7, then=F('event_year') + 1),  # July to December
+                default=F('event_year'),  # January to June
+                output_field=IntegerField()
+            ),
             name=Concat(F('member__first_name'), Value(' '), F('member__last_name'))  # Concatenate first and last names
         ).values(
             'name',  # Use the newly annotated 'name' field
             'member__australian_sailing_number', 
             'member__membership_category',
             'member__teams',
-            'year'
+            'financial_year'
         ).annotate(
             total_points=Sum('points'),
             total_hours=Sum('hours', output_field=IntegerField())
-        ).order_by('name', 'year')
+        ).order_by('name', 'financial_year')
         
         # Convert the queryset to a list of dictionaries
         results = []
         for data in points_data:
             results.append({
                 "name": data['name'],
-                "id": f"{data['member__australian_sailing_number']}__{data['year']}",
+                "id": f"{data['member__australian_sailing_number']}__{data['financial_year']}",
                 "uid": data['member__australian_sailing_number'],
                 "membership_category": data['member__membership_category'],
                 "teams": data['member__teams'],
-                "year": data['year'],
+                "year": data['financial_year'],  # Use 'financial_year' instead of 'year'
                 "total_points": data['total_points'],
                 "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
             })
