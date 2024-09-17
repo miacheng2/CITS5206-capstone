@@ -40,7 +40,6 @@ function AddVolunteerPoints() {
     fetch(`http://localhost:8000/api/events/${eventId}/activities/`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Fetched activities:", data);
         setActivities(data);
       })
       .catch((error) => console.error("Error fetching activities:", error));
@@ -166,7 +165,6 @@ function AddVolunteerPoints() {
       const selectedActivity = activities.find(
         (activity) => activity.name === selectedMember.selectedActivity
       );
-      console.log(selectedMember.selectedActivity);
 
       const data = {
         member: selectedMember.australian_sailing_number,
@@ -178,8 +176,6 @@ function AddVolunteerPoints() {
         activity: selectedActivity ? selectedActivity.id : null, // Use activity ID or null
         created_by: selectedAdmin.id,
       };
-
-      console.log("data:", data);
 
       fetch("http://localhost:8000/api/save-volunteer-points/", {
         method: "POST",

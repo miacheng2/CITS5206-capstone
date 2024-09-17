@@ -567,11 +567,7 @@ def import_csv(request):
 
 @api_view(['GET'])
 def get_activities_for_event(request, event_id):
-    print(event_id)
     event = get_object_or_404(Event, id=event_id)
-    print("event:",event)
     activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity
-    print("activities:",activities)
     serializer = ActivitySerializer(activities, many=True)
-    print(serializer.data)
     return Response(serializer.data)
