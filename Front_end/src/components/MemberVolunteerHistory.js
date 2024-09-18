@@ -78,6 +78,7 @@ function MemberVolunteerHistory() {
             <th>Activity</th>
             <th>Points</th>
             <th>Hours</th>
+            <th>Created By</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -115,7 +116,7 @@ function MemberVolunteerHistory() {
                   <td>{entry.hours}</td>
                 </>
               )}
-
+              <td>{entry.created_by}</td>
               <td>
                 {editIndex === index ? (
                   <>

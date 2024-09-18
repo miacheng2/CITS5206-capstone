@@ -371,8 +371,8 @@ function VolunteerHistory() {
             onChange={(e) => handleTotalPointsFilter(e.target.value)}
           >
             <option value="">All Points</option>
-            <option value=">=200">Points &gt= 200</option>
-            <option value="<200">Points &lt 200</option>
+            <option value=">=200">Points &gt; = 200</option>
+            <option value="<200">Points &lt; 200</option>
           </select>
         </div>
 
