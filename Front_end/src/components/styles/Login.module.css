@@ -39,14 +39,14 @@
 }
 
 .login_form img {
-    width: 120px;  /* 设置宽度 */
-    height: 120px; /* 确保高度与宽度一致，保持圆形 */
+    width: 120px;  
+    height: 120px; 
     margin-bottom: 20px;
-    margin-top: 40px; /* 让图片再往下移动 */
-    border-radius: 50%; /* 使图片呈现圆形 */
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
-    object-fit: contain; /* 确保图片内容保持完整并自适应尺寸 */
-    background-color: white; /* 可选，防止背景色干扰 */
+    margin-top: 40px; 
+    border-radius: 50%; 
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1); 
+    object-fit: contain; 
+    background-color: white; 
 }
 
 
