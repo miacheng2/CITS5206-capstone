@@ -125,10 +125,6 @@ class TeamMemberSerializer(serializers.ModelSerializer):
         fields = ['australian_sailing_number', 'name', 'email', 'membership_category', 'will_volunteer_or_pay_levy', 'teams'] 
 
 
-
-
-
-
 class ActivitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Activity
@@ -153,10 +149,7 @@ class EventSerializer(serializers.ModelSerializer):
 class VolunteerPointsSerializer(serializers.ModelSerializer):
     class Meta:
         model = VolunteerPoints
-        fields = ['member', 'event', 'points', 'hours', 'created_by']
-
-
-
+        fields = ['id','member', 'event', 'points', 'hours', 'created_by','activity']
 
 
 class ChangePasswordSerializer(serializers.Serializer):

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bar, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -26,6 +27,7 @@ ChartJS.register(
 );
 
 function VolunteerHistory() {
+  const navigate = useNavigate();
   const [members, setMembers] = useState([]);
   const [maintenanceTeams, setTeams] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +44,9 @@ function VolunteerHistory() {
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]);
   const [topPerformers, setTopPerformers] = useState({});
+  const handleMemberClick = (uid) => {
+    navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
+  };
 
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
@@ -89,7 +94,7 @@ function VolunteerHistory() {
   useEffect(() => {
     const uniqueMembers = new Set();
     const filtered = members.filter((member) => {
-      console.log("selectedMemeber", member);
+      console.log("selectedMember", member);
       console.log("selectedYear", selectedYear);
       console.log("selectedPoint", selectedTotalPoints);
       const matchesSearchQuery =
@@ -116,7 +121,6 @@ function VolunteerHistory() {
         matchesTotalPoints
       ) {
         if (!uniqueMembers.has(member.id)) {
-          console.log(uniqueMembers);
           uniqueMembers.add(member.id);
           return true;
         }
@@ -126,7 +130,14 @@ function VolunteerHistory() {
     });
 
     setFilteredMembers(filtered);
-  }, [searchQuery, selectedTeamId, selectedCategory, selectedYear, members]);
+  }, [
+    searchQuery,
+    selectedTeamId,
+    selectedCategory,
+    selectedYear,
+    selectedTotalPoints, // Add this dependency
+    members,
+  ]);
 
   const handleTeamFilter = (teamId) => {
     setSelectedTeamId(teamId);
@@ -254,7 +265,7 @@ function VolunteerHistory() {
       {
         label: "Total Points",
         data: maintenanceTeams.map((team) => {
-          const teamMembers = members.filter(
+          const teamMembers = filteredMembers.filter(
             (member) => member.teams === team.id
           );
           return teamMembers.reduce(
@@ -309,59 +320,72 @@ function VolunteerHistory() {
         ))}
         <button onClick={() => handleTeamFilter("")}>All Teams</button>
       </div>
-      {/* Dropdown for Member Category */}
-      <div className="filter-dropdowns">
-        <label htmlFor="category-filter">Filter by Category:</label>
-        <select
-          id="category-filter"
-          onChange={(e) => handleCategoryFilter(e.target.value)}
-          value={selectedCategory}
-        >
-          <option value="">All Categories</option>
-          {uniqueCategories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
+      {/* Filter section */}
+      <div className="filter-dropdowns-container">
+        <div className="filter-group">
+          <label htmlFor="category-filter" className="filter-label">
+            Category:
+          </label>
+          <select
+            id="category-filter"
+            className="filter-select"
+            value={selectedCategory}
+            onChange={(e) => handleCategoryFilter(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {uniqueCategories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {/* Dropdown for Year */}
-        <label htmlFor="year-filter">Filter by Year:</label>
-        <select
-          id="year-filter"
-          onChange={(e) => handleYearFilter(e.target.value)}
-          value={selectedYear}
-        >
-          <option value="">All Years</option>
-          {uniqueYears.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
+        <div className="filter-group">
+          <label htmlFor="year-filter" className="filter-label">
+            Year:
+          </label>
+          <select
+            id="year-filter"
+            className="filter-select"
+            value={selectedYear}
+            onChange={(e) => handleYearFilter(e.target.value)}
+          >
+            <option value="">All Years</option>
+            {uniqueYears.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        {/* Dropdown for Total Points */}
-        <label htmlFor="points-filter">Filter by Total Points:</label>
-        <select
-          id="points-filter"
-          onChange={(e) => handleTotalPointsFilter(e.target.value)}
-          value={selectedTotalPoints}
-        >
-          <option value="">All Points</option>
-          <option value=">=200">Points &gt= 200</option>
-          <option value="<200">Points &lt 200</option>
-        </select>
+        <div className="filter-group">
+          <label htmlFor="points-filter" className="filter-label">
+            Points:
+          </label>
+          <select
+            id="points-filter"
+            className="filter-select"
+            value={selectedTotalPoints}
+            onChange={(e) => handleTotalPointsFilter(e.target.value)}
+          >
+            <option value="">All Points</option>
+            <option value=">=200">Points &gt= 200</option>
+            <option value="<200">Points &lt 200</option>
+          </select>
+        </div>
+
+        <div className="search-group">
+          <input
+            type="text"
+            placeholder="Search by ID or Name"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+        </div>
       </div>
-
-      {/* Search Bar */}
-      <input
-        type="text"
-        placeholder="Search by ID or Name"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="search-bar"
-      />
-
       {/* Volunteer History Table */}
       <table className="volunteer-history-table">
         <thead>
@@ -376,7 +400,7 @@ function VolunteerHistory() {
             <th>Member ID</th>
             <th>Name</th>
             <th>Member Category</th>
-            <th>Year</th>
+            <th>Financial Year</th>
             <th>Total Volunteering Hours</th>
             <th>Total Points</th>
           </tr>
@@ -392,7 +416,12 @@ function VolunteerHistory() {
                 />
               </td>
               <td>{member.uid}</td>
-              <td>{member.name}</td>
+              <td
+                className="clickable-name" // Add a class for styling clickable names
+                onClick={() => handleMemberClick(member.uid)}
+              >
+                {member.name}
+              </td>
               <td>{member.membership_category}</td>
               <td>{member.year}</td>
               <td>{member.total_hours}</td>
