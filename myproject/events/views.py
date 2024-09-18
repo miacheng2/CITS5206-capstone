@@ -472,7 +472,8 @@ class MemberVolunteerHistoryAPIView(APIView):
                 "event_date": point.event.date,
                 "activity": point.activity.name if point.activity else None,
                 "points": point.points,
-                "hours": point.hours
+                "hours": point.hours,
+                "created_by":point.created_by.username
             }
             for point in points
         ]
