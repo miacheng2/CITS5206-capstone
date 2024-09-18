@@ -23,9 +23,15 @@ function Navbar({ logout }) {
                 </ul>
             </nav>
             <div className={styles.leftDiv}>
-                <button 
-                    className={styles.logoutButton} 
-                    onClick={logout}  
+                <button
+                    className={styles.passwordButton}
+                    onClick={logout}
+                >
+                    <b>change password</b>
+                </button>
+                <button
+                    className={styles.logoutButton}
+                    onClick={logout}
                 >
                     <b>Logout</b>
                 </button>
