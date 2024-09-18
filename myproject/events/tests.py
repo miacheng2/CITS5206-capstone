@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
-from events.models import User  # Use your custom User model
+from events.models import User  # Use custom User model
 
 
 class UserRegistrationTestCase(TestCase):
@@ -20,8 +20,6 @@ class UserRegistrationTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('access', response.data)  # Check if JWT access token is returned
         self.assertIn('refresh', response.data)  # Check if JWT refresh token is returned
-
-
 
 
 class UserLoginTestCase(TestCase):

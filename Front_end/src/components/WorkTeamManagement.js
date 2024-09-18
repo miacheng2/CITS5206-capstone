@@ -17,7 +17,11 @@ const WorkTeamManagement = () => {
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");  // New state for search
-    
+    const [filteredMembers, setFilteredMembers] = useState([]);
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
+
+
 
 
 
@@ -89,17 +93,17 @@ const WorkTeamManagement = () => {
 
 
     const handleSelectAll = () => {
-        setSelectedTeams([...teams]);  
+        setSelectedTeams([...teams]);
     };
-    
+
 
     const handleSelectInverse = () => {
-        const unselectedTeams = teams.filter(team => 
-            !selectedTeams.some(selected => selected.id === team.id) 
+        const unselectedTeams = teams.filter(team =>
+            !selectedTeams.some(selected => selected.id === team.id)
         );
-        setSelectedTeams(unselectedTeams);  
+        setSelectedTeams(unselectedTeams);
     };
-    
+
 
     const handleUnselectAll = () => {
         setSelectedTeams([]);
@@ -111,16 +115,16 @@ const WorkTeamManagement = () => {
             alert('Please select at least one team to export.');
             return;
         }
-    
+
         const allMembersData = selectedTeams.flatMap(team => team.members);
-    
+
         if (allMembersData.length === 0) {
             alert('No members available for the selected teams.');
             return;
         }
-    
+
         const csvContent = convertToCSV(allMembersData);
-    
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -130,7 +134,7 @@ const WorkTeamManagement = () => {
         link.click();
         document.body.removeChild(link);
     };
-    
+
 
 
     const convertToCSV = (data) => {
@@ -150,7 +154,7 @@ const WorkTeamManagement = () => {
 
         const csvRows = [
             headers.join(','),
-            ...rows.map(row => row.join(','))  
+            ...rows.map(row => row.join(','))
         ];
 
         return csvRows.join('\n');
@@ -161,23 +165,23 @@ const WorkTeamManagement = () => {
             console.error("Invalid team or team ID:", team);
             return;
         }
-    
+
         console.log("Selected team:", team);
-    
-     
+
+
         const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
-    
+
         if (isAlreadySelected) {
-            
+
             setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
-            console.log("Deleting team with ID:", team.id); 
+            console.log("Deleting team with ID:", team.id);
         } else {
-            
+
             setSelectedTeams([...selectedTeams, team]);
             console.log("Adding team with ID:", team.id);
         }
     };
-    
+
 
 
     const handleClosePopup = () => {
@@ -199,7 +203,7 @@ const WorkTeamManagement = () => {
         }));
     };
 
-    
+
 
 
     const handleAddMember = async () => {
@@ -222,7 +226,7 @@ const WorkTeamManagement = () => {
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-                
+
                 alert('Member added successfully!');
                 handleClosePopup();
             } else {
@@ -293,24 +297,24 @@ const WorkTeamManagement = () => {
             alert('Please select at least one team to delete.');
             return;
         }
-    
+
         const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
         if (!confirmDelete) return;
-    
+
         try {
             // Iterate over all selected teams and send delete requests
             for (const team of selectedTeams) {
                 const response = await fetch(`http://localhost:8000/api/teams/${team.id}/`, {
                     method: 'DELETE'
                 });
-    
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
-    
+
             alert('Selected teams have been successfully deleted!');
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
@@ -319,7 +323,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the teams.');
         }
     };
-    
+
 
 
 
@@ -358,8 +362,8 @@ const WorkTeamManagement = () => {
                         Description: ''
                     });
                     handleClosePopup();
-                    
-                    
+
+
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to update team: ${JSON.stringify(errorData)}`);
@@ -430,7 +434,7 @@ const WorkTeamManagement = () => {
                                 <div
                                     key={team.id}
                                     className={`${styles.teamCard} ${selectedTeams.some(t => t.id === team.id) ? styles.selected : ''}`}
-                                    onClick={() => handleTeamCardClick(team)}  
+                                    onClick={() => handleTeamCardClick(team)}
                                 >
                                     <div className={styles.teamCardUp}>
                                         <input
@@ -533,41 +537,94 @@ const WorkTeamManagement = () => {
                             </table>
 
 
+
+
+
+                            
+
                             {isEditing && (
-                                <div>
-                                    <label>Select to add members:</label>
+                                <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
+                                    {/* Define state */}
+                                    
 
                                     {/* Search Bar */}
                                     <input
                                         type="text"
                                         placeholder="Search member by name"
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}  // Update search query
+                                        value={searchQuery}  // Keep the exact user input
+                                        onChange={(e) => {
+                                            const query = e.target.value;  // Do not convert the input to lowercase here; keep the original input
+                                            setSearchQuery(query);  // Update the search query state with the exact user input
+                                            const filtered = availableMembers.filter(member =>
+                                                `${member.first_name.toLowerCase()} ${member.last_name.toLowerCase()}`.includes(query.toLowerCase())  // Convert only for comparison (not the input)
+                                            );
+                                            setFilteredMembers(filtered);  // Update the filtered members list
+                                            if (filtered.length > 0) {
+                                                setHighlightedIndex(0);  // Highlight the first member in the filtered list
+                                            } else {
+                                                setHighlightedIndex(-1);  // Clear highlight if no matches
+                                            }
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (!memberSelected) {  // Check if the member hasn't been selected yet
+                                                if (e.key === 'ArrowDown' && filteredMembers.length > 0) {
+                                                    setHighlightedIndex((prevIndex) => (prevIndex + 1) % filteredMembers.length);  // Move highlight down the list
+                                                }
+                                                if (e.key === 'ArrowUp' && filteredMembers.length > 0) {
+                                                    setHighlightedIndex((prevIndex) => (prevIndex - 1 + filteredMembers.length) % filteredMembers.length);  // Move highlight up the list
+                                                }
+                                                if (e.key === 'Enter' && highlightedIndex >= 0) {
+                                                    const selectedMember = filteredMembers[highlightedIndex];  // Get the currently highlighted member
+                                                    setSearchQuery(`${selectedMember.first_name} ${selectedMember.last_name}`);  // Set the input field with the selected member's name
+                                                    setSelectedMember(selectedMember.australian_sailing_number);  // Set the selected member's ID
+                                                    setFilteredMembers([]);  // Clear the filtered list after selection
+                                                    setMemberSelected(true);  // Set the flag to prevent further Enter presses
+                                                }
+                                            }
+                                        }}
+                                        
+                                        style={{ flex: '1', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}  // Style the input field
                                     />
 
-                                    {/* Member Selection */}
-                                    <select
-                                        value={selectedMember}
-                                        onChange={(e) => setSelectedMember(e.target.value)}
-                                    >
-                                        <option value="">Select Member</option>
-                                        {availableMembers.length > 0 ? (
-                                            availableMembers
-                                                .filter(member =>
-                                                    `${member.first_name.toLowerCase()} ${member.last_name.toLowerCase()}`.includes(searchQuery)  // Filter by search query
-                                                )
-                                                .map((member) => (
-                                                    <option key={member.australian_sailing_number} value={member.australian_sailing_number}>
-                                                        {member.first_name} {member.last_name}
-                                                    </option>
-                                                ))
-                                        ) : (
-                                            <option disabled>No members available</option>
-                                        )}
-                                    </select>
+                                    {/* Display filtered members as a dropdown list */}
+                                    {filteredMembers.length > 0 && (
+                                        <ul style={{
+                                            position: 'absolute',
+                                            top: '100%',  // Position the dropdown list below the input field
+                                            left: 0,
+                                            right: 0,
+                                            backgroundColor: 'white',
+                                            border: '1px solid #ccc',
+                                            zIndex: 10,
+                                            maxHeight: '150px',  // Limit the height and allow scrolling
+                                            overflowY: 'auto',
+                                            listStyle: 'none',
+                                            padding: 0,
+                                            margin: 0,
+                                            width: '100%'  // Ensure the dropdown width matches the input field
+                                        }}>
+                                            {filteredMembers.map((member, index) => (
+                                                <li
+                                                    key={member.australian_sailing_number}
+                                                    style={{
+                                                        padding: '10px',
+                                                        backgroundColor: highlightedIndex === index ? '#ddd' : 'white',  // Highlight the current member
+                                                        cursor: 'pointer'
+                                                    }}
+                                                    onMouseEnter={() => setHighlightedIndex(index)}  // Highlight on mouse hover
+                                                    onClick={() => {
+                                                        setSearchQuery(`${member.first_name} ${member.last_name}`);  // Set input to selected member's name
+                                                        setSelectedMember(member.australian_sailing_number);  // Set the selected member
+                                                        setFilteredMembers([]);  // Clear the filtered members list
+                                                    }}
+                                                >
+                                                    {member.first_name} {member.last_name}  {/* Display the member's full name */}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
                             )}
-
 
                             <div className={styles.popupButtons}>
                                 {isEditing ? (
