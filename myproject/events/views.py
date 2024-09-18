@@ -43,23 +43,41 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)  
+            user = serializer.save()  # Save the user
+
+            # Generate JWT tokens for the newly created user
+            refresh = RefreshToken.for_user(user)
+            
+            # Return the user data along with the JWT tokens
+            return Response({
+                'user': serializer.data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
+            }, status=status.HTTP_201_CREATED)
+
+        print(serializer.errors)  # For debugging purposes
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        # Check if both username and password are provided
+        if not username or not password:
+            return Response({'detail': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
         user = authenticate(username=username, password=password)
         if user is not None:
+            # Generate JWT tokens for authenticated user
             refresh = RefreshToken.for_user(user)
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
             }, status=status.HTTP_200_OK)
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return 401 Unauthorized for invalid credentials
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class CustomAuthToken(APIView):
