@@ -16,9 +16,12 @@ const WorkTeamManagement = () => {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedMembers, setSelectedMembers] = useState([]);
-    const [searchQuery, setSearchQuery] = useState("");  // New state for search
-    const [filteredMembers, setFilteredMembers] = useState([]);
-    const [highlightedIndex, setHighlightedIndex] = useState(-1);
+    const [filteredMembers, setFilteredMembers] = useState([]);  // Store the filtered list of members
+    const [highlightedIndex, setHighlightedIndex] = useState(-1);  // Store the index of the currently highlighted member
+    const [searchQuery, setSearchQuery] = useState('');  // Store the exact user input
+   
+    const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
+
 
 
 
@@ -534,17 +537,10 @@ const WorkTeamManagement = () => {
                                 </tbody>
                             </table>
 
-
-
-
-
-                            
-
                             {isEditing && (
                                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
                                     {/* Define state */}
-                                    
-
+                                  
                                     {/* Search Bar */}
                                     <input
                                         type="text"
@@ -557,6 +553,7 @@ const WorkTeamManagement = () => {
                                                 `${member.first_name.toLowerCase()} ${member.last_name.toLowerCase()}`.includes(query.toLowerCase())  // Convert only for comparison (not the input)
                                             );
                                             setFilteredMembers(filtered);  // Update the filtered members list
+                                            setMemberSelected(false);  // Reset the flag when the user starts typing again
                                             if (filtered.length > 0) {
                                                 setHighlightedIndex(0);  // Highlight the first member in the filtered list
                                             } else {
@@ -564,17 +561,20 @@ const WorkTeamManagement = () => {
                                             }
                                         }}
                                         onKeyDown={(e) => {
-                                            if (e.key === 'ArrowDown' && filteredMembers.length > 0) {
-                                                setHighlightedIndex((prevIndex) => (prevIndex + 1) % filteredMembers.length);  // Move highlight down the list
-                                            }
-                                            if (e.key === 'ArrowUp' && filteredMembers.length > 0) {
-                                                setHighlightedIndex((prevIndex) => (prevIndex - 1 + filteredMembers.length) % filteredMembers.length);  // Move highlight up the list
-                                            }
-                                            if (e.key === 'Enter' && highlightedIndex >= 0) {
-                                                const selectedMember = filteredMembers[highlightedIndex];  // Get the currently highlighted member
-                                                setSearchQuery(`${selectedMember.first_name} ${selectedMember.last_name}`);  // Set the input field with the selected member's name
-                                                setSelectedMember(selectedMember.australian_sailing_number);  // Set the selected member's ID
-                                                setFilteredMembers([]);  // Clear the filtered list after selection
+                                            if (!memberSelected) {  // Check if the member hasn't been selected yet
+                                                if (e.key === 'ArrowDown' && filteredMembers.length > 0) {
+                                                    setHighlightedIndex((prevIndex) => (prevIndex + 1) % filteredMembers.length);  // Move highlight down the list
+                                                }
+                                                if (e.key === 'ArrowUp' && filteredMembers.length > 0) {
+                                                    setHighlightedIndex((prevIndex) => (prevIndex - 1 + filteredMembers.length) % filteredMembers.length);  // Move highlight up the list
+                                                }
+                                                if (e.key === 'Enter' && highlightedIndex >= 0) {
+                                                    const selectedMember = filteredMembers[highlightedIndex];  // Get the currently highlighted member
+                                                    setSearchQuery(`${selectedMember.first_name} ${selectedMember.last_name}`);  // Set the input field with the selected member's name
+                                                    setSelectedMember(selectedMember.australian_sailing_number);  // Set the selected member's ID
+                                                    setFilteredMembers([]);  // Clear the filtered list after selection
+                                                    setMemberSelected(true);  // Set the flag to prevent further Enter presses
+                                                }
                                             }
                                         }}
                                         style={{ flex: '1', padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }}  // Style the input field
@@ -610,6 +610,7 @@ const WorkTeamManagement = () => {
                                                         setSearchQuery(`${member.first_name} ${member.last_name}`);  // Set input to selected member's name
                                                         setSelectedMember(member.australian_sailing_number);  // Set the selected member
                                                         setFilteredMembers([]);  // Clear the filtered members list
+                                                        setMemberSelected(true);  // Set the flag to prevent further actions
                                                     }}
                                                 >
                                                     {member.first_name} {member.last_name}  {/* Display the member's full name */}
@@ -619,6 +620,8 @@ const WorkTeamManagement = () => {
                                     )}
                                 </div>
                             )}
+
+
 
                             <div className={styles.popupButtons}>
                                 {isEditing ? (
