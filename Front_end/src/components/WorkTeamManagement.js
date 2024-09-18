@@ -16,12 +16,16 @@ const WorkTeamManagement = () => {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [selectedMember, setSelectedMember] = useState(null);
     const [selectedMembers, setSelectedMembers] = useState([]);
+<<<<<<< HEAD
     const [filteredMembers, setFilteredMembers] = useState([]);  // Store the filtered list of members
     const [highlightedIndex, setHighlightedIndex] = useState(-1);  // Store the index of the currently highlighted member
     const [searchQuery, setSearchQuery] = useState('');  // Store the exact user input
    
     const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
 
+=======
+    const [searchQuery, setSearchQuery] = useState("");  // New state for search
+>>>>>>> Xia_Front_End
 
 
 
@@ -362,7 +366,10 @@ const WorkTeamManagement = () => {
                         TeamLeader: '',
                         Description: ''
                     });
+<<<<<<< HEAD
                     handleClosePopup();
+=======
+>>>>>>> Xia_Front_End
 
 
                 } else {

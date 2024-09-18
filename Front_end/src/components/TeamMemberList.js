@@ -6,7 +6,7 @@ const TeamMemberList = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [selectedMembers, setSelectedMembers] = useState({});
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingMember, setEditingMember] = useState(null); 
+    const [editingMember, setEditingMember] = useState(null);
     const [fileInput, setFileInput] = useState(null);
     const [newMember, setNewMember] = useState({
         australian_sailing_number: '',
@@ -16,7 +16,7 @@ const TeamMemberList = () => {
         mobile: '',
         membership_category: '',
         will_volunteer_or_pay_levy: '',
-        teams: '', 
+        teams: '',
     });
 
     useEffect(() => {
@@ -25,7 +25,7 @@ const TeamMemberList = () => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/detailed-team-members/'); 
+            const response = await fetch('http://localhost:8000/api/detailed-team-members/');
             const data = await response.json();
             console.log('Fetched team members:', data);
             setTeamMembers(data);
@@ -51,7 +51,7 @@ const TeamMemberList = () => {
                 member.mobile,
                 member.membership_category,
                 member.will_volunteer_or_pay_levy,
-                member.teams.map(team => team.name).join('; ')  
+                member.teams.map(team => team.name).join('; ')
             ].join(','))
         ];
 
@@ -63,15 +63,15 @@ const TeamMemberList = () => {
     const handleFileUpload = async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-    
+
         try {
             const response = await fetch('http://localhost:8000/api/import-csv/', {
                 method: 'POST',
                 body: formData,
             });
-    
+
             const result = await response.json();
-    
+
             if (response.ok) {
                 alert(`Data imported successfully!\nNew records: ${result.new_records}\nUpdated records: ${result.updated_records}\nUnchanged records: ${result.unchanged_records}`);
                 fetchTeamMembers(); // Refresh the list to show updated data
@@ -92,7 +92,7 @@ const TeamMemberList = () => {
 
     const handleEditClick = (member) => {
         setEditingMember(member);
-        setIsModalOpen(true); 
+        setIsModalOpen(true);
     };
 
     const handleEditSubmit = async () => {
@@ -123,7 +123,7 @@ const TeamMemberList = () => {
         const { name, value } = e.target;
         setEditingMember(prevMember => ({
             ...prevMember,
-            [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+            [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value
         }));
     };
 
@@ -155,16 +155,16 @@ const TeamMemberList = () => {
     };
 
     const handleAddSubmit = async () => {
-        
+
         const teamsArray = typeof newMember.teams === 'string' && newMember.teams.length > 0
             ? newMember.teams.split(',').map(team => team.trim())
-            : []; 
+            : [];
 
         const payload = {
             ...newMember,
-            teams: teamsArray,  
-            membership_category: newMember.membership_category || '',  
-            will_volunteer_or_pay_levy: newMember.will_volunteer_or_pay_levy || ''  
+            teams: teamsArray,
+            membership_category: newMember.membership_category || '',
+            will_volunteer_or_pay_levy: newMember.will_volunteer_or_pay_levy || ''
         };
 
         try {
@@ -188,7 +188,7 @@ const TeamMemberList = () => {
                     mobile: '',
                     membership_category: '',
                     will_volunteer_or_pay_levy: '',
-                    teams: '', 
+                    teams: '',
                 });
             } else {
                 const errorData = await response.json();
@@ -206,22 +206,22 @@ const TeamMemberList = () => {
         if (editingMember) {
             setEditingMember(prevMember => ({
                 ...prevMember,
-                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value
             }));
         } else {
             setNewMember(prevMember => ({
                 ...prevMember,
-                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value 
+                [name]: name === 'teams' ? value.split(',').map(v => v.trim()) : value
             }));
         }
     };
 
-  
+
 
     const selectAll = () => {
         const newSelection = {};
         teamMembers.forEach(member => {
-            newSelection[member.australian_sailing_number] = true; 
+            newSelection[member.australian_sailing_number] = true;
         });
         setSelectedMembers(newSelection);
     };
@@ -231,14 +231,14 @@ const TeamMemberList = () => {
     };
 
     const exportSelected = () => {
-        
+
         const selectedData = teamMembers.filter(member => selectedMembers[member.australian_sailing_number]);
-    
+
         if (selectedData.length > 0) {
-           
+
             const headers = ["Australian Sailing Number", "First Name", "Last Name", "Email", "Mobile", "Membership Category", "Volunteer or Pay Levy", "Teams"];
             const csvRows = [
-                headers.join(','),  
+                headers.join(','),
                 ...selectedData.map(member => [
                     member.australian_sailing_number,
                     member.first_name,
@@ -247,15 +247,15 @@ const TeamMemberList = () => {
                     member.mobile,
                     member.membership_category,
                     member.will_volunteer_or_pay_levy,
-                    member.teams.map(team => team.name).join('; ') 
+                    member.teams.map(team => team.name).join('; ')
                 ].join(','))
             ];
-    
-            const csvContent = csvRows.join('\n'); 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); 
-            saveAs(blob, "selected-team-members.csv"); 
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, "selected-team-members.csv");
         } else {
-            alert("No members selected for export."); 
+            alert("No members selected for export.");
         }
     };
 
@@ -286,7 +286,7 @@ const TeamMemberList = () => {
                         <button onClick={exportSelected}>Export Selected to CSV</button>
                     </div>
                     <div>
-                
+
                         <input
                             type="file"
                             accept=".csv"
@@ -311,14 +311,14 @@ const TeamMemberList = () => {
                     <tbody>
                         {teamMembers.map(member => (
                             <tr key={member.australian_sailing_number}  // Use australian_sailing_number as key
-                            className={selectedMembers[member.australian_sailing_number] ? styles.selectedRow : ''}
-                            onClick={() => toggleSelection(member.australian_sailing_number)}>
-                            <td onClick={(e) => e.stopPropagation()}>
-                                <input
-                                    type='checkbox'
-                                    checked={!!selectedMembers[member.australian_sailing_number]}  // Use australian_sailing_number 
-                                    onChange={() => toggleSelection(member.australian_sailing_number)}
-                                />
+                                className={selectedMembers[member.australian_sailing_number] ? styles.selectedRow : ''}
+                                onClick={() => toggleSelection(member.australian_sailing_number)}>
+                                <td onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                        type='checkbox'
+                                        checked={!!selectedMembers[member.australian_sailing_number]}  // Use australian_sailing_number 
+                                        onChange={() => toggleSelection(member.australian_sailing_number)}
+                                    />
                                 </td>
                                 <td>{member.australian_sailing_number}</td>
                                 <td>{member.first_name}</td>
@@ -344,7 +344,7 @@ const TeamMemberList = () => {
             {isModalOpen && (
                 <div className={styles.modal}>
                     <div className={styles.modalContent}>
-                        <h2>{editingMember ? 'Edit Member' : 'Add New Member'}</h2>
+                        <h2>{editingMember ? 'Editing Member:' + editingMember.australian_sailing_number : 'Add New Member'}</h2>
                         <form>
                             <label>
                                 Australian Sailing Number:
