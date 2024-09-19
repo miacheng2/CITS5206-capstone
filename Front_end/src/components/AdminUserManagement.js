@@ -7,7 +7,7 @@ const AdminUserManagement = ({ userProfile }) => {
         username: '',
         password: '',
         email: '',
-        role: 'admin'  // 默认选项为管理员
+        role: 'admin'
     });
 
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
