@@ -13,9 +13,9 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
 from rest_framework.decorators import api_view
-from .models import User, Team, TeamMember, Event, VolunteerPoints
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer
-from django.db.models import Sum, F, IntegerField,Value
+from .models import User, Team, TeamMember, Event, VolunteerPoints, Activity
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer,ActivitySerializer
+from django.db.models import Sum, F, IntegerField,Value,Case, When, ExpressionWrapper
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear,Concat
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -26,6 +26,7 @@ import os
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
 
 logger = logging.getLogger(__name__)
 from .serializers import (
@@ -43,23 +44,41 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)  
+            user = serializer.save()  # Save the user
+
+            # Generate JWT tokens for the newly created user
+            refresh = RefreshToken.for_user(user)
+            
+            # Return the user data along with the JWT tokens
+            return Response({
+                'user': serializer.data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token)
+            }, status=status.HTTP_201_CREATED)
+
+        print(serializer.errors)  # For debugging purposes
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
+
+        # Check if both username and password are provided
+        if not username or not password:
+            return Response({'detail': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
         user = authenticate(username=username, password=password)
         if user is not None:
+            # Generate JWT tokens for authenticated user
             refresh = RefreshToken.for_user(user)
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
             }, status=status.HTTP_200_OK)
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Return 401 Unauthorized for invalid credentials
+        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class CustomAuthToken(APIView):
@@ -378,40 +397,87 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
 
+    def update(self, request, *args, **kwargs):
+        """Update points and hours for a specific volunteer entry."""
+        try:
+            instance = self.get_object()
+        except VolunteerPoints.DoesNotExist:
+            return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
+        print("request data:",request.data)
+        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            print("serializer:",serializer.data)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """Delete a specific volunteer entry."""
+        try:
+            instance = VolunteerPoints.objects.get(pk=pk)
+        except VolunteerPoints.DoesNotExist:
+            return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 # get all members' point view
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
-        # Aggregate points and hours by member and year
+        # Custom annotation to get the financial year
         points_data = VolunteerPoints.objects.select_related('member').annotate(
-            year=ExtractYear('event__date'),
+            event_year=ExtractYear('event__date'),
+            financial_year=Case(
+                When(event__date__month__gte=7, then=F('event_year') + 1),  # July to December
+                default=F('event_year'),  # January to June
+                output_field=IntegerField()
+            ),
             name=Concat(F('member__first_name'), Value(' '), F('member__last_name'))  # Concatenate first and last names
         ).values(
             'name',  # Use the newly annotated 'name' field
             'member__australian_sailing_number', 
             'member__membership_category',
             'member__teams',
-            'year'
+            'financial_year'
         ).annotate(
             total_points=Sum('points'),
             total_hours=Sum('hours', output_field=IntegerField())
-        ).order_by('name', 'year')
+        ).order_by('name', 'financial_year')
         
         # Convert the queryset to a list of dictionaries
         results = []
         for data in points_data:
             results.append({
                 "name": data['name'],
-                "id": f"{data['member__australian_sailing_number']}__{data['year']}",
+                "id": f"{data['member__australian_sailing_number']}__{data['financial_year']}",
                 "uid": data['member__australian_sailing_number'],
                 "membership_category": data['member__membership_category'],
                 "teams": data['member__teams'],
-                "year": data['year'],
+                "year": data['financial_year'],  # Use 'financial_year' instead of 'year'
                 "total_points": data['total_points'],
                 "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
             })
         
         return Response(results)
 
+# One member's history view
+class MemberVolunteerHistoryAPIView(APIView):
+    def get(self, request, uid):
+        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
+        history = [
+            {
+                 "id": point.id,
+                "event_name": point.event.name,
+                "event_date": point.event.date,
+                "activity": point.activity.name if point.activity else None,
+                "points": point.points,
+                "hours": point.hours,
+                "created_by":point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # update volunteer point view
 @api_view(['POST'])
@@ -517,3 +583,10 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@api_view(['GET'])
+def get_activities_for_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity
+    serializer = ActivitySerializer(activities, many=True)
+    return Response(serializer.data)

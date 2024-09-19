@@ -19,6 +19,8 @@ import Navbar from "./components/Navbar";
 import Report from "./components/Report";
 import Home from "./components/Home";
 import CheckEventHistory from "./components/CheckEventHistory";
+import ChangePassword from './components/ChangePassword';
+import MemberVolunteerHistory from "./components/MemberVolunteerHistory";
 
 import "./assets/fonts/fonts.css";
 
@@ -75,11 +77,16 @@ function App() {
             <Route path="/reward-checkin" element={<RewardCheckin />} />
             <Route path="/volunteer-points" element={<VolunteerPointsList />} />
             <Route path="/reports" element={<Report />} />
+            <Route path="/change-password" element={<ChangePassword />} />
 
             <Route path="/logout" element={<Navigate replace to="/login" />} />
             <Route path="/event-history" element={<CheckEventHistory />} />
 
             <Route path="*" element={<Navigate replace to="/" />} />
+            <Route
+              path="/volunteer-history/:uid"
+              element={<MemberVolunteerHistory />}
+            />
           </Routes>
         </>
       )}
