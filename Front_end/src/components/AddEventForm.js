@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import './AddEventForm.css';
+import './styles/AddEventForm.css';
 
 function AddEventForm() {
   const [users, setUsers] = useState([]);

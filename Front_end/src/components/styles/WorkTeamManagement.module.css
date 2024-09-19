@@ -52,8 +52,9 @@ td>button:first-child {
 }
 
 td>button:last-child {
-    background-color: #cc6c6a;
+    background-color: #ccc76a;
     color: #fff;
+    margin-top: 0em !important;
 }
 
 .feature>div>div>button,
@@ -185,4 +186,10 @@ td>button:last-child {
 
 table {
     margin-bottom: 1em;
+}
+
+.subdivPopup {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }

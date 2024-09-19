@@ -305,7 +305,7 @@ const TeamMemberList = () => {
                             {teamMembers.length > 0 && generateTableHeaders(teamMembers).map((header, index) => (
                                 <th key={index}>{header}</th>
                             ))}
-                            <th>Actions</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -331,10 +331,6 @@ const TeamMemberList = () => {
                                     {member.teams.map((team, index) => (
                                         <span key={index}>{team.name}{index < member.teams.length - 1 ? ', ' : ''}</span>
                                     ))}
-                                </td>
-                                <td>
-                                    <button onClick={() => handleEditClick(member)}>Edit</button>
-                                    <button onClick={() => handleDeleteClick(member.australian_sailing_number)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

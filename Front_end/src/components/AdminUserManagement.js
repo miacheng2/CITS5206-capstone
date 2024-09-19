@@ -7,7 +7,7 @@ const AdminUserManagement = () => {
         username: '',
         password: '',
         email: '',
-        role: 'admin' 
+        role: 'admin'
     });
 
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
