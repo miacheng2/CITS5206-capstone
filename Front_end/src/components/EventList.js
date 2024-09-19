@@ -3,12 +3,15 @@ import api from "../api";
 import { useNavigate } from "react-router-dom";
 import AddEventForm from "./AddEventForm";
 import Modal from "./Modal";
-import "./event.css";
+import EventDetailsModal from "./EventDetailsModal"; // Import EventDetailsModal
+import "./event.css"; // CSS file for styling
 
 function EventList() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [showAddEventModal, setShowAddEventModal] = useState(false); // Modal for AddEventForm
+  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false); // Modal for EventDetailsModal
+  const [selectedEvent, setSelectedEvent] = useState(null); // To track the event being edited or deleted
 
   useEffect(() => {
     // Fetch events from the backend
@@ -22,10 +25,36 @@ function EventList() {
       });
   }, []);
 
-  const toggleModal = () => setShowModal(!showModal);
+  // Toggle modals
+  const toggleAddEventModal = () => setShowAddEventModal(!showAddEventModal);
+  const toggleEventDetailsModal = () => setShowEventDetailsModal(!showEventDetailsModal);
+
+  // Handle editing an event
+  const handleEdit = (event) => {
+    setSelectedEvent(event); // Set the event to be edited
+    console.log("Edit event:", event);
+    // Add further logic here to edit the event (e.g., open a form or modal for editing)
+  };
+
+  // Handle deleting an event
+  const handleDelete = (eventId) => {
+    // Confirmation prompt before deleting
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      api
+        .delete(`events/${eventId}/`)
+        .then(() => {
+          setEvents(events.filter(event => event.id !== eventId)); // Remove event from state
+          console.log("Event deleted:", eventId);
+        })
+        .catch((error) => {
+          console.error("There was an error deleting the event!", error);
+        });
+    }
+  };
 
   return (
     <div>
+      {/* Header section */}
       <header className="event-section">
         <div className="overlay">
           <div className="text-container">
@@ -36,12 +65,15 @@ function EventList() {
 
       {/* Cards Section */}
       <section className="cards-section">
-        <div className="card" onClick={toggleModal}>
+        {/* Add New Event Card */}
+        <div className="card" onClick={toggleAddEventModal}>
           <img src="nycimg1.jpg" alt="Upcoming events" />
           <h3>Add New Event</h3>
           <button className="learn-more">Learn more</button>
         </div>
-        <div className="card" onClick={() => navigate("/event-history")}>
+
+        {/* Event History Card */}
+        <div className="card" onClick={toggleEventDetailsModal}>
           <img src="nycimg4.jpg" alt="Events History" />
           <h3>Events History</h3>
           <button className="learn-more">Learn more</button>
@@ -49,8 +81,19 @@ function EventList() {
       </section>
 
       {/* Modal for Adding New Event */}
-      <Modal isOpen={showModal} onClose={toggleModal}>
+      <Modal isOpen={showAddEventModal} onClose={toggleAddEventModal}>
         <AddEventForm />
+      </Modal>
+
+      {/* Modal for Event History (EventDetailsModal) */}
+      <Modal isOpen={showEventDetailsModal} onClose={toggleEventDetailsModal}>
+        <EventDetailsModal
+          isOpen={showEventDetailsModal}
+          onClose={toggleEventDetailsModal}
+          events={events} // Pass the events data
+          onEdit={handleEdit} // Pass the edit handler
+          onDelete={handleDelete} // Pass the delete handler
+        />
       </Modal>
     </div>
   );
