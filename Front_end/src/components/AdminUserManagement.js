@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import styles from './styles/AdminUserManagement.module.css';
 
-const AdminUserManagement = ({ userProfile }) => {
+const AdminUserManagement = () => {
     const [user, setUser] = useState({
         username: '',
         password: '',
         email: '',
-        role: 'admin'  // 默认选项为管理员
+        role: 'admin' 
     });
 
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
@@ -21,11 +21,11 @@ const AdminUserManagement = ({ userProfile }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const endpoint = user.role === 'admin' ? 'create-admin' : 'create-leader';
-            const response = await axios.post(`http://localhost:8000/api/${endpoint}/`, {
+            const response = await axios.post('http://localhost:8000/api/register/', {
                 username: user.username,
                 password: user.password,
                 email: user.email,
+                user_type: user.role,  // Use the role selected (either 'admin' or 'team_leader')
             });
 
             if (response.status === 201) {
@@ -35,7 +35,8 @@ const AdminUserManagement = ({ userProfile }) => {
             }
         } catch (error) {
             setCreateSuccessMessage('');
-            setCreateErrorMessage('Failed to create user. Please try again.');
+            const errorMsg = error.response?.data.detail || 'Failed to create user. Please try again.';
+            setCreateErrorMessage(`Error: ${errorMsg}`);
             console.error('Error:', error.response ? error.response.data : error.message);
         }
     };
@@ -78,7 +79,7 @@ const AdminUserManagement = ({ userProfile }) => {
                         required
                     >
                         <option value="admin">Create Admin User</option>
-                        <option value="leader">Create Team Leader</option>
+                        <option value="team_leader">Create Team Leader</option>
                     </select>
                     <button type="submit">Create User</button>
                 </form>

@@ -1,20 +1,25 @@
 import React from "react";
 import Modal from "./Modal";
+import "./EventDetailsModal.css"; // Import the CSS styles for the modal
 
 function EventDetailsModal({ isOpen, onClose, events, onEdit, onDelete }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <h2>Event History</h2>
+      <div className="modal-header">
+        <h2>Event History</h2> {/* Header for Event History */}
+        <button onClick={onClose} className="close-button">&times;</button>
+      </div>
+
       {events.length > 0 ? (
-        <ul>
+        <div className="event-card-container">
           {events.map((event) => (
-            <li key={event.id}>
+            <div key={event.id} className="event-card">
               <h3>{event.name}</h3>
-              <p>Date: {event.date}</p>
-              <p>Leader: {event.leader}</p>
-              <p>Volunteers: {event.volunteers}</p>
+              <p><strong>Date:</strong> {event.date}</p>
+              <p><strong>Leader:</strong> {event.leader || "No leader assigned"}</p>
+              <p><strong>Volunteers:</strong> {event.volunteers || 0}</p>
               {event.activities.length > 0 ? (
-                <ul>
+                <ul className="activity-list">
                   {event.activities.map((activity) => (
                     <li key={activity.id}>{activity.name}</li>
                   ))}
@@ -22,11 +27,12 @@ function EventDetailsModal({ isOpen, onClose, events, onEdit, onDelete }) {
               ) : (
                 <p>No activities for this event.</p>
               )}
-              <button onClick={() => onEdit(event)}>Edit</button>
-              <button onClick={() => onDelete(event.id)}>Delete</button>
-            </li>
+              <div className="event-actions">
+                <button className="delete-button" onClick={() => onDelete(event.id)}>Delete</button>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       ) : (
         <p>No events found.</p>
       )}
