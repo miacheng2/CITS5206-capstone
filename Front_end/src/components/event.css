@@ -1,174 +1,125 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
-}
-
-.navbar {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background-color:#010634;
-    color: white;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-}
-
-.navbar .logo {
-    width: 50px;
-    margin-right: 20px;
-}
-
-.navbar h1 {
-    font-size: 24px;
-    margin: 0;
-}
-
-.nav-links {
-    list-style: none;
-    display: flex;
-    gap: 15px;
-    margin-left: auto;
-}
-
-.nav-links li {
-    padding: 5px 10px;
-}
-
-.nav-links a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.nav-links a:hover {
-    text-decoration: underline;
-}
-
+/* Styles for the event section */
 .event-section {
-    position: relative;
-    background-image: url('nycimg5.jpg');
+    background-image: url("nycimg8.jpg");
     background-size: cover;
     background-position: center;
-    height: 400px;
-    margin-top: 70px; /* Adjusted for fixed navbar */
-}
-
-.event-section .overlay {
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    height: 100%;
+    width: 100%;
     position: absolute;
     top: 0;
     left: 0;
+  }
+  
+  .text-container {
+    z-index: 1;
+    color: white;
+    text-align: center;
+  }
+  
+  .text-container h2 {
+    font-size: 36px;
+    font-weight: bold;
+  }
+  
+  /* Cards Section */
+  .cards-section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px 20px;
+  }
+  
+  .card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    text-align: center;
+    padding: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .card img {
     width: 100%;
-    height: 100%;
+    height: 180px;
+    border-radius: 10px;
+    object-fit: cover;
+  }
+  
+  .card h3 {
+    margin: 15px 0;
+    font-size: 20px;
+    color: #4e3d9a;
+  }
+  
+  .card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .card:hover {
+    transform: scale(1.05); /* Hover effect for cards */
+  }
+  
+  .learn-more {
+    background-color: #ffda44;
+    color: #4e3d9a;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .learn-more:hover {
+    background-color: #ffd700;
+  }
+  
+  /* Modal styles */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.text-container {
-    color: white;
-    text-align: center;
-}
-
-.text-container h2 {
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.text-container p {
-    font-size: 18px;
-    margin: 0;
-}
-
-/* Cards Section */
-.cards-section {
-    display: flex;
-    justify-content: space-around;
-    padding: 20px 50px;
-    margin-top: 30px;
-    flex-wrap: wrap;
-}
-
-.card {
-    background-color: #fff;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: white;
     border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-    text-align: center;
-    width: 28%; 
-    margin: 10px;
-    height: auto;
-}
-
-.card img {
-    width: 100%;
-    height: 150px; 
-    object-fit: cover;
-}
-
-.card h3 {
-    margin: 10px 0;
-    font-size: 1.1em;
-}
-
-.learn-more {
-    background-color: #010634;
-    color: white;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
     border: none;
-    padding: 8px 16px;
-    margin: 10px 0 20px 0;
-    border-radius: 5px;
+    font-size: 24px;
     cursor: pointer;
-    font-size: 14px;
-}
-
-.learn-more:hover {
-    background-color: #025aa5;
-}
-
-/* Responsive Design for Smaller Screens */
-@media only screen and (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .nav-links {
-        flex-direction: column;
-        width: 100%;
-        display: none; /* Initially hidden for smaller screens */
-    }
-
-    .nav-links.show {
-        display: flex; /* Show when menu is toggled */
-    }
-
-    .event-section {
-        height: 50vh; /* Adjust the height for smaller screens */
-    }
-
-    .text-container h2 {
-        font-size: 1.5rem; /* Smaller font size for headings */
-    }
-
-    .text-container p {
-        font-size: 1rem; /* Smaller font size for paragraphs */
-    }
-
-    .cards-section {
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-    }
-
-    .card {
-        width: 80%;
-        margin: 10px 0;
-    }
-}
+    color: #333;
+  }
+  
