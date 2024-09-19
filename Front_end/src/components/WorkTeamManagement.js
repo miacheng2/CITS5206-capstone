@@ -19,7 +19,7 @@ const WorkTeamManagement = () => {
     const [filteredMembers, setFilteredMembers] = useState([]);  // Store the filtered list of members
     const [highlightedIndex, setHighlightedIndex] = useState(-1);  // Store the index of the currently highlighted member
     const [searchQuery, setSearchQuery] = useState('');  // Store the exact user input
-   
+
     const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
 
 
@@ -540,7 +540,7 @@ const WorkTeamManagement = () => {
                             {isEditing && (
                                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
                                     {/* Define state */}
-                                  
+
                                     {/* Search Bar */}
                                     <input
                                         type="text"
@@ -636,7 +636,8 @@ const WorkTeamManagement = () => {
                                 ) : (
                                     <>
                                         <button onClick={handleEditTeam}>Edit Team</button>
-                                        <button onClick={handleDeleteTeam}>Delete Team</button>
+                                        <button onClick={handleEditTeam}>Edit Team Member</button>
+                                        <button onClick={handleDeleteTeam}>Delete Team Member</button>
                                         <button onClick={handleClosePopup}>Close</button>
                                     </>
                                 )}
