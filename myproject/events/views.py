@@ -184,6 +184,45 @@ def team_with_members(request):
         })
     return Response(data)
 
+@api_view(['POST'])
+def update_team_members(request, team_id):
+    try:
+        team = Team.objects.get(id=team_id)
+        members_data = request.data.get('members', [])
+        
+        # Assuming `members_data` is a list of Australian Sailing Numbers
+        members = TeamMember.objects.filter(australian_sailing_number__in=members_data)
+
+        # Update the team members
+        team.members.set(members)
+
+        return Response({"message": "Team members updated successfully"}, status=status.HTTP_200_OK)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def remove_member_from_team(request, pk):
+    try:
+        team = Team.objects.get(pk=pk)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    member_id = request.data.get('member')
+    if not member_id:
+        return Response({"error": "No member ID provided"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        member = TeamMember.objects.get(australian_sailing_number=member_id)
+        team.members.remove(member)  # Remove the member from the team
+    except TeamMember.DoesNotExist:
+        return Response({"error": f"Member with ID {member_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    team.save()
+    serializer = DetailedTeamSerializer(team)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
@@ -368,7 +407,13 @@ def delete_multiple_teams(request):
 
     return Response({"message": "Teams deleted successfully", "deleted_team_names": deleted_team_names}, status=status.HTTP_200_OK)
 
-
+def update_team_members(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    if request.method == 'POST':
+        members = request.POST.getlist('members')  # List of member IDs (australian_sailing_number)
+        team.members.set(members)  # Update team members (will replace the old members)
+        return JsonResponse({'status': 'success', 'message': 'Team members updated successfully.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 @api_view(['POST'])
 def add_member_to_team(request, pk):

@@ -46,6 +46,9 @@ const WorkTeamManagement = () => {
 
 
     const [newTeamName, setNewTeamName] = useState('');
+    const [editingMember, setEditingMember] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
 
     useEffect(() => {
         const fetchTeamMembers = async () => {
@@ -86,6 +89,50 @@ const WorkTeamManagement = () => {
         };
         fetchTeamLeaders();
     }, []);
+
+    const handleEditClick = (member) => {
+        setEditingMember(member);
+        setIsModalOpen(true);
+    };
+
+    const handleEditSubmit = async () => {
+        const { australian_sailing_number } = editingMember;
+        try {
+            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(editingMember),
+            });
+
+            if (response.ok) {
+                alert('Member updated successfully!');
+                setIsModalOpen(false);
+                setEditingMember(null);
+
+                // Update the selected team with the updated member data
+                setSelectedTeam((prevTeam) => ({
+                    ...prevTeam,
+                    members: prevTeam.members.map((member) =>
+                        member.australian_sailing_number === australian_sailing_number ? editingMember : member
+                    ),
+                }));
+            } else {
+                alert('Failed to update member.');
+            }
+        } catch (error) {
+            console.error('Error updating member:', error);
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditingMember((prevMember) => ({
+            ...prevMember,
+            [name]: name === 'teams' ? value.split(',').map((v) => v.trim()) : value,
+        }));
+    };
 
     const availableMembers = teamMembers.filter(
         (member) => selectedTeam && selectedTeam.members && !selectedTeam.members.some(
@@ -198,12 +245,6 @@ const WorkTeamManagement = () => {
         setIsEditing(true);
     };
 
-    const handleRemoveMember = (memberName) => {
-        setEditedTeam((prevTeam) => ({
-            ...prevTeam,
-            Members: prevTeam.Members.filter((member) => member.name !== memberName),
-        }));
-    };
 
 
 
@@ -416,6 +457,46 @@ const WorkTeamManagement = () => {
         }
     };
 
+    const handleRemoveMember = async () => {
+        if (!selectedMember) {
+            alert('Please select a member to remove.');
+            return;
+        }
+    
+        try {
+            const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-member/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                
+                },
+                body: JSON.stringify({ member: selectedMember })
+            });
+    
+            if (response.ok) {
+                const updatedTeam = await response.json();
+                setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
+    
+                alert('Member removed successfully!');
+                handleClosePopup();
+            } else {
+                const errorData = await response.json();
+                alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
+            }
+        } catch (error) {
+            console.error('Error removing member:', error);
+            alert('An error occurred while removing the member.');
+        }
+    };
+    
+    
+    
+
+
+
+
+
+
 
 
 
@@ -520,6 +601,7 @@ const WorkTeamManagement = () => {
                             <table>
                                 <thead>
                                     <tr>
+                                        <th>Selection</th>
                                         <th>numberId</th>
                                         <th>firstName</th>
                                         <th>lastName</th>
@@ -534,6 +616,17 @@ const WorkTeamManagement = () => {
                                     {selectedTeam.members && selectedTeam.members.length > 0 ? (
                                         selectedTeam.members.map((member, index) => (
                                             <tr key={index}>
+                                                <td>
+                                                    <input
+                                                        type="radio"
+                                                        name="selectedMember"
+                                                        value={member.australian_sailing_number}
+                                                        onChange={() => {
+                                                            console.log('Selected Member Australian Sailing Number:', member.australian_sailing_number); // Debug log
+                                                            setSelectedMember(member.australian_sailing_number);  // Update selected member's ID
+                                                        }}
+                                                    />
+                                                </td>
                                                 <td>{member.australian_sailing_number}</td>
                                                 <td>{member.first_name}</td>
                                                 <td>{member.last_name}</td>
@@ -542,7 +635,7 @@ const WorkTeamManagement = () => {
                                                 <td>{member.membership_category}</td>
                                                 <td>{member.will_volunteer_or_pay_levy}</td>
                                                 <td>
-                                                    <button onClick={handleDeleteTeam}>Edit</button>
+                                                    <button onClick={() => handleEditClick(member)}>Edit</button>
 
                                                 </td>
                                             </tr>
@@ -554,6 +647,60 @@ const WorkTeamManagement = () => {
                                     )}
                                 </tbody>
                             </table>
+
+                            {isModalOpen && (
+                                <div className={styles.modal}>
+                                    <div className={styles.modalContent}>
+                                        <h2>Edit Member</h2>
+                                        <form>
+                                            <label>
+                                                Australian Sailing Number:
+                                                <input type="text" name="australian_sailing_number" value={editingMember?.australian_sailing_number} onChange={handleInputChange} readOnly />
+                                            </label>
+                                            <label>
+                                                First Name:
+                                                <input type="text" name="first_name" value={editingMember?.first_name} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Last Name:
+                                                <input type="text" name="last_name" value={editingMember?.last_name} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Email:
+                                                <input type="text" name="email" value={editingMember?.email} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Mobile:
+                                                <input type="text" name="mobile" value={editingMember?.mobile} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Membership Category:
+                                                <input type="text" name="membership_category" value={editingMember?.membership_category} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Volunteer or Pay Levy:
+                                                <select name="will_volunteer_or_pay_levy" value={editingMember?.will_volunteer_or_pay_levy} onChange={handleInputChange}>
+                                                    <option value="">Select an option</option>
+                                                    <option value="I will volunteer">I will volunteer</option>
+                                                    <option value="I will pay the levy">I will pay the levy</option>
+                                                </select>
+                                            </label>
+
+                                        </form>
+                                        <div className={styles.modalButtons}>
+                                            <button onClick={handleEditSubmit}>Update</button>
+                                            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+
+
+
+
 
                             {isEditing && (
                                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
@@ -655,7 +802,12 @@ const WorkTeamManagement = () => {
                                     <>
 
                                         <button onClick={handleEditTeam}>Add Team Member</button>
-                                        <button onClick={handleDeleteTeam}>Delete Team Member</button>
+                                        <button
+                                            onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
+
+                                        >
+                                            Delete Team Member
+                                        </button>
                                         <button onClick={handleClosePopup}>Close</button>
                                     </>
                                 )}
@@ -797,7 +949,7 @@ const WorkTeamManagement = () => {
                                 <button className={styles.saveButton} onClick={handleCreateTeam}>
                                     Update
                                 </button>
-                                <button className={styles.cancelButton} onClick={() => setIsAdding(false)}>
+                                <button className={styles.cancelButton} onClick={handleClosePopup}>
                                     Cancel
                                 </button>
                             </div>
