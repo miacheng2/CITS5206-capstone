@@ -33,6 +33,7 @@ const WorkTeamManagement = () => {
     });
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [newTeam, setNewTeam] = useState({
         TeamName: '',
         TeamLeader: '',
@@ -293,6 +294,16 @@ const WorkTeamManagement = () => {
         setIsAdding(true);
     };
 
+    const handleUpdateTeam = () => {
+        if (selectedTeam.name != "") {
+            setNewTeam({
+                TeamName: selectedTeam.name,
+                Description: selectedTeam.description,
+            });
+        }
+        setIsUpdating(true);
+    };
+
     const handleRemoveSelectedTeams = async () => {
         if (selectedTeams.length === 0) {
             alert('Please select at least one team to delete.');
@@ -494,16 +505,18 @@ const WorkTeamManagement = () => {
                 <div className={styles.popupBack}>
                     <div className={styles.popup}>
                         <div className={styles.popupContent}>
+                            <div className={styles.subdivPopup}>
+                                <div>
+                                    <h1>Team: {selectedTeam.name}</h1>
 
-                            <h1>Team: {selectedTeam.name}</h1>
+                                </div>
+                                <div>
+                                    <button onClick={handleUpdateTeam}>Edit Team</button>
+                                </div>
+                            </div>
                             <p>Description: {selectedTeam.description}</p>
-
-
                             <p>Team Leader: {selectedTeam.team_leader_name}</p>
-
-
                             <h3>Members:</h3>
-
                             <table>
                                 <thead>
                                     <tr>
@@ -514,6 +527,7 @@ const WorkTeamManagement = () => {
                                         <th>mobile</th>
                                         <th>membershipCategory</th>
                                         <th>volunteerOrPay</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -527,6 +541,10 @@ const WorkTeamManagement = () => {
                                                 <td>{member.mobile}</td>
                                                 <td>{member.membership_category}</td>
                                                 <td>{member.will_volunteer_or_pay_levy}</td>
+                                                <td>
+                                                    <button onClick={handleDeleteTeam}>Edit</button>
+
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
@@ -635,8 +653,8 @@ const WorkTeamManagement = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <button onClick={handleEditTeam}>Edit Team</button>
-                                        <button onClick={handleEditTeam}>Edit Team Member</button>
+
+                                        <button onClick={handleEditTeam}>Add Team Member</button>
                                         <button onClick={handleDeleteTeam}>Delete Team Member</button>
                                         <button onClick={handleClosePopup}>Close</button>
                                     </>
@@ -708,6 +726,76 @@ const WorkTeamManagement = () => {
                             <div className={styles.popupButtons}>
                                 <button className={styles.saveButton} onClick={handleCreateTeam}>
                                     Create
+                                </button>
+                                <button className={styles.cancelButton} onClick={() => setIsAdding(false)}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isUpdating && (
+                <div className={styles.popupBack}>
+                    <div className={styles.popup}>
+                        <div className={styles.popupContent}>
+                            <div className={styles.editTeam}>
+                                <h4>Enter New Team Name or Select Existing Team:</h4>
+
+
+                                <input
+                                    type="text"
+                                    placeholder="Enter new team name"
+                                    value={newTeam.TeamName}
+                                    onChange={(e) => setNewTeam({ ...newTeam, TeamName: e.target.value })}
+                                />
+
+
+                                <select
+                                    name="TeamName"
+                                    value={newTeam.TeamName}
+                                    onChange={(e) => setNewTeam({ ...newTeam, TeamName: e.target.value })}
+                                >
+                                    <option value="">Select Existing Team</option>
+                                    {teams && teams.length > 0 && teams.map((team) => (
+                                        <option key={team.id} value={team.name}>
+                                            {team.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.editTeam}>
+                                <h4>Description:</h4>
+                                <textarea
+                                    name="Description"
+                                    value={newTeam.Description}
+                                    onChange={(e) => setNewTeam({ ...newTeam, Description: e.target.value })}
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div className={styles.editTeam}>
+                                <h4>Team Leader:</h4>
+                                <select
+                                    name="TeamLeader"
+                                    value={newTeam.TeamLeader}
+                                    onChange={(e) => setNewTeam({ ...newTeam, TeamLeader: e.target.value })}
+                                    required
+                                >
+                                    <option value="">Select Team Leader</option>
+                                    {teamLeaders?.length > 0 && teamLeaders.map((leader, index) => (
+                                        <option key={index} value={leader.id}>
+                                            {leader.username}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.popupButtons}>
+                                <button className={styles.saveButton} onClick={handleCreateTeam}>
+                                    Update
                                 </button>
                                 <button className={styles.cancelButton} onClick={() => setIsAdding(false)}>
                                     Cancel
