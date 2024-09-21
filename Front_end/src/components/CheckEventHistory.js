@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import api from "../api";
 import { useParams, useNavigate } from "react-router-dom";
 
+
+// Suggestion:
+// This doesn't appear to be used anywhere and is duplicated by the EventList component.
+// Should it be removed?
 function CheckEventHistory() {
   const [events, setEvents] = useState([]);
   const navigate = useNavigate();

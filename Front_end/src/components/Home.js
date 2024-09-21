@@ -16,6 +16,8 @@ const Home = () => (
     <section className="homepage-card-container">
       <div className="homepage-card yellow-card">
         <div className="homepage-card-content">
+          {/* Info: */}
+          {/* These are very hard to read/invisible when hovered over */}
           <h2>Volunteer Points</h2>
           <p>Track volunteer hours, assign points, and reward contributions.</p>
         </div>

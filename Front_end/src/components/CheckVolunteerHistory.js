@@ -83,6 +83,9 @@ function VolunteerHistory() {
     const csvContent = csvRows.join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
+
+    // Suggestion:
+    // Replace this with the saveAs function from file-saver
     const link = document.createElement("a");
     link.href = url;
     link.setAttribute("download", "volunteer_history.csv");
@@ -95,6 +98,8 @@ function VolunteerHistory() {
     <div className="volunteer-history-container">
       {/* Team Buttons */}
       <div className="team-buttons">
+        {/* Suggestion: */}
+        {/* Add some styling to indicate which team option is selected */}
         {maintenanceTeams.map((team) => (
           <button key={team.id} onClick={() => handleTeamFilter(team.id)}>
             {team.name}

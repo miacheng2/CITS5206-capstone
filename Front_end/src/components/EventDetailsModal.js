@@ -16,7 +16,11 @@ function EventDetailsModal({ isOpen, onClose, events, onEdit, onDelete }) {
             <div key={event.id} className="event-card">
               <h3>{event.name}</h3>
               <p><strong>Date:</strong> {event.date}</p>
+                {/* Bug: */}
+                {/* Leader does not appear to show, even after a page refresh */}
               <p><strong>Leader:</strong> {event.leader || "No leader assigned"}</p>
+                {/* Bug: */}
+                {/* Volunteers are always zero even when there are supposed to be volunteers */}
               <p><strong>Volunteers:</strong> {event.volunteers || 0}</p>
               {event.activities.length > 0 ? (
                 <ul className="activity-list">

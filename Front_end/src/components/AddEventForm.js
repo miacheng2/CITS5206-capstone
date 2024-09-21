@@ -53,6 +53,9 @@ function AddEventForm() {
     const { eventName, date, teamLeader, eventType, activities } = formData;
 
     try {
+      // Suggestion:
+      // This can be avoided by using ID instead of the username
+      // See my comment below
       const userId = users.find(
         (user) =>
           user.username.trim().toLowerCase() === teamLeader.toLowerCase()
@@ -66,6 +69,8 @@ function AddEventForm() {
         name: activityName,
       }));
 
+      // Info:
+      // djangorestframework-camel-case can be used to avoid the need for formatting
       const formattedData = {
         name: eventName,
         event_type: eventType,
@@ -140,6 +145,9 @@ function AddEventForm() {
             >
               <option value="">Select a Team Leader</option>
               {users.map((user) => (
+                // Suggestion:
+                // By using value={user.id} you can send through the ID instead of the username
+                // This removes the need to find the user and do the mapping on submit
                 <option key={user.id} value={user.username}>
                   {user.username}
                 </option>
@@ -165,6 +173,9 @@ function AddEventForm() {
               <label>Activities:</label>
               {formData.activities.map((activity, index) => (
                 <input
+                  // Suggestion:
+                  // Using the index as the key can cause issues
+                  // You can use key={activity} to avoid these issues
                   key={index}
                   type="text"
                   name={`activity-${index}`}
@@ -179,6 +190,8 @@ function AddEventForm() {
                 className="add-activity-btn"
                 onClick={addActivityField}
               >
+                {/* Suggestion: */}
+                {/* Add a way to remove an activity so that users who accidentally click this button can remove it */}
                 Add Another Activity
               </button>
             </div>

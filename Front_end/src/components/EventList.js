@@ -14,6 +14,9 @@ function EventList() {
   const [selectedEvent, setSelectedEvent] = useState(null); // To track the event being edited or deleted
 
   useEffect(() => {
+    // Bug:
+    // This doesn't seem to show an event when one is created
+    // Ideally this would either refetch this data or invalidate the state when an event is created.
     // Fetch events from the backend
     api
       .get("events/")
