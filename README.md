@@ -8,8 +8,8 @@
 | 23740033 | Zhengyuan Zhang | Ivy(Zhengyuan)   |Both back-end and front-end of Event,Volunteer Point Management,Reporting
 | 24061397 | Xia Cheng       |   miacheng2      |Front-end of Member Management,Work Team Management,User Management
 | 23813666 | Brandon Ge      |    brand         |Back-end of Member Management,Work Team Management,User Management
-| 23806063 | Yuxiao Shi      |   Rita2023       |Both back-end and front-end of Event,Volunteer Point Management,Reporting
-| 23804552 | Ninu Latheesh   |    Ninu1         |Both back-end and front-end of Event,Volunteer Point Management,Reporting
+| 23806063 | Yuxiao Shi      |   Rita2023       |Front-end of Event,Volunteer Point Management,Reporting
+| 23804552 | Ninu Latheesh   |    Ninu1         |Front-end of Event,Volunteer Point Management,Reporting
 
 ## Overview
 
