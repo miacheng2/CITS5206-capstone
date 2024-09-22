@@ -27,13 +27,12 @@ import "./assets/fonts/fonts.css";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [userProfile, setUserProfile] = useState({ username: "", email: "" });
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
       try {
-        const decodedToken = jwtDecode(storedToken);  // Updated to use jwtDecode
+        const decodedToken = jwtDecode(storedToken);
         const currentTime = Date.now() / 1000;
         if (decodedToken.exp < currentTime) {
           logout();
@@ -49,7 +48,6 @@ function App() {
 
   const logout = () => {
     setToken(null);
-    setUserProfile({ username: "", email: "" });
     localStorage.removeItem("token");
     // Redirect to login after logout
     window.location.href = "/login";
@@ -65,9 +63,7 @@ function App() {
         <Routes>
           <Route
             path="/login"
-            element={
-              <Login setToken={setToken} setUserProfile={setUserProfile} />
-            }
+            element={<Login setToken={setToken} />}
           />
           <Route path="/register" element={<Register setToken={setToken} />} />
           <Route path="*" element={<Navigate replace to="/login" />} />
@@ -80,107 +76,33 @@ function App() {
               path="/"
               element={
                 <PrivateRoute>
-                  <Home setToken={setToken} userProfile={userProfile} />
+                  <Home />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/memberManagement"
-              element={
-                <PrivateRoute>
-                  <TeamMemberList />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/WorkTeamManagement"
-              element={
-                <PrivateRoute>
-                  <WorkTeamManagement />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/memberManagement" element={<TeamMemberList />} />
+            <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
             <Route
               path="/AdminUserManagement"
               element={
                 <PrivateRoute>
-                  <AdminUserManagement userProfile={userProfile} />
+                  <AdminUserManagement />
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/add-points"
-              element={
-                <PrivateRoute>
-                  <AddVolunteerPoints />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/check-history"
-              element={
-                <PrivateRoute>
-                  <CheckVolunteerHistory />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/events"
-              element={
-                <PrivateRoute>
-                  <EventList />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/reward-checkin"
-              element={
-                <PrivateRoute>
-                  <RewardCheckin />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/volunteer-points"
-              element={
-                <PrivateRoute>
-                  <VolunteerPointsList />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <PrivateRoute>
-                  <Report />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/change-password"
-              element={
-                <PrivateRoute>
-                  <ChangePassword />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/add-points" element={<AddVolunteerPoints />} />
+            <Route path="/check-history" element={<CheckVolunteerHistory />} />
+            <Route path="/events" element={<EventList />} />
+            <Route path="/reward-checkin" element={<RewardCheckin />} />
+            <Route path="/volunteer-points" element={<VolunteerPointsList />} />
+            <Route path="/reports" element={<Report />} />
+            <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/logout" element={<Navigate replace to="/login" />} />
-            <Route
-              path="/event-history"
-              element={
-                <PrivateRoute>
-                  <CheckEventHistory />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/event-history" element={<CheckEventHistory />} />
             <Route path="*" element={<Navigate replace to="/" />} />
             <Route
               path="/volunteer-history/:uid"
-              element={
-                <PrivateRoute>
-                  <MemberVolunteerHistory />
-                </PrivateRoute>
-              }
+              element={<MemberVolunteerHistory />}
             />
           </Routes>
         </>
