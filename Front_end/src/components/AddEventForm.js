@@ -4,15 +4,6 @@ import './styles/AddEventForm.css';
 function AddEventForm() {
   const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    fetch("http://localhost:8000/api/users/")
-      .then((response) => response.json())
-      .then((data) => {
-        setUsers(data);
-      })
-      .catch((error) => console.error("Error fetching data:", error));
-  }, []);
-
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
@@ -20,6 +11,61 @@ function AddEventForm() {
     eventType: "",
     activities: [],
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');  // Get the token from localStorage
+        if (!token) {
+          throw new Error('No token found');
+        }
+
+        // Fetch users
+        const usersResponse = await fetch("http://localhost:8000/api/users/", {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUsers(usersData);
+        } else {
+          console.error('Failed to fetch users:', usersResponse.status, usersResponse.statusText);
+          if (usersResponse.status === 401) {
+            console.error('Unauthorized: Redirecting to login.');
+            window.location.href = '/login';  // Redirect to login if unauthorized
+          }
+        }
+
+        // Fetch events
+        const eventsResponse = await fetch('http://localhost:8000/api/events/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,  // Set the Authorization header
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (eventsResponse.ok) {
+          const eventsData = await eventsResponse.json();
+          console.log('Fetched events:', eventsData);
+          // You can do something with the events data if needed
+        } else {
+          console.error('Failed to fetch events:', eventsResponse.status, eventsResponse.statusText);
+          if (eventsResponse.status === 401) {
+            console.error('Unauthorized: Redirecting to login.');
+            window.location.href = '/login';  // Redirect to login if unauthorized
+          }
+        }
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -78,17 +124,27 @@ function AddEventForm() {
         delete formattedData.activities;
       }
 
-      const response = await fetch("http://localhost:8000/api/add-event/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-      });
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+      // Get the JWT token from localStorage
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error("No token found");
+        }
+
+        // Make the POST request with the Authorization header
+        const response = await fetch("http://localhost:8000/api/add-event/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`  // Include the token in the Authorization header
+            },
+            body: JSON.stringify(formattedData),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
 
       alert("Event added successfully!");
       setFormData({

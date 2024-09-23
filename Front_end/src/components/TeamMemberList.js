@@ -25,14 +25,34 @@ const TeamMemberList = () => {
 
     const fetchTeamMembers = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/detailed-team-members/');
-            const data = await response.json();
-            console.log('Fetched team members:', data);
-            setTeamMembers(data);
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+
+            const response = await fetch('http://localhost:8000/api/detailed-team-members/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Fetched team members:', data);
+                setTeamMembers(data);
+            } else {
+                console.error('Failed to fetch team members:', response.status, response.statusText);
+                if (response.status === 401) {
+                    console.error('Unauthorized: Redirecting to login.');
+                    window.location.href = '/login';  // Redirect to login if unauthorized
+                }
+            }
         } catch (error) {
             console.error('Error fetching team members:', error);
         }
     };
+
 
     const exportAllToCSV = () => {
         if (teamMembers.length === 0) {
@@ -61,6 +81,13 @@ const TeamMemberList = () => {
     };
 
     const handleFileUpload = async (file) => {
+        // Check if the user is an admin
+        const userRole = localStorage.getItem('user_role');
+        if (userRole !== 'admin') {
+            alert('Access denied: Only admin users can import CSV files.');
+            return;  // Exit the function early if the user is not an admin
+        }
+
         const formData = new FormData();
         formData.append('file', file);
 

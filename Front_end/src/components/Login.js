@@ -1,5 +1,3 @@
-// login.js
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -14,15 +12,18 @@ function Login({ setToken }) {
     const login = async () => {
         try {
             const response = await axios.post('http://localhost:8000/api/login/', { username, password });
-            const token = response.data.access;
-            if (token) {
+            const { access: token, user_role } = response.data;  // Destructure to get both token and user_role
+
+            if (token && user_role) {
                 setToken(token);
                 localStorage.setItem('token', token);
+                localStorage.setItem('user_role', user_role);  // Store the user role
                 console.log('Login successful, token:', token);
+                console.log('User role:', user_role);  // Debugging log to check user role
                 navigate('/');
             } else {
-                setErrorMessage('Token not found in response');
-                console.error('Token not found in response:', response.data);
+                setErrorMessage('Token or user role not found in response');
+                console.error('Token or user role not found in response:', response.data);
             }
         } catch (error) {
             setErrorMessage('Invalid credentials');
@@ -52,6 +53,8 @@ function Login({ setToken }) {
                 <button onClick={login}>Login</button>
                 {errorMessage && <p className={style.error_message}>{errorMessage}</p>}
                 <Link to="/register" className={style.registerLink}>Don't have an account? Register here</Link>
+                <Link to="/password-reset-request">Forgot your password?</Link>
+
             </div>
         </div>
     );
