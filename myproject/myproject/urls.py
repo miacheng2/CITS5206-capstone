@@ -5,7 +5,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,
                           PromoteLeaderView,addEvent, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
                           DetailedTeamViewSet, DetailedTeamMemberViewSet,MemberVolunteerHistoryAPIView,
-                          get_activities_for_event,remove_member_from_team,update_team_members
+                          get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView
                           )
 
 router = DefaultRouter()
@@ -23,6 +23,10 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/detailed-teams/delete-multiple/', delete_multiple_teams, name='delete-multiple-teams'),
     path('api/teams/<int:pk>/update-members/', update_team_members, name='update_team_members'),
+    path('api/password-reset-request/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('api/password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+
+
 
     
 

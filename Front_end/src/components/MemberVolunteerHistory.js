@@ -1,19 +1,49 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 function MemberVolunteerHistory() {
   const { uid } = useParams(); // Get the uid from the URL
   const [history, setHistory] = useState([]);
   const [editIndex, setEditIndex] = useState(null); // To track which row is being edited
   const [updatedEntry, setUpdatedEntry] = useState({ points: "", hours: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch the volunteer history of the member by uid
-    fetch(`http://localhost:8000/api/member-volunteer-history/${uid}/`)
-      .then((response) => response.json())
-      .then((data) => setHistory(data))
-      .catch((error) => console.error("Error fetching member history:", error));
-  }, [uid]);
+    const fetchHistory = async () => {
+      try {
+        const token = localStorage.getItem("token"); // Get the token from localStorage
+        if (!token) {
+          console.error("No token found, redirecting to login.");
+          navigate("/login"); // Redirect to login page
+          return;
+        }
+
+        const response = await fetch(
+          `http://localhost:8000/api/member-volunteer-history/${uid}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the Authorization header
+              "Content-Type": "application/json", // Added content-type header
+
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setHistory(data);
+        } else if (response.status === 401) {
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login"); // Redirect to login if unauthorized
+        } else {
+          console.error("Error fetching member history:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error fetching member history:", error);
+      }
+    };
+
+    fetchHistory();
+  }, [uid, navigate]);
 
   // Function to handle editing
   const handleEditClick = (index, entry) => {
@@ -31,7 +61,14 @@ function MemberVolunteerHistory() {
   };
 
   // Function to save the updated data
-  const handleSaveClick = (index, id) => {
+  const handleSaveClick = async (index, id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found, redirecting to login.");
+      navigate("/login");
+      return;
+    }
+
     const updatedHistory = [...history];
     updatedHistory[index] = {
       ...updatedHistory[index],
@@ -42,28 +79,62 @@ function MemberVolunteerHistory() {
     setEditIndex(null);
 
     // Update the entry on the server (API call)
-    fetch(`http://localhost:8000/api/volunteer-points/${id}/`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        points: parseInt(updatedEntry.points, 10), // Convert to integer
-        hours: parseFloat(updatedEntry.hours), // Convert to float if necessary
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log("Update successful:", data))
-      .catch((error) => console.error("Error updating entry:", error));
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/volunteer-points/${id}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Add the Authorization header
+          },
+          body: JSON.stringify({
+            points: parseInt(updatedEntry.points, 10), // Convert to integer
+            hours: parseFloat(updatedEntry.hours), // Convert to float if necessary
+          }),
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to update entry.");
+      }
+      const data = await response.json();
+      console.log("Update successful:", data);
+    } catch (error) {
+      console.error("Error updating entry:", error);
+    }
   };
 
   // Function to handle deletion
-  const handleDeleteClick = (id) => {
+  const handleDeleteClick = async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found, redirecting to login.");
+      navigate("/login");
+      return;
+    }
+
     const updatedHistory = history.filter((entry) => entry.id !== id);
     setHistory(updatedHistory);
 
     // Delete the entry from the server (API call)
-    fetch(`http://localhost:8000/api/volunteer-points/${id}/`, {
-      method: "DELETE",
-    }).catch((error) => console.error("Error deleting entry:", error));
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/volunteer-points/${id}/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the Authorization header
+            "Content-Type": "application/json", // Added content-type header
+
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete entry.");
+      }
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+    }
   };
 
   return (

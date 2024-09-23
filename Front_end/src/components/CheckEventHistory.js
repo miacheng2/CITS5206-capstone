@@ -8,28 +8,69 @@ function CheckEventHistory() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch events from the backend
-    api
-      .get("events/")
-      .then((response) => {
-        setEvents(response.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the events!", error);
-      });
-  }, []);
+    // Function to fetch events with authorization
+    const fetchEvents = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the token from localStorage
+        if (!token) {
+          // If no token, redirect to login
+          console.error('No token found, redirecting to login.');
+          navigate('/login'); // Redirect to login page
+          return; // Exit the function
+        }
 
-  const handleDelete = (eventId) => {
+        // Fetch events from the backend with the Authorization header
+        const response = await api.get('events/', {
+          headers: {
+            'Authorization': `Bearer ${token}`, // Add the Authorization header
+          },
+        });
+
+        // Update state with the fetched events
+        setEvents(response.data);
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          // Handle 401 Unauthorized by redirecting to login
+          console.error('Unauthorized: Redirecting to login.');
+          navigate('/login');
+        } else {
+          // Handle other errors (e.g., network issues, server errors)
+          console.error('There was an error fetching the events!', error);
+          alert('Failed to fetch events. Please try again later.');
+        }
+      }
+    };
+
+    // Call the fetchEvents function
+    fetchEvents();
+  }, [navigate]); // Add navigate as a dependency
+
+  const handleDelete = async (eventId) => {
     // Call API to delete the event
-    api
-      .delete(`events/${eventId}/`)
-      .then(() => {
-        // Remove event from the state after successful deletion
-        setEvents(events.filter((event) => event.id !== eventId));
-      })
-      .catch((error) => {
-        console.error("There was an error deleting the event!", error);
+    try {
+      const token = localStorage.getItem('token'); // Get the token from localStorage
+      if (!token) {
+        throw new Error('No token found');
+      }
+
+      await api.delete(`events/${eventId}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`, // Add the Authorization header
+        },
       });
+
+      // Remove event from the state after successful deletion
+      setEvents(events.filter((event) => event.id !== eventId));
+      console.log("Event deleted:", eventId);
+    } catch (error) {
+      console.error("There was an error deleting the event!", error);
+      if (error.response && error.response.status === 401) {
+        console.error('Unauthorized: Redirecting to login.');
+        navigate('/login');
+      } else {
+        alert('Failed to delete event. Please try again later.');
+      }
+    }
   };
 
   return (

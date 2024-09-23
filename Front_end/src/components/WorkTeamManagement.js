@@ -49,13 +49,51 @@ const WorkTeamManagement = () => {
     const [editingMember, setEditingMember] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const fetchWithAuth = async (url, options = {}) => {
+        const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+        
+        if (!token) {
+            console.error('No token found in localStorage');
+            throw new Error('No token found');
+        }
+        
+        const headers = {
+            'Authorization': `Bearer ${token}`, // Add the Bearer token to the Authorization header
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+        
+        const response = await fetch(url, {
+            ...options,
+            headers: headers,
+        });
+    
+        if (response.status === 401) {
+            console.log('Unauthorized! Redirecting to login...');
+            window.location.href = '/login'; // Redirect to the login page if unauthorized
+        }
+    
+        return response;
+    };
+    
+    
+    
+
+
+
 
     useEffect(() => {
         const fetchTeamMembers = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/detailed-team-members/');
-                const data = await response.json();
-                setTeamMembers(data || []);
+                const response = await fetchWithAuth('http://localhost:8000/api/detailed-team-members/');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTeamMembers(data);
+                    console.log('Fetched team members:', data);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error fetching team members:', errorData);
+                }
             } catch (error) {
                 console.error('Error fetching team members:', error);
             }
@@ -63,15 +101,21 @@ const WorkTeamManagement = () => {
         fetchTeamMembers();
     }, []);
 
-
     useEffect(() => {
         const fetchTeamsWithMembers = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/teams-with-members/');
+                const response = await fetchWithAuth('http://localhost:8000/api/teams-with-members/');
                 const data = await response.json();
-                setTeams(data || []);
+
+                if (Array.isArray(data)) {
+                    setTeams(data);
+                } else {
+                    console.error('Unexpected response format:', data);
+                    setTeams([]);
+                }
             } catch (error) {
                 console.error('Error fetching teams with members:', error);
+                setTeams([]);  // Fallback to an empty array on error
             }
         };
         fetchTeamsWithMembers();
@@ -80,11 +124,18 @@ const WorkTeamManagement = () => {
     useEffect(() => {
         const fetchTeamLeaders = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/team-leaders/');
+                const response = await fetchWithAuth('http://localhost:8000/api/team-leaders/');
                 const data = await response.json();
-                setTeamLeaders(data || []);
+
+                if (Array.isArray(data)) {
+                    setTeamLeaders(data);
+                } else {
+                    console.error('Unexpected response format:', data);
+                    setTeamLeaders([]);
+                }
             } catch (error) {
                 console.error('Error fetching team leaders:', error);
+                setTeamLeaders([]);  // Fallback to an empty array on error
             }
         };
         fetchTeamLeaders();
@@ -98,19 +149,24 @@ const WorkTeamManagement = () => {
     const handleEditSubmit = async () => {
         const { australian_sailing_number } = editingMember;
         try {
+            const token = localStorage.getItem('token'); // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
                 method: 'PUT',
                 headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(editingMember),
             });
-
+    
             if (response.ok) {
                 alert('Member updated successfully!');
                 setIsModalOpen(false);
                 setEditingMember(null);
-
                 // Update the selected team with the updated member data
                 setSelectedTeam((prevTeam) => ({
                     ...prevTeam,
@@ -125,6 +181,8 @@ const WorkTeamManagement = () => {
             console.error('Error updating member:', error);
         }
     };
+
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -254,22 +312,27 @@ const WorkTeamManagement = () => {
             alert('Please select a member to add.');
             return;
         }
-
+    
         try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/add-member/`, {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     members: [...selectedTeam.members.map(m => m.australian_sailing_number), selectedMember]
                 }),
             });
-
+    
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-
                 alert('Member added successfully!');
                 handleClosePopup();
             } else {
@@ -281,6 +344,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while adding the member.');
         }
     };
+    
 
 
 
@@ -299,15 +363,23 @@ const WorkTeamManagement = () => {
             alert("No team selected to delete.");
             return;
         }
-
+    
         const confirmDelete = window.confirm(`Are you sure you want to delete the team "${selectedTeam.name}"?`);
         if (!confirmDelete) return;
-
+    
         try {
+            const token = localStorage.getItem('token'); // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                },
             });
-
+    
             if (response.ok) {
                 alert('Team deleted successfully!');
                 setTeams((prevTeams) => prevTeams.filter((team) => team.id !== selectedTeam.id));
@@ -321,6 +393,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the team.');
         }
     };
+    
 
 
     const handleChange = (e) => {
@@ -335,39 +408,39 @@ const WorkTeamManagement = () => {
         setIsAdding(true);
     };
 
-    const handleUpdateTeam = () => {
-        if (selectedTeam.name != "") {
-            setNewTeam({
-                TeamName: selectedTeam.name,
-                Description: selectedTeam.description,
-            });
-        }
-        setIsUpdating(true);
-    };
+   
 
     const handleRemoveSelectedTeams = async () => {
         if (selectedTeams.length === 0) {
             alert('Please select at least one team to delete.');
             return;
         }
-
+    
         const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
         if (!confirmDelete) return;
-
+    
         try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             // Iterate over all selected teams and send delete requests
             for (const team of selectedTeams) {
                 const response = await fetch(`http://localhost:8000/api/teams/${team.id}/`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,  // Add the Authorization header
+                    },
                 });
-
+    
                 if (!response.ok) {
                     const errorData = await response.json();
                     alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
-
+    
             alert('Selected teams have been successfully deleted!');
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
@@ -375,6 +448,19 @@ const WorkTeamManagement = () => {
             console.error('Error occurred while deleting teams:', error);
             alert('An error occurred while deleting the teams.');
         }
+    };
+    
+
+    
+
+     const handleUpdateTeam = () => {
+        if (selectedTeam.name != "") {
+            setNewTeam({
+                TeamName: selectedTeam.name,
+                Description: selectedTeam.description,
+            });
+        }
+        setIsUpdating(true);
     };
 
 
@@ -399,24 +485,18 @@ const WorkTeamManagement = () => {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add the authorization header
                     },
                     body: JSON.stringify(teamPayload),
                 });
-
+    
                 if (response.ok) {
                     const updatedTeam = await response.json();
                     alert('Team updated successfully!');
-                    setTeams((prevTeams) =>
-                        prevTeams.map((team) => (team.id === updatedTeam.id ? updatedTeam : team))
+                    setTeams(prevTeams =>
+                        prevTeams.map(team => (team.id === updatedTeam.id ? updatedTeam : team))
                     );
-                    setNewTeam({
-                        TeamName: '',
-                        TeamLeader: '',
-                        Description: ''
-                    });
                     handleClosePopup();
-
-
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to update team: ${JSON.stringify(errorData)}`);
@@ -426,11 +506,13 @@ const WorkTeamManagement = () => {
                 alert('An error occurred while updating the team.');
             }
         } else {
+            // Create a new team
             try {
                 const response = await fetch('http://localhost:8000/api/detailed-teams/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add the authorization header
                     },
                     body: JSON.stringify(teamPayload),
                 });
@@ -464,33 +546,42 @@ const WorkTeamManagement = () => {
         }
     
         try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-member/`, {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
                     'Content-Type': 'application/json',
-                
                 },
-                body: JSON.stringify({ member: selectedMember })
+                body: JSON.stringify({ member: selectedMember }),
             });
     
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-    
                 alert('Member removed successfully!');
                 handleClosePopup();
             } else {
                 const errorData = await response.json();
-                alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
+                if (response.status === 401) {
+                    console.error('Unauthorized: Redirecting to login.');
+                    window.location.href = '/login';  // Redirect to login if unauthorized
+                } else {
+                    alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
+                }
             }
         } catch (error) {
             console.error('Error removing member:', error);
             alert('An error occurred while removing the member.');
         }
     };
-    
-    
-    
+
+
+
 
 
 

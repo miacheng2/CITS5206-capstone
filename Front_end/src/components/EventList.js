@@ -14,16 +14,40 @@ function EventList() {
   const [selectedEvent, setSelectedEvent] = useState(null); // To track the event being edited or deleted
 
   useEffect(() => {
-    // Fetch events from the backend
-    api
-      .get("events/")
-      .then((response) => {
-        setEvents(response.data);
-      })
-      .catch((error) => {
-        console.error("There was an error fetching the events!", error);
-      });
-  }, []);
+    const fetchEvents = async () => {
+      try {
+          const token = localStorage.getItem('token');  // Get the token from localStorage
+          if (!token) {
+              throw new Error('No token found');
+          }
+  
+          const response = await fetch('http://localhost:8000/api/events/', {
+              headers: {
+                  'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                  'Content-Type': 'application/json',
+              },
+          });
+  
+          if (response.ok) {
+              const data = await response.json();
+              console.log('Fetched events:', data);
+              // Do something with the fetched events data
+          } else {
+              console.error('Failed to fetch events:', response.status, response.statusText);
+              if (response.status === 401) {
+                  console.error('Unauthorized: Redirecting to login.');
+                  window.location.href = '/login';  // Redirect to login if unauthorized
+              }
+          }
+      } catch (error) {
+          console.error('Error fetching events:', error);
+      }
+  };
+
+
+    // Call the fetchEvents function
+    fetchEvents();
+  }, [navigate]); // Add navigate as a dependency
 
   // Toggle modals
   const toggleAddEventModal = () => setShowAddEventModal(!showAddEventModal);

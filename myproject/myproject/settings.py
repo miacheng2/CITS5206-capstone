@@ -96,7 +96,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',  
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        #'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 from datetime import timedelta
@@ -144,12 +144,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for simplicity; restrict as needed
-# Add your frontend URL to the list of trusted origins for CSRF protection
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',  # Add your frontend URL
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
@@ -159,3 +158,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# settings.py
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'in-v3.mailjet.com'
+EMAIL_PORT = 587  #  prefer SSL
+EMAIL_USE_TLS = True  # using SSL
+EMAIL_HOST_USER = '081007e42eae254d2c9c8d85e9cf9978'  # Replace with API Key
+EMAIL_HOST_PASSWORD = '2c2b25067ba8d05e453443e9dd4fafeb'  # Replace with Secret Key
+DEFAULT_FROM_EMAIL = '23813666@student.uwa.edu.au'  # Replace with sender email
+

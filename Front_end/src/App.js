@@ -22,6 +22,11 @@ import Home from "./components/Home";
 import CheckEventHistory from "./components/CheckEventHistory";
 import ChangePassword from './components/ChangePassword';
 import MemberVolunteerHistory from "./components/MemberVolunteerHistory";
+import PasswordResetConfirm from './components/PasswordResetConfirm';
+import PasswordResetRequest from './components/PasswordResetRequest'; 
+
+
+
 
 import "./assets/fonts/fonts.css";
 
@@ -66,6 +71,8 @@ function App() {
             element={<Login setToken={setToken} />}
           />
           <Route path="/register" element={<Register setToken={setToken} />} />
+          <Route path="/password-reset-confirm/:uidb64/:token" element={<PasswordResetConfirm />} />
+          <Route path="/password-reset-request" element={<PasswordResetRequest />} />
           <Route path="*" element={<Navigate replace to="/login" />} />
         </Routes>
       ) : (
@@ -90,6 +97,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            
             <Route path="/add-points" element={<AddVolunteerPoints />} />
             <Route path="/check-history" element={<CheckVolunteerHistory />} />
             <Route path="/events" element={<EventList />} />
@@ -100,6 +108,10 @@ function App() {
             <Route path="/logout" element={<Navigate replace to="/login" />} />
             <Route path="/event-history" element={<CheckEventHistory />} />
             <Route path="*" element={<Navigate replace to="/" />} />
+            
+
+            
+
             <Route
               path="/volunteer-history/:uid"
               element={<MemberVolunteerHistory />}
