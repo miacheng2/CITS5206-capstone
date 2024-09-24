@@ -150,3 +150,13 @@ body {
     justify-content: space-around;
     /* Adds spacing between items */
 }
+
+.navLink {
+    display: block;
+    padding: 10px;
+    /* Adjust as necessary */
+    color: inherit;
+    /* Ensures the text color inherits from parent */
+    text-decoration: none;
+    /* Removes underline from links */
+}

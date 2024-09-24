@@ -6,10 +6,12 @@ import styles from './styles/Navbar.module.css';
 function Navbar({ logout }) {
     const navigate = useNavigate();
 
-    // Define the handleChangePassword function
     const handleChangePassword = () => {
         navigate('/change-password');
     };
+
+    // Helper function to determine the class name based on the active state
+    const getNavLinkClass = (isActive) => isActive ? `${styles.active} ${styles.navLink}` : styles.navLink;
 
     return (
         <div className={styles.navbarOutter}>
@@ -19,29 +21,18 @@ function Navbar({ logout }) {
             </div>
             <nav className={styles.navbar}>
                 <ul className={styles.navList}>
-                    <li><NavLink exact to="/" activeClassName={styles.active}><b>Home</b></NavLink></li>
-                    <li><NavLink to="/memberManagement" activeClassName={styles.active}><b>Member Management</b></NavLink></li>
-                    <li><NavLink to="/WorkTeamManagement" activeClassName={styles.active}><b>Team Member Management</b></NavLink></li>
-                    <li><NavLink to="/AdminUserManagement" activeClassName={styles.active}><b>Admin Management</b></NavLink></li>
-                    <li><NavLink to="/volunteer-points" activeClassName={styles.active}><b>Volunteer Points</b></NavLink></li>
-                    <li><NavLink to="/events" activeClassName={styles.active}><b>Events</b></NavLink></li>
-                    <li><NavLink to="/reports" activeClassName={styles.active}><b>Reports</b></NavLink></li>
+                    <li><NavLink to="/" className={({ isActive }) => getNavLinkClass(isActive)}><b>Home</b></NavLink></li>
+                    <li><NavLink to="/memberManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Member Management</b></NavLink></li>
+                    <li><NavLink to="/WorkTeamManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Team Member Management</b></NavLink></li>
+                    <li><NavLink to="/AdminUserManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Admin Management</b></NavLink></li>
+                    <li><NavLink to="/volunteer-points" className={({ isActive }) => getNavLinkClass(isActive)}><b>Volunteer Points</b></NavLink></li>
+                    <li><NavLink to="/events" className={({ isActive }) => getNavLinkClass(isActive)}><b>Events</b></NavLink></li>
+                    <li><NavLink to="/reports" className={({ isActive }) => getNavLinkClass(isActive)}><b>Reports</b></NavLink></li>
                 </ul>
             </nav>
             <div className={styles.leftDiv}>
-                <button
-                    className={styles.passwordButton}
-                    onClick={handleChangePassword}
-                >
-                    <b>Change Password</b>
-                </button>
-
-                <button
-                    className={styles.logoutButton}
-                    onClick={logout}
-                >
-                    <b>Logout</b>
-                </button>
+                <button onClick={handleChangePassword}><b>Change Password</b></button>
+                <button onClick={logout}><b>Logout</b></button>
             </div>
         </div>
     );
