@@ -218,12 +218,21 @@ function AddVolunteerPoints() {
       {/* Team Buttons */}
       <div className="team-buttons">
         {maintenanceTeams.map((team) => (
-          <button key={team.name} onClick={() => handleTeamFilter(team.name)}>
-            {team.name}
-          </button>
-        ))}
-        <button onClick={() => handleTeamFilter("")}>All Teams</button>
-      </div>
+          <button
+          key={team.name}
+          onClick={() => handleTeamFilter(team.name)}
+          className={selectedTeam === team.name ? "selected-team" : ""}
+        >
+          {team.name}
+        </button>
+      ))}
+      <button
+        onClick={() => handleTeamFilter("")}
+        className={selectedTeam === "" ? "selected-team" : ""}
+      >
+        All Teams
+      </button>
+    </div>
 
       {/* Search Bar */}
       <input
