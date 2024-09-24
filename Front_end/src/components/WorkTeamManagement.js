@@ -46,13 +46,54 @@ const WorkTeamManagement = () => {
 
 
     const [newTeamName, setNewTeamName] = useState('');
+    const [editingMember, setEditingMember] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const fetchWithAuth = async (url, options = {}) => {
+        const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+        
+        if (!token) {
+            console.error('No token found in localStorage');
+            throw new Error('No token found');
+        }
+        
+        const headers = {
+            'Authorization': `Bearer ${token}`, // Add the Bearer token to the Authorization header
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+        
+        const response = await fetch(url, {
+            ...options,
+            headers: headers,
+        });
+    
+        if (response.status === 401) {
+            console.log('Unauthorized! Redirecting to login...');
+            window.location.href = '/login'; // Redirect to the login page if unauthorized
+        }
+    
+        return response;
+    };
+    
+    
+    
+
+
+
 
     useEffect(() => {
         const fetchTeamMembers = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/detailed-team-members/');
-                const data = await response.json();
-                setTeamMembers(data || []);
+                const response = await fetchWithAuth('http://localhost:8000/api/detailed-team-members/');
+                if (response.ok) {
+                    const data = await response.json();
+                    setTeamMembers(data);
+                    console.log('Fetched team members:', data);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error fetching team members:', errorData);
+                }
             } catch (error) {
                 console.error('Error fetching team members:', error);
             }
@@ -60,15 +101,21 @@ const WorkTeamManagement = () => {
         fetchTeamMembers();
     }, []);
 
-
     useEffect(() => {
         const fetchTeamsWithMembers = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/teams-with-members/');
+                const response = await fetchWithAuth('http://localhost:8000/api/teams-with-members/');
                 const data = await response.json();
-                setTeams(data || []);
+
+                if (Array.isArray(data)) {
+                    setTeams(data);
+                } else {
+                    console.error('Unexpected response format:', data);
+                    setTeams([]);
+                }
             } catch (error) {
                 console.error('Error fetching teams with members:', error);
+                setTeams([]);  // Fallback to an empty array on error
             }
         };
         fetchTeamsWithMembers();
@@ -77,15 +124,73 @@ const WorkTeamManagement = () => {
     useEffect(() => {
         const fetchTeamLeaders = async () => {
             try {
-                const response = await fetch('http://localhost:8000/api/team-leaders/');
+                const response = await fetchWithAuth('http://localhost:8000/api/team-leaders/');
                 const data = await response.json();
-                setTeamLeaders(data || []);
+
+                if (Array.isArray(data)) {
+                    setTeamLeaders(data);
+                } else {
+                    console.error('Unexpected response format:', data);
+                    setTeamLeaders([]);
+                }
             } catch (error) {
                 console.error('Error fetching team leaders:', error);
+                setTeamLeaders([]);  // Fallback to an empty array on error
             }
         };
         fetchTeamLeaders();
     }, []);
+
+    const handleEditClick = (member) => {
+        setEditingMember(member);
+        setIsModalOpen(true);
+    };
+
+    const handleEditSubmit = async () => {
+        const { australian_sailing_number } = editingMember;
+        try {
+            const token = localStorage.getItem('token'); // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
+            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(editingMember),
+            });
+    
+            if (response.ok) {
+                alert('Member updated successfully!');
+                setIsModalOpen(false);
+                setEditingMember(null);
+                // Update the selected team with the updated member data
+                setSelectedTeam((prevTeam) => ({
+                    ...prevTeam,
+                    members: prevTeam.members.map((member) =>
+                        member.australian_sailing_number === australian_sailing_number ? editingMember : member
+                    ),
+                }));
+            } else {
+                alert('Failed to update member.');
+            }
+        } catch (error) {
+            console.error('Error updating member:', error);
+        }
+    };
+
+
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditingMember((prevMember) => ({
+            ...prevMember,
+            [name]: name === 'teams' ? value.split(',').map((v) => v.trim()) : value,
+        }));
+    };
 
     const availableMembers = teamMembers.filter(
         (member) => selectedTeam && selectedTeam.members && !selectedTeam.members.some(
@@ -198,12 +303,6 @@ const WorkTeamManagement = () => {
         setIsEditing(true);
     };
 
-    const handleRemoveMember = (memberName) => {
-        setEditedTeam((prevTeam) => ({
-            ...prevTeam,
-            Members: prevTeam.Members.filter((member) => member.name !== memberName),
-        }));
-    };
 
 
 
@@ -213,22 +312,27 @@ const WorkTeamManagement = () => {
             alert('Please select a member to add.');
             return;
         }
-
+    
         try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/add-member/`, {
                 method: 'POST',
                 headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     members: [...selectedTeam.members.map(m => m.australian_sailing_number), selectedMember]
                 }),
             });
-
+    
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-
                 alert('Member added successfully!');
                 handleClosePopup();
             } else {
@@ -240,6 +344,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while adding the member.');
         }
     };
+    
 
 
 
@@ -258,15 +363,23 @@ const WorkTeamManagement = () => {
             alert("No team selected to delete.");
             return;
         }
-
+    
         const confirmDelete = window.confirm(`Are you sure you want to delete the team "${selectedTeam.name}"?`);
         if (!confirmDelete) return;
-
+    
         try {
+            const token = localStorage.getItem('token'); // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                },
             });
-
+    
             if (response.ok) {
                 alert('Team deleted successfully!');
                 setTeams((prevTeams) => prevTeams.filter((team) => team.id !== selectedTeam.id));
@@ -280,6 +393,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the team.');
         }
     };
+    
 
 
     const handleChange = (e) => {
@@ -294,39 +408,39 @@ const WorkTeamManagement = () => {
         setIsAdding(true);
     };
 
-    const handleUpdateTeam = () => {
-        if (selectedTeam.name != "") {
-            setNewTeam({
-                TeamName: selectedTeam.name,
-                Description: selectedTeam.description,
-            });
-        }
-        setIsUpdating(true);
-    };
+   
 
     const handleRemoveSelectedTeams = async () => {
         if (selectedTeams.length === 0) {
             alert('Please select at least one team to delete.');
             return;
         }
-
+    
         const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
         if (!confirmDelete) return;
-
+    
         try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
             // Iterate over all selected teams and send delete requests
             for (const team of selectedTeams) {
                 const response = await fetch(`http://localhost:8000/api/teams/${team.id}/`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,  // Add the Authorization header
+                    },
                 });
-
+    
                 if (!response.ok) {
                     const errorData = await response.json();
                     alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
-
+    
             alert('Selected teams have been successfully deleted!');
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
@@ -334,6 +448,19 @@ const WorkTeamManagement = () => {
             console.error('Error occurred while deleting teams:', error);
             alert('An error occurred while deleting the teams.');
         }
+    };
+    
+
+    
+
+     const handleUpdateTeam = () => {
+        if (selectedTeam.name != "") {
+            setNewTeam({
+                TeamName: selectedTeam.name,
+                Description: selectedTeam.description,
+            });
+        }
+        setIsUpdating(true);
     };
 
 
@@ -358,24 +485,18 @@ const WorkTeamManagement = () => {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add the authorization header
                     },
                     body: JSON.stringify(teamPayload),
                 });
-
+    
                 if (response.ok) {
                     const updatedTeam = await response.json();
                     alert('Team updated successfully!');
-                    setTeams((prevTeams) =>
-                        prevTeams.map((team) => (team.id === updatedTeam.id ? updatedTeam : team))
+                    setTeams(prevTeams =>
+                        prevTeams.map(team => (team.id === updatedTeam.id ? updatedTeam : team))
                     );
-                    setNewTeam({
-                        TeamName: '',
-                        TeamLeader: '',
-                        Description: ''
-                    });
                     handleClosePopup();
-
-
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to update team: ${JSON.stringify(errorData)}`);
@@ -385,11 +506,13 @@ const WorkTeamManagement = () => {
                 alert('An error occurred while updating the team.');
             }
         } else {
+            // Create a new team
             try {
                 const response = await fetch('http://localhost:8000/api/detailed-teams/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Add the authorization header
                     },
                     body: JSON.stringify(teamPayload),
                 });
@@ -415,6 +538,55 @@ const WorkTeamManagement = () => {
             }
         }
     };
+
+    const handleRemoveMember = async () => {
+        if (!selectedMember) {
+            alert('Please select a member to remove.');
+            return;
+        }
+    
+        try {
+            const token = localStorage.getItem('token');  // Get the token from localStorage
+            if (!token) {
+                throw new Error('No token found');
+            }
+    
+            const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-member/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ member: selectedMember }),
+            });
+    
+            if (response.ok) {
+                const updatedTeam = await response.json();
+                setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
+                alert('Member removed successfully!');
+                handleClosePopup();
+            } else {
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    console.error('Unauthorized: Redirecting to login.');
+                    window.location.href = '/login';  // Redirect to login if unauthorized
+                } else {
+                    alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error removing member:', error);
+            alert('An error occurred while removing the member.');
+        }
+    };
+
+
+
+
+
+
+
+
 
 
 
@@ -520,6 +692,7 @@ const WorkTeamManagement = () => {
                             <table>
                                 <thead>
                                     <tr>
+                                        <th>Selection</th>
                                         <th>numberId</th>
                                         <th>firstName</th>
                                         <th>lastName</th>
@@ -534,6 +707,17 @@ const WorkTeamManagement = () => {
                                     {selectedTeam.members && selectedTeam.members.length > 0 ? (
                                         selectedTeam.members.map((member, index) => (
                                             <tr key={index}>
+                                                <td>
+                                                    <input
+                                                        type="radio"
+                                                        name="selectedMember"
+                                                        value={member.australian_sailing_number}
+                                                        onChange={() => {
+                                                            console.log('Selected Member Australian Sailing Number:', member.australian_sailing_number); // Debug log
+                                                            setSelectedMember(member.australian_sailing_number);  // Update selected member's ID
+                                                        }}
+                                                    />
+                                                </td>
                                                 <td>{member.australian_sailing_number}</td>
                                                 <td>{member.first_name}</td>
                                                 <td>{member.last_name}</td>
@@ -542,7 +726,7 @@ const WorkTeamManagement = () => {
                                                 <td>{member.membership_category}</td>
                                                 <td>{member.will_volunteer_or_pay_levy}</td>
                                                 <td>
-                                                    <button onClick={handleDeleteTeam}>Edit</button>
+                                                    <button onClick={() => handleEditClick(member)}>Edit</button>
 
                                                 </td>
                                             </tr>
@@ -554,6 +738,60 @@ const WorkTeamManagement = () => {
                                     )}
                                 </tbody>
                             </table>
+
+                            {isModalOpen && (
+                                <div className={styles.modal}>
+                                    <div className={styles.modalContent}>
+                                        <h2>Edit Member</h2>
+                                        <form>
+                                            <label>
+                                                Australian Sailing Number:
+                                                <input type="text" name="australian_sailing_number" value={editingMember?.australian_sailing_number} onChange={handleInputChange} readOnly />
+                                            </label>
+                                            <label>
+                                                First Name:
+                                                <input type="text" name="first_name" value={editingMember?.first_name} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Last Name:
+                                                <input type="text" name="last_name" value={editingMember?.last_name} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Email:
+                                                <input type="text" name="email" value={editingMember?.email} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Mobile:
+                                                <input type="text" name="mobile" value={editingMember?.mobile} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Membership Category:
+                                                <input type="text" name="membership_category" value={editingMember?.membership_category} onChange={handleInputChange} />
+                                            </label>
+                                            <label>
+                                                Volunteer or Pay Levy:
+                                                <select name="will_volunteer_or_pay_levy" value={editingMember?.will_volunteer_or_pay_levy} onChange={handleInputChange}>
+                                                    <option value="">Select an option</option>
+                                                    <option value="I will volunteer">I will volunteer</option>
+                                                    <option value="I will pay the levy">I will pay the levy</option>
+                                                </select>
+                                            </label>
+
+                                        </form>
+                                        <div className={styles.modalButtons}>
+                                            <button onClick={handleEditSubmit}>Update</button>
+                                            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+
+
+
+
 
                             {isEditing && (
                                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
@@ -655,7 +893,12 @@ const WorkTeamManagement = () => {
                                     <>
 
                                         <button onClick={handleEditTeam}>Add Team Member</button>
-                                        <button onClick={handleDeleteTeam}>Delete Team Member</button>
+                                        <button
+                                            onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
+
+                                        >
+                                            Delete Team Member
+                                        </button>
                                         <button onClick={handleClosePopup}>Close</button>
                                     </>
                                 )}
@@ -797,7 +1040,7 @@ const WorkTeamManagement = () => {
                                 <button className={styles.saveButton} onClick={handleCreateTeam}>
                                     Update
                                 </button>
-                                <button className={styles.cancelButton} onClick={() => setIsAdding(false)}>
+                                <button className={styles.cancelButton} onClick={handleClosePopup}>
                                     Cancel
                                 </button>
                             </div>

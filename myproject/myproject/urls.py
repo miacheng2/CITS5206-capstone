@@ -5,7 +5,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,
                           PromoteLeaderView,addEvent, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
                           DetailedTeamViewSet, DetailedTeamMemberViewSet,MemberVolunteerHistoryAPIView,
-                          get_activities_for_event
+                          get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView
                           )
 
 router = DefaultRouter()
@@ -22,6 +22,13 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/detailed-teams/delete-multiple/', delete_multiple_teams, name='delete-multiple-teams'),
+    path('api/teams/<int:pk>/update-members/', update_team_members, name='update_team_members'),
+    path('api/password-reset-request/', PasswordResetRequestView.as_view(), name='password-reset-request'),
+    path('api/password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+
+
+
+    
 
     path('api/change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('api/promote-leader/', PromoteLeaderView.as_view(), name='promote_leader'),
@@ -39,6 +46,9 @@ urlpatterns = [
     path('api/save-volunteer-points/', save_volunteer_points, name='save-volunteer-points'),
 
     path('api/teams/<int:pk>/add-member/', add_member_to_team, name='add_member_to_team'),
+    path('api/teams/<int:pk>/remove-member/', remove_member_from_team, name='remove_member_from_team'),
+
+
 
 
     path('api/teams-with-members/', team_with_members, name='team-with-members'),

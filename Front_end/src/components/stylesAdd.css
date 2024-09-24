@@ -133,3 +133,11 @@ button:hover {
 .volunteer-table tr:nth-child(odd) td {
   background-color: #fff;
 }
+
+
+.team-buttons button.selected-team {
+  background-color: #780ed5;
+  color: white;
+  font-weight: bold;
+}
+

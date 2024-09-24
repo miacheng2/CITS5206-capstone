@@ -12,37 +12,59 @@ function AddVolunteerPoints() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
 
+  const fetchWithToken = async (url) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found, redirecting to login.');
+      // Handle the absence of token (e.g., redirect to login)
+      return null;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.status === 401) {
+      console.error('Unauthorized: Redirecting to login.');
+      // Handle unauthorized access (e.g., redirect to login)
+      return null;
+    }
+
+    return response.json();
+  };
+
   // Fetch users, members, teams, and events
   useEffect(() => {
-    fetch("http://localhost:8000/api/users/")
-      .then((response) => response.json())
-      .then((data) => setUser(data))
-      .catch((error) => console.error("Error fetching users:", error));
+    const fetchData = async () => {
+      try {
+        const usersData = await fetchWithToken("http://localhost:8000/api/users/");
+        if (usersData) setUser(usersData);
 
-    fetch("http://localhost:8000/api/team-members/")
-      .then((response) => response.json())
-      .then((data) => setMembers(data))
-      .catch((error) => console.error("Error fetching members:", error));
+        const membersData = await fetchWithToken("http://localhost:8000/api/team-members/");
+        if (membersData) setMembers(membersData);
 
-    fetch("http://localhost:8000/api/teams/")
-      .then((response) => response.json())
-      .then((data) => setTeams(data))
-      .catch((error) => console.error("Error fetching teams:", error));
+        const teamsData = await fetchWithToken("http://localhost:8000/api/teams/");
+        if (teamsData) setTeams(teamsData);
 
-    fetch("http://localhost:8000/api/events/")
-      .then((response) => response.json())
-      .then((data) => setEvents(data))
-      .catch((error) => console.error("Error fetching events:", error));
+        const eventsData = await fetchWithToken("http://localhost:8000/api/events/");
+        if (eventsData) setEvents(eventsData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Fetch activities for selected event
-  const fetchActivitiesForEvent = (eventId) => {
-    fetch(`http://localhost:8000/api/events/${eventId}/activities/`)
-      .then((response) => response.json())
-      .then((data) => {
-        setActivities(data);
-      })
-      .catch((error) => console.error("Error fetching activities:", error));
+  const fetchActivitiesForEvent = async (eventId) => {
+    const activitiesData = await fetchWithToken(`http://localhost:8000/api/events/${eventId}/activities/`);
+    if (activitiesData) {
+      setActivities(activitiesData);
+    }
   };
 
   // fliter user by search query
@@ -85,18 +107,28 @@ function AddVolunteerPoints() {
 
   const handleInputChange = (field, value) => {
     if (field === "startTime" || field === "endTime") {
+      // Correct the Date formatting
       const start = new Date(`1970-01-01T${selectedMember.startTime}`);
       const end = new Date(`1970-01-01T${selectedMember.endTime}`);
-      const hours = (end - start) / (1000 * 60 * 60);
-
+  
+      // Calculate total time difference in milliseconds
+      const timeDifference = end - start;
+  
+      // Convert the time difference into hours and minutes
+      const totalHours = Math.floor(timeDifference / (1000 * 60 * 60)); // Extract hours
+      const totalMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)); // Extract minutes
+  
+      // Store the formatted result in the same hours variable
+      const hours = `${totalHours} hours ${totalMinutes} minutes`;
+  
       // Get the selected event to determine points and hours
       const selectedEvent = maintenanceEvents.find(
         (event) => event.name === selectedMember.maintenanceEvent
       );
-
+  
       if (selectedEvent) {
         const isOnWaterEvent = selectedEvent.event_type === "on_water";
-        const points = isOnWaterEvent ? 20 : Math.floor(hours * (20 / 3)); // 20 points for 3 hours for off-water
+        const points = isOnWaterEvent ? 20 : Math.floor(totalHours * (20 / 3)); // 20 points for 3 hours for off-water
         const hoursToSet = isOnWaterEvent ? 0 : hours; // Set hours to 0 for on-water events
 
         setSelectedMember((prevState) => ({
@@ -145,7 +177,7 @@ function AddVolunteerPoints() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedMember) {
       setSelectedMember((prevState) => ({
         ...prevState,
@@ -178,22 +210,34 @@ function AddVolunteerPoints() {
         created_by: selectedAdmin.id,
       };
 
-      fetch("http://localhost:8000/api/save-volunteer-points/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Saved details:", data);
-          alert("Volunteer points saved successfully!");
-        })
-        .catch((error) => {
-          console.error("Error saving data:", error);
-          alert("Failed to save volunteer points.");
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found, redirecting to login.');
+          return;
+        }
+
+        const response = await fetch("http://localhost:8000/api/save-volunteer-points/", {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${token}`, // Add the Authorization header
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
         });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log("Saved details:", responseData);
+          alert("Volunteer points saved successfully!");
+        } else {
+          console.error("Failed to save volunteer points:", response.statusText);
+          alert("Failed to save volunteer points.");
+        }
+      } catch (error) {
+        console.error("Error saving data:", error);
+        alert("Failed to save volunteer points.");
+      }
     } else {
       console.log("Please select a member");
     }
@@ -208,12 +252,21 @@ function AddVolunteerPoints() {
       {/* Team Buttons */}
       <div className="team-buttons">
         {maintenanceTeams.map((team) => (
-          <button key={team.name} onClick={() => handleTeamFilter(team.name)}>
-            {team.name}
-          </button>
-        ))}
-        <button onClick={() => handleTeamFilter("")}>All Teams</button>
-      </div>
+          <button
+          key={team.name}
+          onClick={() => handleTeamFilter(team.name)}
+          className={selectedTeam === team.name ? "selected-team" : ""}
+        >
+          {team.name}
+        </button>
+      ))}
+      <button
+        onClick={() => handleTeamFilter("")}
+        className={selectedTeam === "" ? "selected-team" : ""}
+      >
+        All Teams
+      </button>
+    </div>
 
       {/* Search Bar */}
       <input

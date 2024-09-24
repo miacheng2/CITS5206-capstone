@@ -1,10 +1,17 @@
 from time import timezone
 from rest_framework import viewsets  # viewsets
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny
+from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny,IsAdminUser
 from rest_framework.response import Response
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.hashers import make_password
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.http import urlsafe_base64_decode,urlsafe_base64_encode
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -12,6 +19,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.generics import UpdateAPIView
+from .utils import send_password_reset_email
 from rest_framework.decorators import api_view
 from .models import User, Team, TeamMember, Event, VolunteerPoints, Activity
 from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer,ActivitySerializer
@@ -39,7 +47,7 @@ from .serializers import (
 User = get_user_model()
 
 class RegisterView(APIView):
-    permission_classes = []
+    permission_classes = [AllowAny] 
 
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -60,6 +68,8 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
+    permission_classes = [AllowAny] 
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -72,9 +82,12 @@ class LoginView(APIView):
         if user is not None:
             # Generate JWT tokens for authenticated user
             refresh = RefreshToken.for_user(user)
+            user_role = user.user_type  # Retrieve user role from the user model
+            
             return Response({
                 'access': str(refresh.access_token),
                 'refresh': str(refresh),
+                'user_role': user_role  # Include the user role in the response
             }, status=status.HTTP_200_OK)
         
         # Return 401 Unauthorized for invalid credentials
@@ -133,12 +146,12 @@ class GetProfileView(APIView):
         except User.DoesNotExist:
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
-class IsAdmin(BasePermission):
+class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
-        return request.user and (request.user.is_staff or request.user.is_superuser)
+        return request.user and request.user.is_authenticated and request.user.user_type == 'admin'
 
 class CreateAdminUserView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def post(self, request):
         logger.debug(f"Request made by: {request.user.username}, Is superuser: {request.user.is_superuser}")
@@ -170,6 +183,7 @@ class CreateAdminUserView(APIView):
             return Response({"error": "Failed to create admin user"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def team_with_members(request):
     teams = Team.objects.prefetch_related('members').select_related('team_leader').all()
     data = []
@@ -184,11 +198,50 @@ def team_with_members(request):
         })
     return Response(data)
 
+@api_view(['POST'])
+def update_team_members(request, team_id):
+    try:
+        team = Team.objects.get(id=team_id)
+        members_data = request.data.get('members', [])
+        
+        # Assuming `members_data` is a list of Australian Sailing Numbers
+        members = TeamMember.objects.filter(australian_sailing_number__in=members_data)
+
+        # Update the team members
+        team.members.set(members)
+
+        return Response({"message": "Team members updated successfully"}, status=status.HTTP_200_OK)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['POST'])
+def remove_member_from_team(request, pk):
+    try:
+        team = Team.objects.get(pk=pk)
+    except Team.DoesNotExist:
+        return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    member_id = request.data.get('member')
+    if not member_id:
+        return Response({"error": "No member ID provided"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        member = TeamMember.objects.get(australian_sailing_number=member_id)
+        team.members.remove(member)  # Remove the member from the team
+    except TeamMember.DoesNotExist:
+        return Response({"error": f"Member with ID {member_id} not found"}, status=status.HTTP_404_NOT_FOUND)
+    
+    team.save()
+    serializer = DetailedTeamSerializer(team)
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 class TeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
     serializer_class = TeamMemberSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
     def list(self, request, *args, **kwargs):
         logger.debug(f"User: {request.user}, Authenticated: {request.user.is_authenticated}")
@@ -201,7 +254,7 @@ class DetailedTeamMemberViewSet(viewsets.ModelViewSet):
     queryset = TeamMember.objects.all()
     serializer_class = DetailedTeamMemberSerializer
     lookup_field = 'australian_sailing_number'
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     
 
     def create(self, request, *args, **kwargs):
@@ -214,20 +267,10 @@ class DetailedTeamMemberViewSet(viewsets.ModelViewSet):
 
 
 
-class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
-    serializer_class = EventSerializer
-    permission_classes = [AllowAny]
-
-class VolunteerPointsViewSet(viewsets.ModelViewSet):
-    queryset = VolunteerPoints.objects.all()
-    serializer_class = VolunteerPointsSerializer
-    permission_classes = [AllowAny]
-
 # from django.contrib.auth.models import User
 
 class UpdateProfileView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def put(self, request):
         try:
@@ -258,7 +301,7 @@ from django.contrib.auth.hashers import check_password
 # from django.contrib.auth.models import User
 
 class ChangePasswordView(APIView):
-    permission_classes = [AllowAny] # Allow All for now
+    permission_classes = [IsAuthenticated] # user only
 
     def put(self, request):
         current_password = request.data.get('current_password')
@@ -308,12 +351,13 @@ class PromoteLeaderView(APIView):
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
+    permission_classes = [IsAuthenticated] 
 
 
 class DetailedTeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = DetailedTeamSerializer
-    permission_classes = [AllowAny] 
+    permission_classes = [IsAuthenticated] 
 
 @api_view(['POST'])
 def create_team(request):
@@ -368,7 +412,13 @@ def delete_multiple_teams(request):
 
     return Response({"message": "Teams deleted successfully", "deleted_team_names": deleted_team_names}, status=status.HTTP_200_OK)
 
-
+def update_team_members(request, pk):
+    team = get_object_or_404(Team, pk=pk)
+    if request.method == 'POST':
+        members = request.POST.getlist('members')  # List of member IDs (australian_sailing_number)
+        team.members.set(members)  # Update team members (will replace the old members)
+        return JsonResponse({'status': 'success', 'message': 'Team members updated successfully.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 @api_view(['POST'])
 def add_member_to_team(request, pk):
@@ -392,10 +442,18 @@ def add_member_to_team(request, pk):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
+    permission_classes = [IsAuthenticated]  # to require authentication
+    
+    
+    
+
 
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
+    permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
+
+    
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -423,6 +481,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # get all members' point view
+@permission_classes([IsAuthenticated])  # to require authentication
 class AllMembersPointsAPIView(APIView):
     def get(self, request):
         # Custom annotation to get the financial year
@@ -461,7 +520,8 @@ class AllMembersPointsAPIView(APIView):
         
         return Response(results)
 
-# One member's history view
+# get all members' point view
+@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
 class MemberVolunteerHistoryAPIView(APIView):
     def get(self, request, uid):
         points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
@@ -481,6 +541,7 @@ class MemberVolunteerHistoryAPIView(APIView):
 
 # update volunteer point view
 @api_view(['POST'])
+@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
 def save_volunteer_points(request):
     serializer = VolunteerPointsSerializer(data=request.data)
     if serializer.is_valid():
@@ -488,8 +549,9 @@ def save_volunteer_points(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# add event point view
+# update volunteer point view
 @api_view(['POST'])
+@permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
 def addEvent(request):
     serializer = EventSerializer(data=request.data)
     if serializer.is_valid():
@@ -498,6 +560,7 @@ def addEvent(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
+@permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
 def import_csv(request):
     if request.method == 'POST' and request.FILES.get('file'):
         file = request.FILES['file']
@@ -585,8 +648,47 @@ def import_csv(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated,IsAdminUser])
 def get_activities_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity
     serializer = ActivitySerializer(activities, many=True)
     return Response(serializer.data)
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, uidb64, token):
+        try:
+            uid = urlsafe_base64_decode(uidb64).decode()
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        token_generator = PasswordResetTokenGenerator()
+        if user and token_generator.check_token(user, token):
+            new_password = request.data.get('new_password')
+            if not new_password:
+                return Response({'detail': 'New password is required'}, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(new_password)
+            user.save()
+            return Response({'detail': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Invalid token or user ID.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'detail': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(email=email)
+            send_password_reset_email(user, request)
+            return Response({'detail': 'Password reset link sent to email.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'detail': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        

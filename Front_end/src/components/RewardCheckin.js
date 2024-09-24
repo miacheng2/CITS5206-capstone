@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 import './stylesRewardCheckin.css';
 
 function RewardCheckin() {
@@ -8,26 +10,81 @@ function RewardCheckin() {
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
   const [maintenanceTeams, setTeams] = useState([]); // To store teams data
   const currentYear = new Date().getFullYear(); // Get the current year
+  const navigate = useNavigate(); // Initialize navigate
 
+  // Function to fetch members with authorization handling
+  const fetchMembers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8000/api/team-members/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login");
+        } else {
+          throw new Error("Failed to fetch members.");
+        }
+      }
+
+      const data = await response.json();
+      setMembers(data);
+    } catch (error) {
+      console.error("Error fetching members data:", error);
+      alert("Failed to fetch members. Please try again later.");
+    }
+  };
+
+  // Function to fetch teams with authorization handling
+  const fetchTeams = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/login");
+        return;
+      }
+
+      const response = await fetch("http://localhost:8000/api/teams/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login");
+        } else {
+          throw new Error("Failed to fetch teams.");
+        }
+      }
+
+      const data = await response.json();
+      setTeams(data);
+    } catch (error) {
+      console.error("Error fetching teams:", error);
+      alert("Failed to fetch teams. Please try again later.");
+    }
+  };
+
+  // Use effect to fetch members and teams data
   useEffect(() => {
-    // Fetch members
-    fetch("http://localhost:8000/api/team-members/")
-      .then((response) => response.json())
-      .then((data) => {
-        setMembers(data);
-      })
-      .catch((error) => console.error("Error fetching members data:", error));
+    fetchMembers();
+    fetchTeams();
   }, []);
 
-  useEffect(() => {
-    // Fetch teams
-    fetch("http://localhost:8000/api/teams/")
-      .then((response) => response.json())
-      .then((data) => {
-        setTeams(data);
-      })
-      .catch((error) => console.error("Error fetching teams:", error));
-  }, []);
+
 
   useEffect(() => {
     setFilteredMembers(
