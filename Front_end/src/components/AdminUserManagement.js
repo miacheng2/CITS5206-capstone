@@ -43,10 +43,9 @@ const AdminUserManagement = () => {
 
     return (
         <div className={styles.container}>
-            <h2>Admin Management</h2>
 
             <div className={styles.feature}>
-                <h2>Create Admin User or Team Leader</h2>
+                <h2>Create Admin or Team Leader</h2>
                 <form onSubmit={handleSubmit} className={styles.form}>
                     <input
                         name="username"
