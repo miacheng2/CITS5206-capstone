@@ -36,6 +36,8 @@ function ChangePassword() {
                 setPasswordSuccessMessage("Password changed successfully.");
                 setPasswordErrorMessage('');
                 setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Clear the form
+                localStorage.removeItem('token');  // Remove the JWT token
+                window.location.href = '/login';   // Redirect to login page
             }
         } catch (error) {
             setPasswordErrorMessage("Failed to change password. Please check your current password and try again.");
