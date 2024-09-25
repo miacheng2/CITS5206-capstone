@@ -69,7 +69,7 @@
 }
 
 .homepage-card:hover .homepage-card-content {
-  opacity: 0.5; /* Slightly fade the content but keep text readable */
+  opacity: 0.9; /* Slightly fade the content but keep text readable */
 }
 
 .homepage-card:hover .homepage-card-hover {

@@ -141,3 +141,7 @@ button:hover {
   font-weight: bold;
 }
 
+td>button:last-child {
+  background-color: #2332ad;
+  color: #fff;
+}
