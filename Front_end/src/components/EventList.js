@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddEventForm from "./AddEventForm";
 import Modal from "./Modal";
+import './styles/AddEventForm.css';
 import "./event.css";
 
 function EventList() {
