@@ -42,6 +42,7 @@ function EventList() {
     fetchEvents();
   }, [navigate]);
 
+  console.log("get events:", events);
   // Toggle modals
   const toggleAddEventModal = () => setShowAddEventModal(!showAddEventModal);
 
