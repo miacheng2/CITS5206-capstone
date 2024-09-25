@@ -1,48 +1,23 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-/Front_end/node_modules/
-
-/build/
-/dist/
-*.log
-*.lock
-# testing
-/coverage
-
-# production
-/build
-
-#venv
-venv/
-
-
-
-# misc
+.idea
+*.pyc
+*~
+db.sqlite3
+.sass-cache/
+celerybeat-schedule
+nyc_volunteer_mgmt/localsettings.py
+nyc_volunteer_mgmt/local.py
+static_root/
+node_modules/
+openapitools.json
+media/
+docs/_build
+_dist/
+.env
+.env.production
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.direnv
+.envrc
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Ignore virtual environment
-venv/
-node_modules
-
-# Ignore the database file
-myproject/db.sqlite3
-
-
-# Byte-compiled files
-__pycache__/
-
-
-
-# Cython debug symbols
-cython_debug/
-
-# Migrations folder
-myproject/myapp/migrations/__pycache__/
+# uncomment these lines after setting up the front-end build pipeline in dev and production
+# static/css/
+# static/js/
