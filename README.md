@@ -127,6 +127,7 @@ python manage.py runserver
 
 # Step 6:Run the frontend/open second terminal and Navigate to the Front_end/ directory.
 cd Front_end
+npm install
 npm start
 
 ```
