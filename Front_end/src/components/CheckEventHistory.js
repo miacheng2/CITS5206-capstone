@@ -1,77 +1,92 @@
-// src/components/CheckEventHistory.js
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api";
-import { useParams, useNavigate } from "react-router-dom";
+import ConfirmationModal from "./ConfirmationModal"; // Import the confirmation modal component
+import "./EventDetailsModal.css"; // Import CSS for the table
 
 function CheckEventHistory() {
   const [events, setEvents] = useState([]);
+  const [filterName, setFilterName] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(null); // Track which event is being deleted
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Function to fetch events with authorization
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("token"); // Get the token from localStorage
+        const token = localStorage.getItem("token");
         if (!token) {
-          // If no token, redirect to login
           console.error("No token found, redirecting to login.");
-          navigate("/login"); // Redirect to login page
-          return; // Exit the function
+          navigate("/login");
+          return;
         }
 
-        // Fetch events from the backend with the Authorization header
         const response = await api.get("events/", {
           headers: {
-            Authorization: `Bearer ${token}`, // Add the Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
 
-        // Update state with the fetched events
-        console.log("Event:", response.data);
         setEvents(response.data);
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          // Handle 401 Unauthorized by redirecting to login
           console.error("Unauthorized: Redirecting to login.");
           navigate("/login");
         } else {
-          // Handle other errors (e.g., network issues, server errors)
-          console.error("There was an error fetching the events!", error);
+          console.error("Error fetching events!", error);
           alert("Failed to fetch events. Please try again later.");
         }
       }
     };
 
-    // Call the fetchEvents function
     fetchEvents();
-  }, [navigate]); // Add navigate as a dependency
+  }, [navigate]);
 
-  const handleDelete = async (eventId) => {
-    // Call API to delete the event
+  // Filter events by name and month
+  const filteredEvents = events.filter((event) => {
+    const matchesName = event.name.toLowerCase().includes(filterName.toLowerCase());
+    const matchesMonth = filterMonth
+      ? new Date(event.date).getMonth() + 1 === parseInt(filterMonth)
+      : true;
+    return matchesName && matchesMonth;
+  });
+
+  // Function to handle opening the confirmation modal
+  const openConfirmationModal = (eventId) => {
+    setSelectedEventId(eventId);
+    setIsModalOpen(true);
+  };
+
+  // Handle confirming deletion
+  const handleDeleteConfirm = async () => {
     try {
-      const token = localStorage.getItem("token"); // Get the token from localStorage
+      const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
       }
 
-      await api.delete(`events/${eventId}/`, {
+      await api.delete(`events/${selectedEventId}/`, {
         headers: {
-          Authorization: `Bearer ${token}`, // Add the Authorization header
+          Authorization: `Bearer ${token}`,
         },
       });
 
-      // Remove event from the state after successful deletion
-      setEvents(events.filter((event) => event.id !== eventId));
-      console.log("Event deleted:", eventId);
+      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== selectedEventId));
+      console.log("Event deleted:", selectedEventId);
     } catch (error) {
       console.error("There was an error deleting the event!", error);
-      if (error.response && error.response.status === 401) {
-        console.error("Unauthorized: Redirecting to login.");
-        navigate("/login");
-      } else {
-        alert("Failed to delete event. Please try again later.");
-      }
+      alert("Failed to delete event. Please try again later.");
+    } finally {
+      setIsModalOpen(false); // Close the modal after deletion
+      setSelectedEventId(null); // Reset the selected event
     }
+  };
+
+  // Handle cancelling deletion
+  const handleDeleteCancel = () => {
+    setIsModalOpen(false);
+    setSelectedEventId(null);
   };
 
   return (
@@ -84,34 +99,92 @@ function CheckEventHistory() {
         </div>
       </header>
 
-      <section className="events-list">
-        {events.length > 0 ? (
-          <ul>
-            {events.map((event) => (
-              <li key={event.id}>
-                <h3>{event.name}</h3>
-                <p>Date: {event.date}</p>
-                <p>Team Leader: {event.created_by}</p>
-                <p>Activities:</p>
-                {event.activities && event.activities.length > 0 ? (
+      {/* Search and Filter Controls */}
+      <div className="filter-controls">
+        <input
+          type="text"
+          placeholder="Search by event name"
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
+        />
+        <select
+          value={filterMonth}
+          onChange={(e) => setFilterMonth(e.target.value)}
+        >
+          <option value="">All Months</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+
+      {/* Events Table */}
+      <table className="event-table">
+        <thead>
+          <tr>
+            <th>Event Name</th>
+            <th>Date</th>
+            <th>Event Type</th>
+            <th>Created By</th> 
+            <th>Activities</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredEvents.length > 0 ? (
+            filteredEvents.map((event) => (
+              <tr key={event.id}>
+                <td>{event.name}</td>
+                <td>{event.date}</td>
+                <td>{event.event_type}</td> {/* Display the event type */}
+                <td>{event.created_by.username}</td> {/* Display the username */}
+                <td>
                   <ul>
-                    {event.activities.map((activity) => (
-                      <li key={activity.id}>{activity.name}</li>
-                    ))}
+                    {event.activities && event.activities.length > 0 ? (
+                      event.activities.map((activity) => (
+                        <li key={activity.id}>{activity.name}</li>
+                      ))
+                    ) : (
+                      <li>No activities</li>
+                    )}
                   </ul>
-                ) : (
-                  <p>No activities for this event.</p>
-                )}
-                <button onClick={() => handleDelete(event.id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No events found.</p>
-        )}
-      </section>
+                </td>
+                <td>
+                  <button onClick={() => openConfirmationModal(event.id)}>Delete</button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="6">
+                <div className="no-events-wrapper">
+                  <p className="no-events-message">No events found.</p>
+                </div>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        message="Are you sure you want to delete this event?"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }
 
 export default CheckEventHistory;
+

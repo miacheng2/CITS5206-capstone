@@ -1,84 +1,54 @@
 import React, { useState, useEffect } from "react";
-import api from "../api";
 import { useNavigate } from "react-router-dom";
 import AddEventForm from "./AddEventForm";
 import Modal from "./Modal";
-import EventDetailsModal from "./EventDetailsModal"; // Import EventDetailsModal
-import "./event.css"; // CSS file for styling
+import "./event.css";
 
 function EventList() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [showAddEventModal, setShowAddEventModal] = useState(false); // Modal for AddEventForm
-  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false); // Modal for EventDetailsModal
   const [selectedEvent, setSelectedEvent] = useState(null); // To track the event being edited or deleted
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem("token"); // Get the token from localStorage
+        const token = localStorage.getItem('token');
         if (!token) {
-          throw new Error("No token found");
+          throw new Error('No token found');
         }
 
-        const response = await fetch("http://localhost:8000/api/events/", {
+        const response = await fetch('http://localhost:8000/api/events/', {
           headers: {
-            Authorization: `Bearer ${token}`, // Set the Authorization header
-            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
           },
         });
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched events:", data);
           setEvents(data);
         } else {
-          console.error(
-            "Failed to fetch events:",
-            response.status,
-            response.statusText
-          );
+          console.error('Failed to fetch events:', response.status, response.statusText);
           if (response.status === 401) {
-            console.error("Unauthorized: Redirecting to login.");
-            window.location.href = "/login"; // Redirect to login if unauthorized
+            window.location.href = '/login';
           }
         }
       } catch (error) {
-        console.error("Error fetching events:", error);
+        console.error('Error fetching events:', error);
       }
     };
 
-    // Call the fetchEvents function
     fetchEvents();
-  }, [navigate]); // Add navigate as a dependency
+  }, [navigate]);
 
   console.log("get events:", events);
   // Toggle modals
   const toggleAddEventModal = () => setShowAddEventModal(!showAddEventModal);
-  const toggleEventDetailsModal = () =>
-    setShowEventDetailsModal(!showEventDetailsModal);
 
-  // Handle editing an event
-  const handleEdit = (event) => {
-    setSelectedEvent(event); // Set the event to be edited
-    console.log("Edit event:", event);
-    // Add further logic here to edit the event (e.g., open a form or modal for editing)
-  };
-
-  // Handle deleting an event
-  const handleDelete = (eventId) => {
-    // Confirmation prompt before deleting
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      api
-        .delete(`events/${eventId}/`)
-        .then(() => {
-          setEvents(events.filter((event) => event.id !== eventId)); // Remove event from state
-          console.log("Event deleted:", eventId);
-        })
-        .catch((error) => {
-          console.error("There was an error deleting the event!", error);
-        });
-    }
+  // Navigate to event history page
+  const goToEventHistory = () => {
+    navigate("/event-history"); // Navigate to the event history page
   };
 
   return (
@@ -102,7 +72,7 @@ function EventList() {
         </div>
 
         {/* Event History Card */}
-        <div className="card" onClick={toggleEventDetailsModal}>
+        <div className="card" onClick={goToEventHistory}>
           <img src="nycimg4.jpg" alt="Events History" />
           <h3>Events History</h3>
           <button className="learn-more">Learn more</button>
@@ -112,17 +82,6 @@ function EventList() {
       {/* Modal for Adding New Event */}
       <Modal isOpen={showAddEventModal} onClose={toggleAddEventModal}>
         <AddEventForm />
-      </Modal>
-
-      {/* Modal for Event History (EventDetailsModal) */}
-      <Modal isOpen={showEventDetailsModal} onClose={toggleEventDetailsModal}>
-        <EventDetailsModal
-          isOpen={showEventDetailsModal}
-          onClose={toggleEventDetailsModal}
-          events={events} // Pass the events data
-          onEdit={handleEdit} // Pass the edit handler
-          onDelete={handleDelete} // Pass the delete handler
-        />
       </Modal>
     </div>
   );
