@@ -11,32 +11,33 @@ function CheckEventHistory() {
     // Function to fetch events with authorization
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem('token'); // Get the token from localStorage
+        const token = localStorage.getItem("token"); // Get the token from localStorage
         if (!token) {
           // If no token, redirect to login
-          console.error('No token found, redirecting to login.');
-          navigate('/login'); // Redirect to login page
+          console.error("No token found, redirecting to login.");
+          navigate("/login"); // Redirect to login page
           return; // Exit the function
         }
 
         // Fetch events from the backend with the Authorization header
-        const response = await api.get('events/', {
+        const response = await api.get("events/", {
           headers: {
-            'Authorization': `Bearer ${token}`, // Add the Authorization header
+            Authorization: `Bearer ${token}`, // Add the Authorization header
           },
         });
 
         // Update state with the fetched events
+        console.log("Event:", response.data);
         setEvents(response.data);
       } catch (error) {
         if (error.response && error.response.status === 401) {
           // Handle 401 Unauthorized by redirecting to login
-          console.error('Unauthorized: Redirecting to login.');
-          navigate('/login');
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login");
         } else {
           // Handle other errors (e.g., network issues, server errors)
-          console.error('There was an error fetching the events!', error);
-          alert('Failed to fetch events. Please try again later.');
+          console.error("There was an error fetching the events!", error);
+          alert("Failed to fetch events. Please try again later.");
         }
       }
     };
@@ -48,14 +49,14 @@ function CheckEventHistory() {
   const handleDelete = async (eventId) => {
     // Call API to delete the event
     try {
-      const token = localStorage.getItem('token'); // Get the token from localStorage
+      const token = localStorage.getItem("token"); // Get the token from localStorage
       if (!token) {
-        throw new Error('No token found');
+        throw new Error("No token found");
       }
 
       await api.delete(`events/${eventId}/`, {
         headers: {
-          'Authorization': `Bearer ${token}`, // Add the Authorization header
+          Authorization: `Bearer ${token}`, // Add the Authorization header
         },
       });
 
@@ -65,10 +66,10 @@ function CheckEventHistory() {
     } catch (error) {
       console.error("There was an error deleting the event!", error);
       if (error.response && error.response.status === 401) {
-        console.error('Unauthorized: Redirecting to login.');
-        navigate('/login');
+        console.error("Unauthorized: Redirecting to login.");
+        navigate("/login");
       } else {
-        alert('Failed to delete event. Please try again later.');
+        alert("Failed to delete event. Please try again later.");
       }
     }
   };
