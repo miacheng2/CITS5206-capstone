@@ -1,15 +1,9 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 import styles from './styles/Navbar.module.css';
 
 function Navbar({ logout }) {
-    const navigate = useNavigate();
-
-    // Define the handleChangePassword function
-    const handleChangePassword = () => {
-        navigate('/change-password');
-    };
 
     return (
         <div className={styles.navbarOutter}>
@@ -29,16 +23,9 @@ function Navbar({ logout }) {
                 </ul>
             </nav>
             <div className={styles.leftDiv}>
-                <button
-                    className={styles.passwordButton}
-                    onClick={handleChangePassword}
-                >
-                    <b>Change Password</b>
-                </button>
-
-                <button
-                    className={styles.logoutButton}
-                    onClick={logout}
+                <button 
+                    className={styles.logoutButton} 
+                    onClick={logout}  
                 >
                     <b>Logout</b>
                 </button>
