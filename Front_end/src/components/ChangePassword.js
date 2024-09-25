@@ -1,80 +1,45 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import styles from './styles/ChangePassword.module.css';
+import api from '../api';
 
 function ChangePassword() {
-    const [passwordData, setPasswordData] = useState({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-    const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
-    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
+    const [oldPassword, setOldPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
-    const handlePasswordChange = (event) => {
-        const { name, value } = event.target;
-        setPasswordData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handlePasswordSubmit = async (event) => {
-        event.preventDefault();
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setPasswordErrorMessage('New password and confirm password do not match.');
-            return;
-        }
-        try {
-            const response = await axios.put('http://localhost:8000/api/change-password/', {
-                current_password: passwordData.currentPassword,
-                new_password: passwordData.newPassword
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
+    const changePassword = () => {
+        setMessage('');
+        setError('');
+        api.put('change-password/', { old_password: oldPassword, new_password: newPassword })
+            .then(response => {
+                setMessage('Password changed successfully');
+                setOldPassword('');
+                setNewPassword('');
+            })
+            .catch(error => {
+                console.error('Error changing password:', error.response ? error.response.data : error.message);
+                setError('There was an error changing the password');
             });
-
-            if (response.status === 200) {
-                setPasswordSuccessMessage("Password changed successfully.");
-                setPasswordErrorMessage('');
-                setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' }); // Clear the form
-            }
-        } catch (error) {
-            setPasswordErrorMessage("Failed to change password. Please check your current password and try again.");
-            console.error('Error:', error.response ? error.response.data : error.message);
-        }
     };
 
     return (
-        <div className={styles.container}>
+        <div>
             <h2>Change Password</h2>
-            <form onSubmit={handlePasswordSubmit} className={styles.form}>
-                <input
-                    name="currentPassword"
-                    type="password"
-                    placeholder="Current Password"
-                    value={passwordData.currentPassword}
-                    onChange={handlePasswordChange}
-                    required
-                />
-                <input
-                    name="newPassword"
-                    type="password"
-                    placeholder="New Password"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordChange}
-                    required
-                />
-                <input
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="Confirm New Password"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordChange}
-                    required
-                />
-                <button type="submit">Change Password</button>
-            </form>
-            {passwordSuccessMessage && <p className={styles.successMessage}>{passwordSuccessMessage}</p>}
-            {passwordErrorMessage && <p className={styles.errorMessage}>{passwordErrorMessage}</p>}
+            <input 
+                type="password" 
+                placeholder="Old Password" 
+                value={oldPassword} 
+                onChange={(e) => setOldPassword(e.target.value)} 
+            />
+            <input 
+                type="password" 
+                placeholder="New Password" 
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+            />
+            <button onClick={changePassword}>Change Password</button>
+            {message && <p style={{ color: 'green' }}>{message}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );
 }

@@ -149,11 +149,8 @@ td>button:last-child {
     border-radius: 20px;
     background-color: #fff;
     width: 1280px;
+    margin: 20em auto;
     padding: 1em;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
 }
 
 .popupContent {

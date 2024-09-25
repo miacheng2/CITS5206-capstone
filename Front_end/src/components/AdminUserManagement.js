@@ -1,42 +1,117 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styles from './styles/AdminUserManagement.module.css';
 
-const AdminUserManagement = () => {
-    const [user, setUser] = useState({
+const AdminUserManagement = ({ userProfile }) => {
+    const [createUser, setCreateUser] = useState({
         username: '',
         password: '',
-        email: '',
-        role: 'admin' 
+        email: ''
+    });
+    const [promoteLeader, setPromoteLeader] = useState({
+        username: '',
+        email: ''
+    });
+
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
     });
 
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
     const [createErrorMessage, setCreateErrorMessage] = useState('');
+    const [editSuccessMessage, setEditSuccessMessage] = useState('');
+    const [editErrorMessage, setEditErrorMessage] = useState('');
+    const [passwordSuccessMessage, setPasswordSuccessMessage] = useState('');
+    const [passwordErrorMessage, setPasswordErrorMessage] = useState('');
 
-    const handleInputChange = (event) => {
+    useEffect(() => {
+        if (promoteLeader.username || promoteLeader.email) {
+            setEditErrorMessage('');
+        }
+    }, [promoteLeader]);
+
+    // const fetchProfile = async () => {
+    //     try {
+    //         const response = await axios.get('http://localhost:8000/api/get-profile/');
+    //         setEditErrorMessage('');
+    //     } catch (error) {
+    //         console.error('Failed to fetch profile:', error.response ? error.response.data : error.message);
+    //         setEditErrorMessage('Failed to load profile information.');
+    //     }
+    // };
+
+    const handleCreateInputChange = (event) => {
         const { name, value } = event.target;
-        setUser(prev => ({ ...prev, [name]: value }));
+        setCreateUser(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    const handlePromoteLeaderChange = (event) => {
+        const { name, value } = event.target;
+        setPromoteLeader(prev => ({ ...prev, [name]: value }));
+    };
+    const handlePasswordChange = (event) => {
+        const { name, value } = event.target;
+        setPasswordData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleCreateSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8000/api/register/', {
-                username: user.username,
-                password: user.password,
-                email: user.email,
-                user_type: user.role,  // Use the role selected (either 'admin' or 'team_leader')
+            const response = await axios.post('http://localhost:8000/api/create-admin/', {
+                username: createUser.username,
+                password: createUser.password,
+                email: createUser.email,
             });
 
             if (response.status === 201) {
-                setCreateSuccessMessage(`${user.role === 'admin' ? 'Admin' : 'Team leader'} user created successfully!`);
+                setCreateSuccessMessage('Admin user created successfully!');
                 setCreateErrorMessage('');
-                setUser({ username: '', password: '', email: '', role: 'admin' }); // Clear form fields
+                setCreateUser({ username: '', password: '', email: '' }); // Clear form fields
             }
         } catch (error) {
             setCreateSuccessMessage('');
-            const errorMsg = error.response?.data.detail || 'Failed to create user. Please try again.';
-            setCreateErrorMessage(`Error: ${errorMsg}`);
+            setCreateErrorMessage('Failed to create admin user. Please try again.');
+            console.error('Error:', error.response ? error.response.data : error.message);
+        }
+    };
+
+    const handlePromoteLeaderSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axios.post('http://localhost:8000/api/promote-leader/', promoteLeader);
+            setEditSuccessMessage(response.data.message);
+            setEditErrorMessage('');
+        } catch (error) {
+            setEditErrorMessage(error.response.data.error || 'An error occurred');
+            setEditSuccessMessage('');
+        }
+    };
+
+    const handlePasswordSubmit = async (event) => {
+        event.preventDefault();
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordErrorMessage('New password and confirm password do not match.');
+            return;
+        }
+
+        try {
+            const response = await axios.put('http://localhost:8000/api/change-password/', {
+                current_password: passwordData.currentPassword,
+                new_password: passwordData.newPassword
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                }
+            });
+    
+            if (response.status === 200) {
+                setPasswordSuccessMessage("Password changed successfully.");
+                setPasswordErrorMessage('');
+            }
+        } catch (error) {
+            setPasswordErrorMessage("Failed to change password. Please check your current password and try again.");
             console.error('Error:', error.response ? error.response.data : error.message);
         }
     };
@@ -45,46 +120,97 @@ const AdminUserManagement = () => {
         <div className={styles.container}>
             <h2>Admin Management</h2>
 
+            {/* Create Admin User Section */}
             <div className={styles.feature}>
-                <h2>Create Admin User or Team Leader</h2>
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <h2>Create Admin User</h2>
+                <form onSubmit={handleCreateSubmit} className={styles.form}>
                     <input
                         name="username"
                         type="text"
                         placeholder="Username"
-                        value={user.username}
-                        onChange={handleInputChange}
+                        value={createUser.username}
+                        onChange={handleCreateInputChange}
                         required
                     />
                     <input
                         name="password"
                         type="password"
                         placeholder="Password"
-                        value={user.password}
-                        onChange={handleInputChange}
+                        value={createUser.password}
+                        onChange={handleCreateInputChange}
                         required
                     />
                     <input
                         name="email"
                         type="email"
                         placeholder="Email"
-                        value={user.email}
-                        onChange={handleInputChange}
+                        value={createUser.email}
+                        onChange={handleCreateInputChange}
                         required
                     />
-                    <select
-                        name="role"
-                        value={user.role}
-                        onChange={handleInputChange}
-                        required
-                    >
-                        <option value="admin">Create Admin User</option>
-                        <option value="team_leader">Create Team Leader</option>
-                    </select>
-                    <button type="submit">Create User</button>
+                    <button type="submit">Create Admin</button>
                 </form>
                 {createSuccessMessage && <p className={styles.successMessage}>{createSuccessMessage}</p>}
                 {createErrorMessage && <p className={styles.errorMessage}>{createErrorMessage}</p>}
+            </div>
+
+            {/* PromoteLeader Section */}
+            <div className={styles.feature}>
+                <h2>Promote Leader</h2>
+                <form onSubmit={handlePromoteLeaderSubmit} className={styles.form}>
+                    <input
+                        name="username"
+                        type="text"
+                        placeholder="Username"
+                        value={promoteLeader.username}
+                        onChange={handlePromoteLeaderChange}
+                    />
+                    <p>Or</p>
+                    <input
+                        name="email"
+                        type="email"
+                        placeholder="Email"
+                        value={promoteLeader.email}
+                        onChange={handlePromoteLeaderChange}
+                    />
+                    <button type="submit">Promote Team Leader</button>
+                </form>
+                {editSuccessMessage && <p className={styles.successMessage}>{editSuccessMessage}</p>}
+                {editErrorMessage && <p className={styles.errorMessage}>{editErrorMessage}</p>}
+            </div>
+
+            {/* Change Password Section */}
+            <div className={styles.feature}>
+                <h2>Change Password</h2>
+                <form onSubmit={handlePasswordSubmit} className={styles.form}>
+                    <input
+                        name="currentPassword"
+                        type="password"
+                        placeholder="Current Password"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <input
+                        name="newPassword"
+                        type="password"
+                        placeholder="New Password"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <input
+                        name="confirmPassword"
+                        type="password"
+                        placeholder="Confirm New Password"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        required
+                    />
+                    <button type="submit">Change Password</button>
+                </form>
+                {passwordSuccessMessage && <p className={styles.successMessage}>{passwordSuccessMessage}</p>}
+                {passwordErrorMessage && <p className={styles.errorMessage}>{passwordErrorMessage}</p>}
             </div>
         </div>
     );
