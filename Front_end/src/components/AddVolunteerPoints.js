@@ -90,14 +90,9 @@ function AddVolunteerPoints() {
       const end = new Date(`1970-01-01T${selectedMember.endTime}`);
   
       // Calculate total time difference in milliseconds
-      const timeDifference = end - start;
+      const hours = (end - start) / (1000 * 60 * 60);
   
-      // Convert the time difference into hours and minutes
-      const totalHours = Math.floor(timeDifference / (1000 * 60 * 60)); // Extract hours
-      const totalMinutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60)); // Extract minutes
-  
-      // Store the formatted result in the same hours variable
-      const hours = `${totalHours} hours ${totalMinutes} minutes`;
+      
   
       // Get the selected event to determine points and hours
       const selectedEvent = maintenanceEvents.find(
@@ -106,7 +101,7 @@ function AddVolunteerPoints() {
   
       if (selectedEvent) {
         const isOnWaterEvent = selectedEvent.event_type === "on_water";
-        const points = isOnWaterEvent ? 20 : Math.floor(totalHours * (20 / 3)); // 20 points for 3 hours for off-water
+        const points = isOnWaterEvent ? 20 : Math.floor(hours * (20 / 3)); // 20 points for 3 hours for off-water
         const hoursToSet = isOnWaterEvent ? 0 : hours; // Set hours to 0 for on-water events
 
         setSelectedMember((prevState) => ({
@@ -211,6 +206,14 @@ function AddVolunteerPoints() {
 
   const handleTeamFilter = (team) => {
     setSelectedTeam(team);
+  };
+
+  const formatHoursAndMinutes = (decimalHours) => {
+    if (!decimalHours || isNaN(decimalHours)) return ""; // Handle cases where decimalHours is empty or not a number
+    const totalMinutes = Math.floor(decimalHours * 60); // Convert decimal hours to total minutes
+    const hours = Math.floor(totalMinutes / 60); // Extract hours
+    const minutes = totalMinutes % 60; // Extract remaining minutes
+    return `${hours} hours ${minutes} minutes`;
   };
 
   return (
@@ -362,7 +365,7 @@ function AddVolunteerPoints() {
               <td>
                 {selectedMember?.australian_sailing_number ===
                 member.australian_sailing_number
-                  ? selectedMember.volunteerHours
+                  ? formatHoursAndMinutes(selectedMember.volunteerHours)
                   : ""}
               </td>
               <td>
