@@ -165,7 +165,8 @@ function AddEventForm() {
         <div className="form-header">
           <h2>Event Form</h2>
         </div>
-        <form onSubmit={handleSubmit}>
+
+        <form onSubmit={handleSubmit} className="event-form">
           <div className="form-group">
             <label>Event Name:</label>
             <input
@@ -174,8 +175,10 @@ function AddEventForm() {
               value={formData.eventName}
               onChange={handleChange}
               required
+              className="form-input"
             />
           </div>
+
           <div className="form-group">
             <label>Date:</label>
             <input
@@ -184,8 +187,10 @@ function AddEventForm() {
               value={formData.date}
               onChange={handleChange}
               required
+              className="form-input"
             />
           </div>
+
           <div className="form-group">
             <label>Team Leader:</label>
             <select
@@ -193,6 +198,7 @@ function AddEventForm() {
               value={formData.teamLeader}
               onChange={handleChange}
               required
+              className="form-input"
             >
               <option value="">Select a Team Leader</option>
               {users.map((user) => (
@@ -202,6 +208,7 @@ function AddEventForm() {
               ))}
             </select>
           </div>
+
           <div className="form-group">
             <label>Event Type:</label>
             <select
@@ -209,6 +216,7 @@ function AddEventForm() {
               value={formData.eventType}
               onChange={handleChange}
               required
+              className="form-input"
             >
               <option value="">Select Event Type</option>
               <option value="on_water">On Water</option>
@@ -217,7 +225,7 @@ function AddEventForm() {
           </div>
 
           {formData.eventType === "on_water" && (
-            <div className="activities-group">
+            <div className="form-group activities-group">
               <label>Activities:</label>
               {formData.activities.map((activity, index) => (
                 <input
@@ -227,7 +235,7 @@ function AddEventForm() {
                   value={activity}
                   onChange={handleChange}
                   placeholder={`Activity ${index + 1}`}
-                  required
+                  className="form-input"
                 />
               ))}
               <button
@@ -242,6 +250,10 @@ function AddEventForm() {
 
           <button type="submit" className="submit-btn">Add Event</button>
         </form>
+
+
+
+
       </div>
     </div>
   );
