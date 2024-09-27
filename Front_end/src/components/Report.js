@@ -368,13 +368,22 @@ function VolunteerHistory() {
     <div className="volunteer-history-container">
       {/* Team Buttons */}
       <div className="team-buttons">
-        {maintenanceTeams.map((team) => (
-          <button key={team.id} onClick={() => handleTeamFilter(team.id)}>
-            {team.name}
+         {maintenanceTeams.map((team) => (
+        <button
+         key={team.id}
+          onClick={() => handleTeamFilter(team.id)}
+          className={selectedTeamId === team.id ? "team-btn selected" : "team-btn"}
+          >
+          {team.name}
           </button>
-        ))}
-        <button onClick={() => handleTeamFilter("")}>All Teams</button>
-      </div>
+          ))}
+        <button
+        onClick={() => handleTeamFilter("")}
+        className={selectedTeamId === "" ? "team-btn selected" : "team-btn"}
+        >
+        All Teams
+       </button>
+        </div>
       {/* Filter section */}
       <div className="filter-dropdowns-container">
         <div className="filter-group">
