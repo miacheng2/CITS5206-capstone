@@ -21,6 +21,8 @@ const WorkTeamManagement = () => {
     const [searchQuery, setSearchQuery] = useState('');  // Store the exact user input
 
     const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
+    const [loading, setLoading] = useState(false);
+
 
 
 
@@ -51,33 +53,33 @@ const WorkTeamManagement = () => {
 
     const fetchWithAuth = async (url, options = {}) => {
         const token = localStorage.getItem('token'); // Retrieve the token from localStorage
-        
+
         if (!token) {
             console.error('No token found in localStorage');
             throw new Error('No token found');
         }
-        
+
         const headers = {
             'Authorization': `Bearer ${token}`, // Add the Bearer token to the Authorization header
             'Content-Type': 'application/json',
             ...options.headers,
         };
-        
+
         const response = await fetch(url, {
             ...options,
             headers: headers,
         });
-    
+
         if (response.status === 401) {
             console.log('Unauthorized! Redirecting to login...');
             window.location.href = '/login'; // Redirect to the login page if unauthorized
         }
-    
+
         return response;
     };
-    
-    
-    
+
+
+
 
 
 
@@ -153,7 +155,7 @@ const WorkTeamManagement = () => {
             if (!token) {
                 throw new Error('No token found');
             }
-    
+
             const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
                 method: 'PUT',
                 headers: {
@@ -162,7 +164,7 @@ const WorkTeamManagement = () => {
                 },
                 body: JSON.stringify(editingMember),
             });
-    
+
             if (response.ok) {
                 alert('Member updated successfully!');
                 setIsModalOpen(false);
@@ -267,7 +269,37 @@ const WorkTeamManagement = () => {
         return csvRows.join('\n');
     };
 
+    useEffect(() => {
+        const savedTeamId = localStorage.getItem('selectedTeamId');
+        const isPopupOpen = localStorage.getItem('isPopupOpen') === 'true';
+
+        if (savedTeamId && isPopupOpen) {
+            const team = teams.find(t => t.id === parseInt(savedTeamId));
+            if (team) {
+                setSelectedTeam(team);
+            }
+        }
+    }, [teams]);
+
     const handleTeamCardClick = (team) => {
+        if (!team || !team.id) {
+            console.error("Invalid team or team ID:", team);
+            return;
+        }
+    
+        console.log("Selected team:", team);
+    
+        const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
+    
+        if (isAlreadySelected) {
+            setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
+            console.log("Removing team with ID:", team.id);
+        } else {
+            setSelectedTeams([...selectedTeams, team]);
+            console.log("Adding team with ID:", team.id);
+        }
+    };
+    const handleViewClick = (team) => {
         if (!team || !team.id) {
             console.error("Invalid team or team ID:", team);
             return;
@@ -275,19 +307,32 @@ const WorkTeamManagement = () => {
 
         console.log("Selected team:", team);
 
-
         const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
 
         if (isAlreadySelected) {
-
             setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
             console.log("Deleting team with ID:", team.id);
-        } else {
 
+            localStorage.removeItem('selectedTeamId');
+            localStorage.removeItem('isPopupOpen');
+
+     
+            setSelectedTeam(null);
+        } else {
             setSelectedTeams([...selectedTeams, team]);
             console.log("Adding team with ID:", team.id);
+
+            // store team ID  localStorage
+            localStorage.setItem('selectedTeamId', team.id);
+            localStorage.setItem('isPopupOpen', 'true');
+
+     
+            setSelectedTeam(team);
         }
+
+
     };
+
 
 
 
@@ -295,56 +340,96 @@ const WorkTeamManagement = () => {
         setSelectedTeam(null);
         setIsEditing(false);
         setEditedTeam(null);
+
+        localStorage.removeItem('selectedTeamId');
+        localStorage.removeItem('isPopupOpen');
         window.location.reload();
+
     };
+
+    const ClosePopup = () => {
+        setSelectedTeam(null);
+        setIsEditing(false);
+        setEditedTeam(null);
+        localStorage.removeItem('selectedTeamId');
+        localStorage.removeItem('isPopupOpen');
+      
+
+    };
+    useEffect(() => {
+        // loading
+        const handleInitialLoad = () => {
+            setLoading(true);
+            setTimeout(() => {
+                setLoading(false);
+            }, 1500);
+        };
+
+        window.addEventListener('load', handleInitialLoad);
+
+        return () => {
+            window.removeEventListener('load', handleInitialLoad);
+        };
+    }, []);
 
 
     const handleEditTeam = () => {
         setIsEditing(true);
     };
 
+    useEffect(() => {
+        const savedTeamId = localStorage.getItem('selectedTeamId');
+        const isPopupOpen = localStorage.getItem('isPopupOpen');
 
+        if (savedTeamId && isPopupOpen === 'true') {
+            // savedTeamId find team
+            const team = teams.find(t => t.id === parseInt(savedTeamId));
 
+            if (team) {
+                setSelectedTeam(team);  
+                setIsEditing(true);  
+            }
+        }
+    }, [teams]); 
 
 
     const handleAddMember = async () => {
-        if (!selectedMember) {
-            alert('Please select a member to add.');
-            return;
-        }
-    
+        setLoading(true); 
         try {
-            const token = localStorage.getItem('token');  // Get the token from localStorage
+            const token = localStorage.getItem('token');
             if (!token) {
                 throw new Error('No token found');
             }
-    
+
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/add-member/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     members: [...selectedTeam.members.map(m => m.australian_sailing_number), selectedMember]
                 }),
             });
-    
+
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-                alert('Member added successfully!');
-                handleClosePopup();
+                window.location.reload();
             } else {
                 const errorData = await response.json();
                 alert(`Failed to add member: ${JSON.stringify(errorData)}`);
+                setLoading(false); 
             }
         } catch (error) {
             console.error('Error adding member:', error);
-            alert('An error occurred while adding the member.');
+            setLoading(false); 
         }
     };
+
+ 
     
+
 
 
 
@@ -363,23 +448,23 @@ const WorkTeamManagement = () => {
             alert("No team selected to delete.");
             return;
         }
-    
+
         const confirmDelete = window.confirm(`Are you sure you want to delete the team "${selectedTeam.name}"?`);
         if (!confirmDelete) return;
-    
+
         try {
             const token = localStorage.getItem('token'); // Get the token from localStorage
             if (!token) {
                 throw new Error('No token found');
             }
-    
+
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,  // Set the Authorization header
                 },
             });
-    
+
             if (response.ok) {
                 alert('Team deleted successfully!');
                 setTeams((prevTeams) => prevTeams.filter((team) => team.id !== selectedTeam.id));
@@ -393,7 +478,7 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the team.');
         }
     };
-    
+
 
 
     const handleChange = (e) => {
@@ -408,23 +493,23 @@ const WorkTeamManagement = () => {
         setIsAdding(true);
     };
 
-   
+
 
     const handleRemoveSelectedTeams = async () => {
         if (selectedTeams.length === 0) {
             alert('Please select at least one team to delete.');
             return;
         }
-    
+
         const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
         if (!confirmDelete) return;
-    
+
         try {
             const token = localStorage.getItem('token');  // Get the token from localStorage
             if (!token) {
                 throw new Error('No token found');
             }
-    
+
             // Iterate over all selected teams and send delete requests
             for (const team of selectedTeams) {
                 const response = await fetch(`http://localhost:8000/api/teams/${team.id}/`, {
@@ -433,14 +518,14 @@ const WorkTeamManagement = () => {
                         'Authorization': `Bearer ${token}`,  // Add the Authorization header
                     },
                 });
-    
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
-    
+
             alert('Selected teams have been successfully deleted!');
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
@@ -449,11 +534,11 @@ const WorkTeamManagement = () => {
             alert('An error occurred while deleting the teams.');
         }
     };
-    
 
-    
 
-     const handleUpdateTeam = () => {
+
+
+    const handleUpdateTeam = () => {
         if (selectedTeam.name != "") {
             setNewTeam({
                 TeamName: selectedTeam.name,
@@ -489,7 +574,7 @@ const WorkTeamManagement = () => {
                     },
                     body: JSON.stringify(teamPayload),
                 });
-    
+
                 if (response.ok) {
                     const updatedTeam = await response.json();
                     alert('Team updated successfully!');
@@ -546,7 +631,7 @@ const WorkTeamManagement = () => {
         }
     
         try {
-            const token = localStorage.getItem('token');  // Get the token from localStorage
+            const token = localStorage.getItem('token');  // 从 localStorage 获取 token
             if (!token) {
                 throw new Error('No token found');
             }
@@ -554,33 +639,33 @@ const WorkTeamManagement = () => {
             const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-member/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
+                    'Authorization': `Bearer ${token}`,  // 设置 Authorization 头
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ member: selectedMember }),
+                body: JSON.stringify({ member: selectedMember }), // 发送要删除的成员ID
             });
     
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
                 alert('Member removed successfully!');
-                handleClosePopup();
+    
+                // 更新团队信息并保持弹出窗口状态
+                localStorage.setItem('selectedTeamId', selectedTeam.id);
+                localStorage.setItem('isPopupOpen', 'true'); // 保持弹出窗口打开
+    
+                // 刷新页面以反映更改
+                window.location.reload();
             } else {
                 const errorData = await response.json();
-                if (response.status === 401) {
-                    console.error('Unauthorized: Redirecting to login.');
-                    window.location.href = '/login';  // Redirect to login if unauthorized
-                } else {
-                    alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
-                }
+                alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
             }
         } catch (error) {
             console.error('Error removing member:', error);
             alert('An error occurred while removing the member.');
         }
     };
-
-
+    
 
 
 
@@ -595,7 +680,12 @@ const WorkTeamManagement = () => {
 
 
     return (
-        <>
+        <>{loading && (
+            <div className={styles.loadingOverlay}>
+                <div className={styles.loadingSpinner}></div>
+            </div>
+        )}
+            <div id="main-content" style={{ display: loading ? 'none' : 'block' }}>
             <div className={styles.container}>
                 <h1>NYC Work Team Management</h1>
                 <div className={styles.feature}>
@@ -627,23 +717,13 @@ const WorkTeamManagement = () => {
                                             readOnly
                                         />
                                         <h2>{team.name}</h2>
-                                        <button onClick={() => {
-                                            console.log('Team Object:', team);
-                                            if (team.teams && team.teams.length > 0) {
-                                                console.log('First Team in Teams:', team.teams[0]);
-                                                //console.log('Creation Date:', team.teams[0].creation_date); //  creation_date
-                                                //console.log('Last Modified Date:', team.teams[0].last_modified_date); // last_modified_date
-                                            } else {
-                                                console.warn('No teams available for this team.');
-                                            }
+                                        <button
+                                            onClick={() => handleViewClick(team)}
+                                        >
+                                            View
+                                        </button>
+                                        
 
-
-                                            setSelectedTeam({
-                                                ...team,
-                                                team_leader_name: team.team_leader || "No leader",
-
-                                            });
-                                        }}>View</button>
 
 
                                     </div>
@@ -666,6 +746,7 @@ const WorkTeamManagement = () => {
                         ) : (
                             <p>No teams available</p>
                         )}
+                    </div>
                     </div>
 
 
@@ -780,16 +861,13 @@ const WorkTeamManagement = () => {
                                         </form>
                                         <div className={styles.modalButtons}>
                                             <button onClick={handleEditSubmit}>Update</button>
-                                            <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+                                             <button onClick={ClosePopup}>
+                                            Cancel
+                                        </button>
                                         </div>
                                     </div>
                                 </div>
                             )}
-
-
-
-
-
 
 
 
@@ -885,9 +963,17 @@ const WorkTeamManagement = () => {
                                         <button className={styles.saveButton} onClick={handleAddMember}>
                                             Save
                                         </button>
-                                        <button className={styles.cancelButton} onClick={handleClosePopup}>
+                                        
+                                        <button
+                                            onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
+
+                                        >
+                                            Remove
+                                        </button>
+                                        <button className={styles.cancelButton} onClick={ClosePopup}>
                                             Cancel
                                         </button>
+                                        
                                     </>
                                 ) : (
                                     <>
@@ -899,9 +985,10 @@ const WorkTeamManagement = () => {
                                         >
                                             Delete Team Member
                                         </button>
-                                        <button onClick={handleClosePopup}>Close</button>
+                                        <button onClick={ClosePopup}>Close</button>
                                     </>
                                 )}
+                                
                             </div>
                         </div>
                     </div>
@@ -1047,9 +1134,11 @@ const WorkTeamManagement = () => {
                         </div>
                     </div>
                 </div>
+                
             )}
         </>
     );
+    
 };
 
 export default WorkTeamManagement;
