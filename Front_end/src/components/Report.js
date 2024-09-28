@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback,useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Bar, Line } from "react-chartjs-2";
 import {
@@ -47,6 +47,7 @@ function VolunteerHistory() {
   const handleMemberClick = (uid) => {
     navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
   };
+  const hasAlerted = useRef(false);
 
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
@@ -71,12 +72,25 @@ function VolunteerHistory() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
+        const userRole = localStorage.getItem('user_role');
         const token = localStorage.getItem("token");
+        
         if (!token) {
           console.error("No token found, redirecting to login.");
           navigate("/login");
           return;
         }
+        if (userRole !== 'admin') {
+          if (!hasAlerted.current) {
+              alert('Access denied: This section is for admin users only.');
+              hasAlerted.current = true; // Ensure alert is only shown once
+          }
+          console.error('Unauthorized: Admin role required.');
+          navigate('/login'); 
+          return;
+      }
+
+        
 
         const response = await fetch("http://localhost:8000/api/members-points-all/", {
           headers: {

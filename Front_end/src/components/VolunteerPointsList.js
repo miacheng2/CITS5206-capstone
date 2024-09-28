@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles.css'; 
 
 function VolunteerPointsList() {
     const navigate = useNavigate();
-    const hasAlerted = useRef(false);
+
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -14,17 +14,7 @@ function VolunteerPointsList() {
                     throw new Error('No token found');
                 }
         
-                const userRole = localStorage.getItem('user_role');
-        
-                if (userRole !== 'admin') {
-                    if (!hasAlerted.current) {
-                        alert('Access denied: This section is for admin users only.');
-                        hasAlerted.current = true; // Ensure alert is only shown once
-                    }
-                    console.error('Unauthorized: Admin role required.');
-                    navigate('/login');  // Use navigate instead of window.location.href
-                    return;
-                }
+            
         
                 const response = await fetch('http://localhost:8000/api/events/', {
                     headers: {
