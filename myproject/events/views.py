@@ -444,16 +444,11 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]  # to require authentication
     
-    
-    
-
-
+# get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
     permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
-
-    
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -479,6 +474,24 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
 
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False, methods=['get'], url_path='member-history/(?P<uid>[^/.]+)')
+    def member_volunteer_history(self, request, uid=None):
+        """Retrieve volunteer history for a specific member."""
+        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
+        history = [
+            {
+                "id": point.id,
+                "event_name": point.event.name,
+                "event_date": point.event.date,
+                "activity": point.activity.name if point.activity else None,
+                "points": int(point.points+0.5),
+                "hours": int(point.hours+0.5),
+                "created_by": point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # get all members' point view
 @permission_classes([IsAuthenticated])  # to require authentication
@@ -501,7 +514,7 @@ class AllMembersPointsAPIView(APIView):
             'financial_year'
         ).annotate(
             total_points=Sum('points'),
-            total_hours=Sum('hours', output_field=IntegerField())
+            total_hours=Sum('hours')
         ).order_by('name', 'financial_year')
         
         # Convert the queryset to a list of dictionaries
@@ -514,30 +527,11 @@ class AllMembersPointsAPIView(APIView):
                 "membership_category": data['member__membership_category'],
                 "teams": data['member__teams'],
                 "year": data['financial_year'],  # Use 'financial_year' instead of 'year'
-                "total_points": data['total_points'],
-                "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
+                "total_points": int(data['total_points']+0.5),
+                "total_hours": int(data['total_hours']+0.5) or 0  # Handle case where hours might be null
             })
         
         return Response(results)
-
-# get all members' point view
-@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
-class MemberVolunteerHistoryAPIView(APIView):
-    def get(self, request, uid):
-        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
-        history = [
-            {
-                 "id": point.id,
-                "event_name": point.event.name,
-                "event_date": point.event.date,
-                "activity": point.activity.name if point.activity else None,
-                "points": point.points,
-                "hours": point.hours,
-                "created_by":point.created_by.username
-            }
-            for point in points
-        ]
-        return Response(history)
 
 # update volunteer point view
 @api_view(['POST'])

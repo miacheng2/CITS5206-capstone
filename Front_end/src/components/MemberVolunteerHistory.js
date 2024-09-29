@@ -19,12 +19,11 @@ function MemberVolunteerHistory() {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/member-volunteer-history/${uid}/`,
+          `http://localhost:8000/api/volunteer-points/member-history/${uid}/`,
           {
             headers: {
               Authorization: `Bearer ${token}`, // Add the Authorization header
               "Content-Type": "application/json", // Added content-type header
-
             },
           }
         );
@@ -125,7 +124,6 @@ function MemberVolunteerHistory() {
           headers: {
             Authorization: `Bearer ${token}`, // Add the Authorization header
             "Content-Type": "application/json", // Added content-type header
-
           },
         }
       );
