@@ -1,5 +1,5 @@
 # models.py
-
+import math
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -125,16 +125,19 @@ class Event(models.Model):
 class VolunteerPoints(models.Model):
     member = models.ForeignKey(TeamMember, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    points = models.IntegerField()
-    hours = models.IntegerField(null=True, blank=True)  # Only for off-water events
+    points = models.FloatField()  # Allow decimal points for finer calculations
+    hours = models.FloatField(null=True, blank=True)  
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.event.event_type == 'off_water' and self.hours:
-            self.points = self.hours * 20/3  # 20 points for 3 hour
+            # Round time to the nearest 15 minutes
+            rounded_hours = round(self.hours * 4) / 4  # Round to nearest 15 mins (0.25 hours)
+            # Calculate points based on the rounded time
+            self.points = (20 / 3) * rounded_hours
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
-            self.points = 20  # Fixed points
-            self.hours = 0   # Set hours to zero for on-water events
+            self.points = 20  # Fixed points for on-water events
+            self.hours = 3  # Set hours to zero for on-water events
         super().save(*args, **kwargs)
