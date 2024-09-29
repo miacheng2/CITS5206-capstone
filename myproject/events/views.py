@@ -485,8 +485,8 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
                 "event_name": point.event.name,
                 "event_date": point.event.date,
                 "activity": point.activity.name if point.activity else None,
-                "points": point.points,
-                "hours": point.hours,
+                "points": int(point.points+0.5),
+                "hours": int(point.hours+0.5),
                 "created_by": point.created_by.username
             }
             for point in points
@@ -514,7 +514,7 @@ class AllMembersPointsAPIView(APIView):
             'financial_year'
         ).annotate(
             total_points=Sum('points'),
-            total_hours=Sum('hours', output_field=IntegerField())
+            total_hours=Sum('hours')
         ).order_by('name', 'financial_year')
         
         # Convert the queryset to a list of dictionaries
@@ -527,8 +527,8 @@ class AllMembersPointsAPIView(APIView):
                 "membership_category": data['member__membership_category'],
                 "teams": data['member__teams'],
                 "year": data['financial_year'],  # Use 'financial_year' instead of 'year'
-                "total_points": data['total_points'],
-                "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
+                "total_points": int(data['total_points']+0.5),
+                "total_hours": int(data['total_hours']+0.5) or 0  # Handle case where hours might be null
             })
         
         return Response(results)
