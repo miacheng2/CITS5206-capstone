@@ -444,16 +444,11 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]  # to require authentication
     
-    
-    
-
-
+# get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
     permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
-
-    
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -479,6 +474,24 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
 
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False, methods=['get'], url_path='member-history/(?P<uid>[^/.]+)')
+    def member_volunteer_history(self, request, uid=None):
+        """Retrieve volunteer history for a specific member."""
+        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
+        history = [
+            {
+                "id": point.id,
+                "event_name": point.event.name,
+                "event_date": point.event.date,
+                "activity": point.activity.name if point.activity else None,
+                "points": point.points,
+                "hours": point.hours,
+                "created_by": point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # get all members' point view
 @permission_classes([IsAuthenticated])  # to require authentication
@@ -519,25 +532,6 @@ class AllMembersPointsAPIView(APIView):
             })
         
         return Response(results)
-
-# get all members' point view
-@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
-class MemberVolunteerHistoryAPIView(APIView):
-    def get(self, request, uid):
-        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
-        history = [
-            {
-                 "id": point.id,
-                "event_name": point.event.name,
-                "event_date": point.event.date,
-                "activity": point.activity.name if point.activity else None,
-                "points": point.points,
-                "hours": point.hours,
-                "created_by":point.created_by.username
-            }
-            for point in points
-        ]
-        return Response(history)
 
 # update volunteer point view
 @api_view(['POST'])
