@@ -132,10 +132,7 @@ class VolunteerPoints(models.Model):
 
     def save(self, *args, **kwargs):
         if self.event.event_type == 'off_water' and self.hours:
-            # Round time to the nearest 15 minutes
-            rounded_hours = round(self.hours * 4) / 4  # Round to nearest 15 mins (0.25 hours)
-            # Calculate points based on the rounded time
-            self.points = (20 / 3) * rounded_hours
+            self.points = (20 / 3) * self.hours
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
             self.points = 20  # Fixed points for on-water events
