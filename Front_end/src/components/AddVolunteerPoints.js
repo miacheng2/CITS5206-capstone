@@ -13,22 +13,22 @@ function AddVolunteerPoints() {
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
 
   const fetchWithToken = async (url) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      console.error('No token found, redirecting to login.');
+      console.error("No token found, redirecting to login.");
       // Handle the absence of token (e.g., redirect to login)
       return null;
     }
 
     const response = await fetch(url, {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
 
     if (response.status === 401) {
-      console.error('Unauthorized: Redirecting to login.');
+      console.error("Unauthorized: Redirecting to login.");
       // Handle unauthorized access (e.g., redirect to login)
       return null;
     }
@@ -40,16 +40,24 @@ function AddVolunteerPoints() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersData = await fetchWithToken("http://localhost:8000/api/users/");
+        const usersData = await fetchWithToken(
+          "http://localhost:8000/api/users/"
+        );
         if (usersData) setUser(usersData);
 
-        const membersData = await fetchWithToken("http://localhost:8000/api/team-members/");
+        const membersData = await fetchWithToken(
+          "http://localhost:8000/api/team-members/"
+        );
         if (membersData) setMembers(membersData);
 
-        const teamsData = await fetchWithToken("http://localhost:8000/api/teams/");
+        const teamsData = await fetchWithToken(
+          "http://localhost:8000/api/teams/"
+        );
         if (teamsData) setTeams(teamsData);
 
-        const eventsData = await fetchWithToken("http://localhost:8000/api/events/");
+        const eventsData = await fetchWithToken(
+          "http://localhost:8000/api/events/"
+        );
         if (eventsData) setEvents(eventsData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -61,7 +69,9 @@ function AddVolunteerPoints() {
 
   // Fetch activities for selected event
   const fetchActivitiesForEvent = async (eventId) => {
-    const activitiesData = await fetchWithToken(`http://localhost:8000/api/events/${eventId}/activities/`);
+    const activitiesData = await fetchWithToken(
+      `http://localhost:8000/api/events/${eventId}/activities/`
+    );
     if (activitiesData) {
       setActivities(activitiesData);
     }
@@ -107,24 +117,24 @@ function AddVolunteerPoints() {
 
   const handleInputChange = (field, value) => {
     if (field === "startTime" || field === "endTime") {
-      // Correct the Date formatting
-      const start = new Date(`1970-01-01T${selectedMember.startTime}`);
-      const end = new Date(`1970-01-01T${selectedMember.endTime}`);
-  
+      const start = new Date(
+        `1970-01-01T${field === "startTime" ? value : selectedMember.startTime}`
+      );
+      const end = new Date(
+        `1970-01-01T${field === "endTime" ? value : selectedMember.endTime}`
+      );
       // Calculate total time difference in milliseconds
       const hours = (end - start) / (1000 * 60 * 60);
-  
-      
-  
       // Get the selected event to determine points and hours
       const selectedEvent = maintenanceEvents.find(
         (event) => event.name === selectedMember.maintenanceEvent
       );
-  
+
       if (selectedEvent) {
         const isOnWaterEvent = selectedEvent.event_type === "on_water";
-        const points = isOnWaterEvent ? 20 : Math.floor(hours * (20 / 3)); // 20 points for 3 hours for off-water
-        const hoursToSet = isOnWaterEvent ? 0 : hours; // Set hours to 0 for on-water events
+        const points = isOnWaterEvent ? 20 : (hours * (20 / 3)).toFixed(2);
+        // 20 points for 3 hours for off-water
+        const hoursToSet = isOnWaterEvent ? 3 : hours; // Set hours to 0 for on-water events
 
         setSelectedMember((prevState) => ({
           ...prevState,
@@ -174,6 +184,14 @@ function AddVolunteerPoints() {
 
   const handleSave = async () => {
     if (selectedMember) {
+      // Check for valid hours and points
+      if (
+        selectedMember.volunteerHours < 0 ||
+        selectedMember.volunteerPoints < 0
+      ) {
+        alert("Volunteer hours and points must be non-negative.");
+        return;
+      }
       setSelectedMember((prevState) => ({
         ...prevState,
         editTime: new Date().toLocaleString(),
@@ -206,27 +224,30 @@ function AddVolunteerPoints() {
       };
 
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          console.error('No token found, redirecting to login.');
+          console.error("No token found, redirecting to login.");
           return;
         }
 
-        const response = await fetch("http://localhost:8000/api/save-volunteer-points/", {
-          method: "POST",
-          headers: {
-            'Authorization': `Bearer ${token}`, // Add the Authorization header
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(data),
-        });
-
+        const response = await fetch(
+          "http://localhost:8000/api/save-volunteer-points/",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the Authorization header
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          }
+        );
         if (response.ok) {
-          const responseData = await response.json();
-          console.log("Saved details:", responseData);
           alert("Volunteer points saved successfully!");
         } else {
-          console.error("Failed to save volunteer points:", response.statusText);
+          console.error(
+            "Failed to save volunteer points:",
+            response.statusText
+          );
           alert("Failed to save volunteer points.");
         }
       } catch (error) {
@@ -256,20 +277,20 @@ function AddVolunteerPoints() {
       <div className="team-buttons">
         {maintenanceTeams.map((team) => (
           <button
-          key={team.name}
-          onClick={() => handleTeamFilter(team.name)}
-          className={selectedTeam === team.name ? "selected-team" : ""}
+            key={team.name}
+            onClick={() => handleTeamFilter(team.name)}
+            className={selectedTeam === team.name ? "selected-team" : ""}
+          >
+            {team.name}
+          </button>
+        ))}
+        <button
+          onClick={() => handleTeamFilter("")}
+          className={selectedTeam === "" ? "selected-team" : ""}
         >
-          {team.name}
+          All Teams
         </button>
-      ))}
-      <button
-        onClick={() => handleTeamFilter("")}
-        className={selectedTeam === "" ? "selected-team" : ""}
-      >
-        All Teams
-      </button>
-    </div>
+      </div>
 
       {/* Search Bar */}
       <input
@@ -405,7 +426,7 @@ function AddVolunteerPoints() {
               <td>
                 {selectedMember?.australian_sailing_number ===
                 member.australian_sailing_number
-                  ? selectedMember.volunteerPoints
+                  ? Math.round(selectedMember.volunteerPoints)
                   : ""}
               </td>
 

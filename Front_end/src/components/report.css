@@ -191,3 +191,9 @@
 .clickable-name:hover {
   color: darkblue; /* Optional: change color on hover */
 }
+
+.team-btn.selected {
+  background-color: #3b76e4; /* Highlight color */
+  color: #fff;
+  border-color: #007bff;
+}

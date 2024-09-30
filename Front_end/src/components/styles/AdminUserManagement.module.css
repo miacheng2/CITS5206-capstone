@@ -101,3 +101,47 @@
         opacity: 1;
     }
 }
+.statsSection {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    background-color: #635985;  /* Match the purple color */
+    padding: 20px;  /* Add padding to make it look more balanced */
+    border-radius: 8px;  /* Add rounded corners */
+}
+
+.statItem {
+    flex-basis: 48%;
+    text-align: center;
+    background-color: transparent;  /* Make individual items transparent to inherit the section's background */
+    color: white;  /* Adjust text color to white to stand out on the purple background */
+}
+
+.statItem h3 {
+    margin: 0;
+    color: #ddd;  /* Slightly lighter text for headings */
+}
+
+.statItem p {
+    font-size: 2em;
+    margin-top: 5px;
+    color: #fff;  /* White for the main number to contrast against the purple background */
+}
+.avatarContainer {
+    cursor: pointer;
+    display: inline-block;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar:hover {
+    opacity: 0.8;  /* Slight transparency to show it's clickable */
+}
+
+
+

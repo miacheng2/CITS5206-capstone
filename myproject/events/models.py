@@ -1,5 +1,5 @@
 # models.py
-
+import math
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
@@ -40,6 +40,8 @@ class User(AbstractBaseUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True)  
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)  # New field for avatar
+
     
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -125,16 +127,16 @@ class Event(models.Model):
 class VolunteerPoints(models.Model):
     member = models.ForeignKey(TeamMember, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    points = models.IntegerField()
-    hours = models.IntegerField(null=True, blank=True)  # Only for off-water events
+    points = models.FloatField()  # Allow decimal points for finer calculations
+    hours = models.FloatField(null=True, blank=True)  
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.event.event_type == 'off_water' and self.hours:
-            self.points = self.hours * 20/3  # 20 points for 3 hour
+            self.points = (20 / 3) * self.hours
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
-            self.points = 20  # Fixed points
-            self.hours = 0   # Set hours to zero for on-water events
+            self.points = 20  # Fixed points for on-water events
+            self.hours = 3  # Set hours to zero for on-water events
         super().save(*args, **kwargs)

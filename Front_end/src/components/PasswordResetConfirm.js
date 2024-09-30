@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import './PasswordResetConfirm.css';
 
 function PasswordResetConfirm() {
     const [newPassword, setNewPassword] = useState('');
@@ -31,7 +32,7 @@ function PasswordResetConfirm() {
     };
 
     return (
-        <div>
+        <div className="password-reset-container">
             <h2>Reset Your Password</h2>
             <form onSubmit={handleSubmit}>
                 <input

@@ -27,6 +27,7 @@ from django.db.models import Sum, F, IntegerField,Value,Case, When, ExpressionWr
 from django.contrib.auth import get_user_model
 from django.db.models.functions import ExtractYear,Concat
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import IntegrityError
 import logging
 import csv
@@ -127,24 +128,32 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
 class GetProfileView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
 
     def get(self, request):
-        
-        username = request.query_params.get('username')
-        
-        if not username:
-            return Response({"detail": "Username not provided"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            user = User.objects.get(username=username)
-            profile_data = {
-                'username': user.username,
-                'email': user.email,
-            }
-            return Response(profile_data)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        user = request.user  # Get the currently logged-in user
+
+        # Prepare profile data
+        profile_data = {
+            'username': user.username,
+            'email': user.email,
+             'avatar': user.avatar.url if user.avatar else None,  # Include avatar URL
+
+        }
+
+        return Response(profile_data, status=status.HTTP_200_OK)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_counts(request):
+    # Count the number of admins and team leaders
+    admin_count = User.objects.filter(user_type='admin').count()
+    team_leader_count = User.objects.filter(user_type='team_leader').count()
+
+    return Response({
+        'admin_count': admin_count,
+        'team_leader_count': team_leader_count,
+    })
     
 class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
@@ -266,32 +275,36 @@ class DetailedTeamMemberViewSet(viewsets.ModelViewSet):
     
 
 
-
-# from django.contrib.auth.models import User
-
 class UpdateProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
         try:
-            user = User.objects.get(username=request.data.get('username'))
+            user = request.user  
+            
             new_username = request.data.get('new_username')
             new_email = request.data.get('email')
+            avatar = request.FILES.get('avatar')  # Get the avatar file
 
-            if not new_username:
-                return Response({"detail": "New username is required"}, status=status.HTTP_400_BAD_REQUEST)
-            
-            if not new_email:
-                return Response({"detail": "New email is required"}, status=status.HTTP_400_BAD_REQUEST)
+            if new_username:
+                user.username = new_username
+            if new_email:
+                user.email = new_email
+            if avatar:
+                user.avatar = avatar  # Save the new avatar
 
-            user.username = new_username
-            user.email = new_email
             user.save()
 
-            return Response({"detail": "Profile updated successfully"}, status=status.HTTP_200_OK)
+            return Response({
+                "username": user.username,
+                "email": user.email,
+                "avatar": user.avatar.url if user.avatar else None  # Ensure avatar URL is returned
+            }, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
         
 from rest_framework.views import APIView
@@ -444,16 +457,11 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]  # to require authentication
     
-    
-    
-
-
+# get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
     permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
-
-    
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -479,6 +487,24 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
 
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    @action(detail=False, methods=['get'], url_path='member-history/(?P<uid>[^/.]+)')
+    def member_volunteer_history(self, request, uid=None):
+        """Retrieve volunteer history for a specific member."""
+        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
+        history = [
+            {
+                "id": point.id,
+                "event_name": point.event.name,
+                "event_date": point.event.date,
+                "activity": point.activity.name if point.activity else None,
+                "points": int(point.points+0.5),
+                "hours": int(point.hours+0.5),
+                "created_by": point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # get all members' point view
 @permission_classes([IsAuthenticated])  # to require authentication
@@ -501,7 +527,7 @@ class AllMembersPointsAPIView(APIView):
             'financial_year'
         ).annotate(
             total_points=Sum('points'),
-            total_hours=Sum('hours', output_field=IntegerField())
+            total_hours=Sum('hours')
         ).order_by('name', 'financial_year')
         
         # Convert the queryset to a list of dictionaries
@@ -514,30 +540,11 @@ class AllMembersPointsAPIView(APIView):
                 "membership_category": data['member__membership_category'],
                 "teams": data['member__teams'],
                 "year": data['financial_year'],  # Use 'financial_year' instead of 'year'
-                "total_points": data['total_points'],
-                "total_hours": data['total_hours'] or 0  # Handle case where hours might be null
+                "total_points": int(data['total_points']+0.5),
+                "total_hours": int(data['total_hours']+0.5) or 0  # Handle case where hours might be null
             })
         
         return Response(results)
-
-# get all members' point view
-@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
-class MemberVolunteerHistoryAPIView(APIView):
-    def get(self, request, uid):
-        points = VolunteerPoints.objects.filter(member__australian_sailing_number=uid).select_related('event', 'activity')
-        history = [
-            {
-                 "id": point.id,
-                "event_name": point.event.name,
-                "event_date": point.event.date,
-                "activity": point.activity.name if point.activity else None,
-                "points": point.points,
-                "hours": point.hours,
-                "created_by":point.created_by.username
-            }
-            for point in points
-        ]
-        return Response(history)
 
 # update volunteer point view
 @api_view(['POST'])
