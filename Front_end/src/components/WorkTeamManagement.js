@@ -552,12 +552,19 @@ const WorkTeamManagement = () => {
 
 
     const handleCreateTeam = async () => {
+        const trimmedTeamName = newTeam.TeamName.trim(); // Remove whitespace
+    
+        if (!trimmedTeamName || trimmedTeamName === "Default Team Name") {
+            alert("Please enter a team name.");
+            return;
+        }
+    
         const existingTeam = teams.find(team => team.name === newTeam.TeamName);
-
+    
         const currentMembers = existingTeam ? existingTeam.members.map(member => member.australian_sailing_number) : [];
-
+    
         const teamPayload = {
-            name: newTeam.TeamName || "Default Team Name",
+            name: newTeam.TeamName,
             description: newTeam.Description || "No description available",
             team_leader: newTeam.TeamLeader || null,
             members: currentMembers
