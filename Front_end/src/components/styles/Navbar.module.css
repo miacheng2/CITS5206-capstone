@@ -126,7 +126,10 @@ body {
 /* Navbar.module.css */
 .active {
     background-color: #f7fc00;
-    color: #00004D;
+}
+
+.active>b {
+    color: #000;
 }
 
 .dropdownItem {
