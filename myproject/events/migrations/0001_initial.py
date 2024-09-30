@@ -3,7 +3,21 @@
 import django.db.models.deletion
 from django.conf import settings
 from django.db import migrations, models
+from django.contrib.auth.hashers import make_password
 
+def create_initial_admin(apps, schema_editor):
+    User = apps.get_model('events', 'User')  
+
+    # Check if the admin already exists
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create(
+            username='admin',
+            email='admin@example.com',
+            password=make_password('admin'),  
+            user_type='admin',
+            is_active=True,
+            is_admin=True,
+        )
 
 class Migration(migrations.Migration):
 
@@ -83,4 +97,5 @@ class Migration(migrations.Migration):
                 ('member', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='events.teammember')),
             ],
         ),
+        migrations.RunPython(create_initial_admin),  # Add this to run the initial admin creation function
     ]

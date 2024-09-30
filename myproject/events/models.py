@@ -40,6 +40,8 @@ class User(AbstractBaseUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=50, unique=True)  
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)  # New field for avatar
+
     
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
