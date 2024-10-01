@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback,useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar,Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +11,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  
 } from "chart.js";
 import "./report.css";
 
@@ -40,9 +41,10 @@ function VolunteerHistory() {
   const [selectAll, setSelectAll] = useState(false); // State for "Select All"
   const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =
     useState(false);
-  const [showVolunteerHoursGraph, setShowVolunteerHoursGraph] = useState(false);
+  
   const [showTopPerformers, setShowTopPerformers] = useState(false);
-  const [monthlyVolunteerHours, setMonthlyVolunteerHours] = useState([]);
+  const [showYearwiseLineGraph, setShowYearwiseLineGraph] = useState(false);
+
   const [topPerformers, setTopPerformers] = useState({});
   const handleMemberClick = (uid) => {
     navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
@@ -297,38 +299,11 @@ function VolunteerHistory() {
       }
     });
 
-    console.log("Calculated Monthly Volunteer Hours:", monthlyHours);
-    setMonthlyVolunteerHours(monthlyHours);
+    
   };
 
   // Prepare data for volunteer hours graph
-  const volunteerHoursData = {
-    labels: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
-    datasets: [
-      {
-        label: "Total Volunteering Hours",
-        data: monthlyVolunteerHours,
-        fill: false,
-        borderColor: "#4BC0C0",
-        backgroundColor: "#4BC0C0",
-        tension: 0.1,
-      },
-    ],
-  };
-
+ 
   
   // Function to calculate the points for each team dynamically
   const calculateTeamPoints = () => {
@@ -345,6 +320,8 @@ function VolunteerHistory() {
       return totalPointsForTeam;
     });
   };
+   
+
 
   // Data for the chart
   const teamPerformanceData = {
@@ -372,18 +349,48 @@ function VolunteerHistory() {
     },
   };
 
-  const volunteerHoursOptions = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top",
-      },
-      title: {
-        display: true,
-        text: "Monthly Volunteer Hours",
-      },
-    },
+ 
+  const calculateYearwiseTeamPoints = () => {
+    const years = [...new Set(members.map((member) => member.year))]; // Get unique years from members
+    const teamYearPoints = maintenanceTeams.map((team) => {
+      const teamDataByYear = years.map((year) => {
+        const teamMembers = members.filter(
+          (member) => member.teams === team.id && member.year === year
+        );
+        return teamMembers.reduce(
+          (total, member) => total + member.total_points,
+          0
+        );
+      });
+      return { teamName: team.name, data: teamDataByYear };
+    });
+    return { years, teamYearPoints };
   };
+  const { years, teamYearPoints } = calculateYearwiseTeamPoints();
+
+const lineChartData = {
+  labels: years,
+  datasets: teamYearPoints.map((teamData, index) => ({
+    label: teamData.teamName,
+    data: teamData.data,
+    borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'][index % 4], // Dynamic colors
+    fill: false,
+  })),
+};
+
+const lineChartOptions = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+    title: {
+      display: true,
+      text: 'Year-wise Comparison of Team Points',
+    },
+  },
+};
+
 
   const uniqueCategories = [
     ...new Set(members.map((member) => member.membership_category)),
@@ -526,28 +533,30 @@ function VolunteerHistory() {
         Download CSV
       </button>
 
-      {/* Toggle buttons for graphs and top performers */}
+      
+          {/* Toggle buttons for graphs and top performers */}
       <div className="toggle-buttons">
-        <button
-          onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
-        >
-          {showTeamPerformanceGraph
-            ? "Hide Team Performance Graph"
-            : "Show Team Performance Graph"}
-        </button>
-        <button
-          onClick={() => setShowVolunteerHoursGraph(!showVolunteerHoursGraph)}
-        >
-          {showVolunteerHoursGraph
-            ? "Hide Volunteer Hours Graph"
-            : "Show Volunteer Hours Graph"}
-        </button>
-        <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
-          {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
-        </button>
-      </div>
+      <button
+        onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
+      >
+        {showTeamPerformanceGraph
+          ? "Hide Team Performance Graph"
+          : "Show Team Performance Graph"}
+      </button>
+      
+      <button onClick={() => setShowYearwiseLineGraph(!showYearwiseLineGraph)}>
+        {showYearwiseLineGraph ? "Hide Year-wise Line Graph" : "Show Year-wise Line Graph"}
+      </button>
+
+      <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
+        {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
+      </button>
+    </div>
+
+
 
       {/* Section for top performers by team in table format */}
+    
       {showTopPerformers && (
         <div className="grouped-volunteers-section">
           <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
@@ -585,17 +594,20 @@ function VolunteerHistory() {
       )}
 
       {/* Section for graphs */}
+
       <div className="chart-section">
-        {showVolunteerHoursGraph && (
-          <div className="chart-container">
-            <Line data={volunteerHoursData} options={volunteerHoursOptions} />
-          </div>
-        )}
-        {showTeamPerformanceGraph && (
-          <div className="chart-container">
-            <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
-          </div>
-        )}
+  
+  {showTeamPerformanceGraph && (
+    <div className="chart-container">
+      <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
+    </div>
+  )}
+     {/* Line chart for year-wise comparison */}
+     {showYearwiseLineGraph && (
+        <div className="chart-container">
+          <Line data={lineChartData} options={lineChartOptions} />
+        </div>
+      )}
       </div>
     </div>
   );
