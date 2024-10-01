@@ -455,7 +455,15 @@ def add_member_to_team(request, pk):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]  # to require authentication
+    permission_classes = [IsAuthenticated]  # Require authentication for all actions
+
+    def create(self, request, *args, **kwargs):
+        """Create a new event."""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
         """Delete a specific event if it is not linked to any volunteer history."""
@@ -588,16 +596,6 @@ class AllMembersPointsAPIView(APIView):
             })
         
         return Response(results)
-
-# add Event view
-@api_view(['POST'])
-@permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
-def addEvent(request):
-    serializer = EventSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
 @permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
