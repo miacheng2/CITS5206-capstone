@@ -48,6 +48,7 @@ function VolunteerHistory() {
     navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
   };
   const hasAlerted = useRef(false);
+  
 
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
@@ -328,24 +329,35 @@ function VolunteerHistory() {
     ],
   };
 
+  
+  // Function to calculate the points for each team dynamically
+  const calculateTeamPoints = () => {
+    return maintenanceTeams.map((team) => {
+      // Filter members based on the current team
+      const teamMembers = members.filter((member) => member.teams === team.id);
+
+      // Calculate total points for the team
+      const totalPointsForTeam = teamMembers.reduce(
+        (total, member) => total + member.total_points,
+        0
+      );
+
+      return totalPointsForTeam;
+    });
+  };
+
+  // Data for the chart
   const teamPerformanceData = {
-    labels: maintenanceTeams.map((team) => team.name),
+    labels: maintenanceTeams.map((team) => team.name), // Use dynamically updated team names
     datasets: [
       {
         label: "Total Points",
-        data: maintenanceTeams.map((team) => {
-          const teamMembers = filteredMembers.filter(
-            (member) => member.teams === team.id
-          );
-          return teamMembers.reduce(
-            (total, member) => total + member.total_points,
-            0
-          );
-        }),
-        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"],
+        data: calculateTeamPoints(), // Dynamically calculate the points for each team
+        backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"], // Customize colors
       },
     ],
   };
+
 
   const teamPerformanceOptions = {
     responsive: true,
