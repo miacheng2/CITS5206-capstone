@@ -1,15 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
-import ConfirmationModal from "./ConfirmationModal"; // Import the confirmation modal component
-import "./EventDetailsModal.css"; // Import CSS for the table
+import ConfirmationModal from "./ConfirmationModal";
+import "./EventDetailsModal.css";
 
 function CheckEventHistory() {
+  const [user, setUser] = useState([]);
   const [events, setEvents] = useState([]);
   const [filterName, setFilterName] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState(null); // Track which event is being deleted
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [modalMessage, setModalMessage] = useState(
+    "Are you sure you want to delete this event?"
+  );
+  const [showConfirmButtons, setShowConfirmButtons] = useState(true); // Track if modal shows Yes/No buttons or just Close
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +26,14 @@ function CheckEventHistory() {
           navigate("/login");
           return;
         }
+
+        const usersData = await api.get("users/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUser(usersData.data);
 
         const response = await api.get("events/", {
           headers: {
@@ -43,9 +56,10 @@ function CheckEventHistory() {
     fetchEvents();
   }, [navigate]);
 
-  // Filter events by name and month
   const filteredEvents = events.filter((event) => {
-    const matchesName = event.name.toLowerCase().includes(filterName.toLowerCase());
+    const matchesName = event.name
+      .toLowerCase()
+      .includes(filterName.toLowerCase());
     const matchesMonth = filterMonth
       ? new Date(event.date).getMonth() + 1 === parseInt(filterMonth)
       : true;
@@ -53,12 +67,44 @@ function CheckEventHistory() {
   });
 
   // Function to handle opening the confirmation modal
-  const openConfirmationModal = (eventId) => {
-    setSelectedEventId(eventId);
-    setIsModalOpen(true);
+  const openConfirmationModal = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      // Check for linked volunteer history
+      const response = await api.get(
+        `volunteer-points/event-history/${eventId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.length > 0) {
+        console.log(response.data);
+        // If volunteer history is linked, update the modal to only show the Close button
+        setModalMessage(
+          "Can't delete as there is volunteer history linked to this event."
+        );
+        setShowConfirmButtons(false); // Don't show Yes/No buttons
+      } else {
+        // Otherwise, set the default message and show Yes/No buttons
+        setModalMessage("Are you sure you want to delete this event?");
+        setShowConfirmButtons(true); // Show Yes/No buttons
+      }
+
+      setSelectedEventId(eventId);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Error checking volunteer history!", error);
+      alert("Failed to check volunteer history. Please try again later.");
+    }
   };
 
-  // Handle confirming deletion
   const handleDeleteConfirm = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -72,18 +118,19 @@ function CheckEventHistory() {
         },
       });
 
-      setEvents((prevEvents) => prevEvents.filter((event) => event.id !== selectedEventId));
+      setEvents((prevEvents) =>
+        prevEvents.filter((event) => event.id !== selectedEventId)
+      );
       console.log("Event deleted:", selectedEventId);
     } catch (error) {
       console.error("There was an error deleting the event!", error);
       alert("Failed to delete event. Please try again later.");
     } finally {
-      setIsModalOpen(false); // Close the modal after deletion
-      setSelectedEventId(null); // Reset the selected event
+      setIsModalOpen(false);
+      setSelectedEventId(null);
     }
   };
 
-  // Handle cancelling deletion
   const handleDeleteCancel = () => {
     setIsModalOpen(false);
     setSelectedEventId(null);
@@ -99,7 +146,6 @@ function CheckEventHistory() {
         </div>
       </header>
 
-      {/* Search and Filter Controls */}
       <div className="filter-controls">
         <input
           type="text"
@@ -112,29 +158,17 @@ function CheckEventHistory() {
           onChange={(e) => setFilterMonth(e.target.value)}
         >
           <option value="">All Months</option>
-          <option value="1">January</option>
-          <option value="2">February</option>
-          <option value="3">March</option>
-          <option value="4">April</option>
-          <option value="5">May</option>
-          <option value="6">June</option>
-          <option value="7">July</option>
-          <option value="8">August</option>
-          <option value="9">September</option>
-          <option value="10">October</option>
-          <option value="11">November</option>
-          <option value="12">December</option>
+          {/* Month options */}
         </select>
       </div>
 
-      {/* Events Table */}
       <table className="event-table">
         <thead>
           <tr>
             <th>Event Name</th>
             <th>Date</th>
             <th>Event Type</th>
-            <th>Created By</th> 
+            <th>Created By</th>
             <th>Activities</th>
             <th>Actions</th>
           </tr>
@@ -145,8 +179,11 @@ function CheckEventHistory() {
               <tr key={event.id}>
                 <td>{event.name}</td>
                 <td>{event.date}</td>
-                <td>{event.event_type}</td> {/* Display the event type */}
-                <td>{event.created_by.username}</td> {/* Display the username */}
+                <td>{event.event_type}</td>
+                <td>
+                  {user.find((user) => user.id === event.created_by)
+                    ?.username || "Unknown"}
+                </td>
                 <td>
                   <ul>
                     {event.activities && event.activities.length > 0 ? (
@@ -159,7 +196,9 @@ function CheckEventHistory() {
                   </ul>
                 </td>
                 <td>
-                  <button onClick={() => openConfirmationModal(event.id)}>Delete</button>
+                  <button onClick={() => openConfirmationModal(event.id)}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))
@@ -175,16 +214,15 @@ function CheckEventHistory() {
         </tbody>
       </table>
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={isModalOpen}
-        message="Are you sure you want to delete this event?"
-        onConfirm={handleDeleteConfirm}
+        message={modalMessage}
+        onConfirm={showConfirmButtons ? handleDeleteConfirm : null} // Only show onConfirm when buttons are needed
         onCancel={handleDeleteCancel}
+        showConfirmButtons={showConfirmButtons} // Pass prop to show or hide confirm buttons
       />
     </div>
   );
 }
 
 export default CheckEventHistory;
-
