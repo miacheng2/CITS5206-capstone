@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
-from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,
+from events.views import (TeamMemberViewSet, EventViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,
                           PromoteLeaderView,addEvent, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
                           DetailedTeamViewSet, DetailedTeamMemberViewSet,
                           get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView,get_user_counts

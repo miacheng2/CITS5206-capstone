@@ -511,6 +511,23 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
             for point in points
         ]
         return Response(history)
+    
+    @action(detail=False, methods=['get'], url_path='event-history/(?P<event_id>[^/.]+)')
+    def event_volunteer_history(self, request, event_id=None):
+        """Retrieve volunteer points linked to a specific event."""
+        points = VolunteerPoints.objects.filter(event_id=event_id).select_related('member', 'activity')
+        history = [
+            {
+                "id": point.id,
+                "member": point.member.australian_sailing_number,
+                "points": int(point.points + 0.5),
+                "hours": int(point.hours + 0.5),
+                "activity": point.activity.name if point.activity else None,
+                "created_by": point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
 
 # get all members' point view
 @permission_classes([IsAuthenticated])  # to require authentication
