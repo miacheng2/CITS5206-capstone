@@ -455,13 +455,49 @@ def add_member_to_team(request, pk):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
-    permission_classes = [IsAuthenticated]  # to require authentication
+    permission_classes = [IsAuthenticated]  # Require authentication for all actions
+
+    def create(self, request, *args, **kwargs):
+        """Create a new event."""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        """Delete a specific event if it is not linked to any volunteer history."""
+        try:
+            event = self.get_object()  # Get the event instance
+        except Event.DoesNotExist:
+            return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if there are any volunteer points linked to this event
+        linked_volunteer_points = VolunteerPoints.objects.filter(event=event).exists()
+
+        if linked_volunteer_points:
+            return Response(
+                {"error": "Cannot delete event. There are volunteer histories linked to this event."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # If no linked volunteer points, proceed to delete the event
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
-# get, update, delete one member's point
+# create, get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
-    permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
+    permission_classes = [IsAuthenticated, IsAdminUser]  # to require authentication
+
+    def create(self, request, *args, **kwargs):
+        """Create new volunteer points entry."""
+        serializer = VolunteerPointsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -469,12 +505,10 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
         except VolunteerPoints.DoesNotExist:
             return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
-        print("request data:",request.data)
-        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
         
+        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            print("serializer:",serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -500,6 +534,23 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
                 "activity": point.activity.name if point.activity else None,
                 "points": int(point.points+0.5),
                 "hours": int(point.hours+0.5),
+                "created_by": point.created_by.username
+            }
+            for point in points
+        ]
+        return Response(history)
+    
+    @action(detail=False, methods=['get'], url_path='event-history/(?P<event_id>[^/.]+)')
+    def event_volunteer_history(self, request, event_id=None):
+        """Retrieve volunteer points linked to a specific event."""
+        points = VolunteerPoints.objects.filter(event_id=event_id).select_related('member', 'activity')
+        history = [
+            {
+                "id": point.id,
+                "member": point.member.australian_sailing_number,
+                "points": int(point.points + 0.5),
+                "hours": int(point.hours + 0.5),
+                "activity": point.activity.name if point.activity else None,
                 "created_by": point.created_by.username
             }
             for point in points
@@ -545,26 +596,6 @@ class AllMembersPointsAPIView(APIView):
             })
         
         return Response(results)
-
-# update volunteer point view
-@api_view(['POST'])
-@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
-def save_volunteer_points(request):
-    serializer = VolunteerPointsSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# update volunteer point view
-@api_view(['POST'])
-@permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
-def addEvent(request):
-    serializer = EventSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @csrf_exempt
 @permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication

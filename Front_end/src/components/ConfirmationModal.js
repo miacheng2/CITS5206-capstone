@@ -1,8 +1,14 @@
 // src/components/ConfirmationModal.js
 import React from "react";
-import "./EventDetailsModal.css"; // Import CSS for styling
+import "./EventDetailsModal.css";
 
-const ConfirmationModal = ({ isOpen, message, onConfirm, onCancel }) => {
+const ConfirmationModal = ({
+  isOpen,
+  message,
+  onConfirm,
+  onCancel,
+  showConfirmButtons,
+}) => {
   if (!isOpen) return null; // If modal is not open, don't render anything
 
   return (
@@ -10,8 +16,20 @@ const ConfirmationModal = ({ isOpen, message, onConfirm, onCancel }) => {
       <div className="modal-content">
         <p>{message}</p>
         <div className="modal-buttons">
-          <button onClick={onConfirm} className="confirm-btn">Yes</button>
-          <button onClick={onCancel} className="cancel-btn">No</button>
+          {showConfirmButtons ? (
+            <>
+              <button onClick={onConfirm} className="confirm-btn">
+                Yes
+              </button>
+              <button onClick={onCancel} className="cancel-btn">
+                No
+              </button>
+            </>
+          ) : (
+            <button onClick={onCancel} className="cancel-btn">
+              Close
+            </button>
+          )}
         </div>
       </div>
     </div>

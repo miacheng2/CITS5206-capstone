@@ -165,7 +165,7 @@ function AddVolunteerPoints() {
             : prevState.volunteerPoints,
         volunteerHours:
           selectedEvent?.event_type === "on_water"
-            ? 0
+            ? 3
             : prevState.volunteerHours,
       }));
     } else if (field === "selectedActivity") {
@@ -231,7 +231,7 @@ function AddVolunteerPoints() {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/save-volunteer-points/",
+          "http://localhost:8000/api/volunteer-points/",
           {
             method: "POST",
             headers: {
