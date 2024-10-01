@@ -5,6 +5,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import "./EventDetailsModal.css";
 
 function CheckEventHistory() {
+  const [user, setUser] = useState([]);
   const [events, setEvents] = useState([]);
   const [filterName, setFilterName] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
@@ -25,6 +26,14 @@ function CheckEventHistory() {
           navigate("/login");
           return;
         }
+
+        const usersData = await api.get("users/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setUser(usersData.data);
 
         const response = await api.get("events/", {
           headers: {
@@ -171,7 +180,10 @@ function CheckEventHistory() {
                 <td>{event.name}</td>
                 <td>{event.date}</td>
                 <td>{event.event_type}</td>
-                <td>{event.created_by.username}</td>
+                <td>
+                  {user.find((user) => user.id === event.created_by)
+                    ?.username || "Unknown"}
+                </td>
                 <td>
                   <ul>
                     {event.activities && event.activities.length > 0 ? (
