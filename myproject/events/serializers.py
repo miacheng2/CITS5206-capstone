@@ -65,10 +65,17 @@ class DetailedTeamSerializer(serializers.ModelSerializer):
         if obj.team_leader:
             return obj.team_leader.username  
         return "No leader"
+    def validate_team_leader(self, value):
+        if value is None:
+            raise serializers.ValidationError("A team leader is required.")
+        if not User.objects.filter(id=value.id).exists():
+            raise serializers.ValidationError("The selected team leader does not exist.")
+        return value
     
     def create(self, validated_data):
         members_data = validated_data.pop('members', [])  
         team = Team.objects.create(**validated_data)
+    
 
       
         for member_data in members_data:

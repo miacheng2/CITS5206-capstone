@@ -366,7 +366,17 @@ class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated] 
 
-
+@api_view(['POST'])
+def create_team(request):
+    # Use the serializer for validation and team creation
+    serializer = DetailedTeamSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class DetailedTeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = DetailedTeamSerializer
@@ -374,8 +384,10 @@ class DetailedTeamViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def create_team(request):
+    
     team_leader_id = request.data.get('team_leader')
     description = request.data.get('description')
+    
 
     # pass team_leader ID
     team_leader = None

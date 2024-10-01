@@ -22,6 +22,24 @@ class UserRegistrationTestCase(TestCase):
         self.assertIn('access', response.data)  # Check if JWT access token is returned
         self.assertIn('refresh', response.data)  # Check if JWT refresh token is returned
 
+    def test_create_admin_user(self):
+        # Data for creating a new admin user
+        data = {
+            'username': 'newadmin',
+            'password': 'newadminpass123',
+            'email': 'newadmin@example.com',
+            'user_type': 'admin'
+        }
+        # POST request to register a new admin user
+        response = self.client.post(self.registration_url, data, format='json')
+
+        # Assert that the user creation was successful
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Assert that the newly created user is an admin
+        new_admin = User.objects.get(username='newadmin')
+        self.assertEqual(new_admin.user_type, 'admin')
+
 
 class UserLoginTestCase(TestCase):
     def setUp(self):
@@ -63,7 +81,7 @@ class UserModelTest(TestCase):
     def test_create_superuser(self):
         admin_user = User.objects.create_superuser(
             username='adminuser',
-            email='admin@example.com',
+            email='adminunique@example.com',  # Ensure unique email
             password='adminpass'
         )
         self.assertTrue(admin_user.is_admin)
@@ -74,6 +92,8 @@ class UserModelTest(TestCase):
 
 class TeamModelTest(TestCase):
     def setUp(self):
+        self.client = APIClient()  # Use APIClient for REST framework capabilities
+
         # Create a user to assign as team leader
         self.team_leader = User.objects.create_user(
             username='leader',
@@ -81,18 +101,38 @@ class TeamModelTest(TestCase):
             user_type=User.TEAM_LEADER,
             password='leaderpass'
         )
-        # Create a team
-        self.team = Team.objects.create(
+        response = self.client.post('/api/login/', {'username': 'leader', 'password': 'leaderpass'}, format='json')
+        self.token = response.data['access']
+
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+        self.create_team_url = '/api/teams/'
+        
+    
+    def test_team_creation(self):
+    # Create a team within the test method
+        team = Team.objects.create(
             name='Test Team',
             description='A description of the test team',
             team_leader=self.team_leader
         )
-    
-    def test_team_creation(self):
-        self.assertEqual(self.team.name, 'Test Team')
-        self.assertEqual(self.team.description, 'A description of the test team')
-        self.assertEqual(self.team.team_leader, self.team_leader)
+        self.assertEqual(team.name, 'Test Team')
+        self.assertEqual(team.description, 'A description of the test team')
+        self.assertEqual(team.team_leader, self.team_leader)
+    def test_team_creation_without_leader(self):
+        team = Team.objects.create(
+            name='Test Team',
+            description='A description of the test team',
+        )
+        self.assertIsNone(team.team_leader)
 
+    def test_team_creation_with_long_name(self):
+        long_name = 'T' * 300  # Example of a very long name
+        team = Team.objects.create(
+            name=long_name,
+            description='A description of the test team',
+            team_leader=self.team_leader
+        )
+        self.assertEqual(len(team.name), 300)
 
 class VolunteerPointsModelTest(TestCase):
     def setUp(self):
@@ -143,3 +183,14 @@ class VolunteerPointsModelTest(TestCase):
             created_by=self.user
         )
         self.assertEqual(points.points, 40)  # 6 hours * (20/3) = 40 points
+
+
+
+
+
+        
+    
+        
+
+
+
