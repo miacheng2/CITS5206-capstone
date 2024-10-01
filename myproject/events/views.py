@@ -456,6 +456,26 @@ class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]  # to require authentication
+
+    def destroy(self, request, pk=None):
+        """Delete a specific event if it is not linked to any volunteer history."""
+        try:
+            event = self.get_object()  # Get the event instance
+        except Event.DoesNotExist:
+            return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if there are any volunteer points linked to this event
+        linked_volunteer_points = VolunteerPoints.objects.filter(event=event).exists()
+
+        if linked_volunteer_points:
+            return Response(
+                {"error": "Cannot delete event. There are volunteer histories linked to this event."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # If no linked volunteer points, proceed to delete the event
+        event.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 # create, get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
