@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.authtoken.views import obtain_auth_token
-from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,save_volunteer_points,
+from events.views import (TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,
                           PromoteLeaderView,addEvent, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
                           DetailedTeamViewSet, DetailedTeamMemberViewSet,
                           get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView,get_user_counts
@@ -37,7 +37,6 @@ urlpatterns = [
     path('api/register/', RegisterView.as_view(), name='register'),
     path('api/get-profile/', GetProfileView.as_view(), name='get-profile'),
     path('api/members-points-all/', AllMembersPointsAPIView.as_view(), name='all-members-points'),
-    path('api/save-volunteer-points/', save_volunteer_points, name='save-volunteer-points'),
     path('api/teams/<int:pk>/add-member/', add_member_to_team, name='add_member_to_team'),
     path('api/teams/<int:pk>/remove-member/', remove_member_from_team, name='remove_member_from_team'),
     path('api/teams-with-members/', team_with_members, name='team-with-members'),

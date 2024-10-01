@@ -457,11 +457,19 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     permission_classes = [IsAuthenticated]  # to require authentication
     
-# get, update, delete one member's point
+# create, get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
-    permission_classes = [IsAuthenticated,IsAdminUser]  #  to require authentication
+    permission_classes = [IsAuthenticated, IsAdminUser]  # to require authentication
+
+    def create(self, request, *args, **kwargs):
+        """Create new volunteer points entry."""
+        serializer = VolunteerPointsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -469,12 +477,10 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
         except VolunteerPoints.DoesNotExist:
             return Response({"error": "VolunteerPoint not found."}, status=status.HTTP_404_NOT_FOUND)
-        print("request data:",request.data)
-        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
         
+        serializer = VolunteerPointsSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            print("serializer:",serializer.data)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -546,17 +552,7 @@ class AllMembersPointsAPIView(APIView):
         
         return Response(results)
 
-# update volunteer point view
-@api_view(['POST'])
-@permission_classes([IsAuthenticated,IsAdminUser])  # to require authentication
-def save_volunteer_points(request):
-    serializer = VolunteerPointsSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-# update volunteer point view
+# add Event view
 @api_view(['POST'])
 @permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
 def addEvent(request):
