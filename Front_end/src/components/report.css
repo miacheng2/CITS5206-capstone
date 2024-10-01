@@ -217,3 +217,11 @@
   text-align: center;
   margin-bottom: 10px;
 }
+
+
+.volunteer-history-table th:nth-child(6), /* Volunteering Hours */
+.volunteer-history-table td:nth-child(6) {
+  width: 200px;
+}
+
+
