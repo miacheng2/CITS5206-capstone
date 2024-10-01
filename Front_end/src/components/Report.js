@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback,useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bar,Line } from "react-chartjs-2";
+import { Bar,Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -11,6 +11,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
   
 } from "chart.js";
 import "./report.css";
@@ -24,7 +25,8 @@ ChartJS.register(
   PointElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 function VolunteerHistory() {
@@ -44,6 +46,7 @@ function VolunteerHistory() {
   
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [showYearwiseLineGraph, setShowYearwiseLineGraph] = useState(false);
+  const [showPieCharts, setShowPieCharts] = useState(false);
 
   const [topPerformers, setTopPerformers] = useState({});
   const handleMemberClick = (uid) => {
@@ -51,7 +54,27 @@ function VolunteerHistory() {
   };
   const hasAlerted = useRef(false);
   
+  const togglePieCharts = () => {
+    setShowPieCharts(!showPieCharts);
+  };
+  const groupPieData = (team) => {
+    const teamMembers = members.filter((member) => member.teams === team.id); // Filter members for this team
+    if (!teamMembers.length) return { labels: [], datasets: [] }; // If no members in the team, return empty data
 
+    return {
+      labels: teamMembers.map((member) => member.name),
+      datasets: [
+        {
+          data: teamMembers.map((member) => member.total_points),
+          backgroundColor: teamMembers.map(
+            () => "#" + ((Math.random() * 0xffffff) << 0).toString(16)
+          ), // Random colors
+        },
+      ],
+    };
+  };
+
+  
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
     (data) => {
@@ -551,6 +574,11 @@ const lineChartOptions = {
       <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
         {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
       </button>
+
+      <button onClick={togglePieCharts}>
+  {showPieCharts ? "Hide Team Members Stats" : "Show Team Members Stats"}
+</button>
+
     </div>
 
 
@@ -608,6 +636,17 @@ const lineChartOptions = {
           <Line data={lineChartData} options={lineChartOptions} />
         </div>
       )}
+      {showPieCharts && (
+  <div className="pie-charts-container">
+    {maintenanceTeams.map((team) => (
+      <div key={team.id} style={{ marginBottom: '20px',width: '25%', display: 'inline-block'  }}>
+        <h2 style={{ color: 'black' }}>{team.name}</h2>
+        <Pie data={groupPieData(team)} />
+      </div>
+    ))}
+  </div>
+)}
+
       </div>
     </div>
   );
