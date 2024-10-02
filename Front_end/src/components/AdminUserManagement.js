@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // Make sure to import 
 import styles from './styles/AdminUserManagement.module.css';
-import api from '../api'; 
+import api from '../api';
 
 const AdminUserManagement = () => {
     const [user, setUser] = useState({
@@ -60,12 +60,12 @@ const AdminUserManagement = () => {
                     navigate("/login");
                     return;
                 }
-            
+
                 fetchAdminList();
                 fetchTeamLeaderList();
                 fetchCurrentUser();
                 fetchUserCounts();
-             
+
             } catch (error) {
                 console.error("Error during permissions check!", error);
             }
@@ -499,14 +499,25 @@ const AdminUserManagement = () => {
 
                         {searchQuery && (
                             <div className={styles.adminList}>
-                                {filteredAdmins.length > 0 ? (
-                                    filteredAdmins.map(admin => (
-                                        <div key={admin.id} className={`${styles.adminItem} ${styles[admin.role]}`}>
-                                            <p><strong>Username:</strong> {admin.username}</p>
-                                            <p><strong>Email:</strong> {admin.email}</p>
-                                            <p><strong>Role:</strong> {admin.user_type}</p>
-                                        </div>
-                                    ))
+                                {filteredAdmins.length > 0 || teamLeaders.length > 0 ? (
+                                    <ul>
+                                        {/* Display matching admins */}
+                                        {filteredAdmins.map(admin => (
+                                            <li key={admin.id} className={`${styles.adminItem} ${styles[admin.role]}`}>
+                                                <p><strong>Username:</strong> {admin.username}</p>
+                                                <p><strong>Email:</strong> {admin.email}</p>
+                                                <p><strong>Role:</strong> {admin.user_type}</p>
+                                            </li>
+                                        ))}
+                                        {/* Display matching team leaders */}
+                                        {teamLeaders.map(leader => (
+                                            <li key={leader.id} className={`${styles.adminItem} ${styles[leader.role]}`}>
+                                                <p><strong>Username:</strong> {leader.username}</p>
+                                                <p><strong>Email:</strong> {leader.email}</p>
+                                                <p><strong>Role:</strong> {leader.user_type}</p>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : (
                                     <p>No admins or team leaders found</p>
                                 )}
