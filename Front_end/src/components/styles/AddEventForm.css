@@ -75,6 +75,29 @@
   margin: 0 auto; /* Ensure centering of all input and buttons */
 }
 
+/* Activity item styling */
+.activity-item {
+  margin-bottom: 5px;
+  margin-left: 25px;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: static;
+}
+
+/* Input field for activities */
+.activity-item input {
+  flex: 1;
+}
+
+/* Remove activity button (×) */
+.remove-activity-btn {
+  background-color: transparent;
+  color: rgb(186, 177, 177);
+  cursor: pointer;
+  font-size: 16px;
+}
+
 /* Button styling */
 .submit-btn {
   background-color: #4e3d9a;

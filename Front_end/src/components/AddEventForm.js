@@ -95,6 +95,16 @@ function AddEventForm() {
       }));
     }
   };
+    // Function to remove an activity
+    const removeActivityField = (index) => {
+      const updatedActivities = formData.activities.filter(
+        (activity, i) => i !== index
+      );
+      setFormData((prevState) => ({
+        ...prevState,
+        activities: updatedActivities,
+      }));
+    };
 
   const addActivityField = () => {
     setFormData((prevState) => ({
@@ -236,6 +246,7 @@ function AddEventForm() {
             <div className="form-group activities-group">
               <label>Activities:</label>
               {formData.activities.map((activity, index) => (
+                <div key={index} className="activity-item">
                 <input
                   key={index}
                   type="text"
@@ -245,7 +256,19 @@ function AddEventForm() {
                   placeholder={`Activity ${index + 1}`}
                   className="form-input"
                 />
+                <button
+                    type="button"
+                    className="remove-activity-btn"
+                    onClick={() => removeActivityField(index)}
+                  >
+                    &times;
+                  </button>
+                </div>
+                
+                
+              
               ))}
+              
               <button
                 type="button"
                 className="add-activity-btn"
