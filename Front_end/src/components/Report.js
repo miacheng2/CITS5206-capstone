@@ -551,10 +551,6 @@ const lineChartOptions = {
         </tbody>
       </table>
 
-      {/* Download Button */}
-      <button className="download-btn" onClick={downloadCSV}>
-        Download CSV
-      </button>
 
       
           {/* Toggle buttons for graphs and top performers */}
