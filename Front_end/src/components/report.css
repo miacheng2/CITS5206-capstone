@@ -59,7 +59,7 @@
 }
 
 .volunteer-history-table th {
-  background-color: #6b0c59;
+  background-color: #4d48a4;
   color: white;
 }
 
@@ -72,11 +72,19 @@
 .leaderboard-section {
   margin-top: 40px;
 }
+.column-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: start; /* Align items to the start of the column */
+  padding: 10px;
+  margin-top: 20px; /* Adjust spacing to match your design */
+}
+
 
 .download-btn {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: #cb3679;
+  background-color: #4d48a4;
   color: white;
   border: none;
   border-radius: 5px;
@@ -96,7 +104,7 @@
 .toggle-buttons button {
   margin: 0 10px; /* Add margin to space out buttons */
   padding: 10px 20px;
-  background-color: #cb3679;
+  background-color: #4d48a4;
   color: white;
   border: none;
   border-radius: 5px;
@@ -176,6 +184,7 @@
 .search-group {
   flex-grow: 1;
   max-width: 300px;
+  margin-top: 18px;
 }
 
 .search-input {
@@ -197,3 +206,31 @@
   color: #fff;
   border-color: #007bff;
 }
+
+.pie-charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Distribute charts evenly */
+  gap: 20px; /* Space between charts */
+}
+
+.pie-chart-item {
+  flex: 0 1 calc(33.33% - 20px); /* Ensure 3 charts fit in a row with gap */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 33.33%;
+}
+
+.pie-chart-item h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+
+.volunteer-history-table th:nth-child(6), /* Volunteering Hours */
+.volunteer-history-table td:nth-child(6) {
+  width: 200px;
+}
+
+

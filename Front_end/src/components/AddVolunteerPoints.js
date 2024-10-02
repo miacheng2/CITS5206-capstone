@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
+import { useNavigate } from "react-router-dom"; 
+import sailImage from "./yacht.jpg";
 
 function AddVolunteerPoints() {
   const [adminsAndLeaders, setUser] = useState([]); // To store users data
@@ -11,12 +13,18 @@ function AddVolunteerPoints() {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
+  const navigate = useNavigate(); 
+
+
+  const [modalMessage, setModalMessage] = useState(""); // Modal message state
+  const [isModalOpen, setModalOpen] = useState(false);  // Modal visibility state
 
   const fetchWithToken = async (url) => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found, redirecting to login.");
       // Handle the absence of token (e.g., redirect to login)
+      navigate("/login");
       return null;
     }
 
@@ -30,6 +38,7 @@ function AddVolunteerPoints() {
     if (response.status === 401) {
       console.error("Unauthorized: Redirecting to login.");
       // Handle unauthorized access (e.g., redirect to login)
+      navigate("/login");
       return null;
     }
 
@@ -242,20 +251,19 @@ function AddVolunteerPoints() {
           }
         );
         if (response.ok) {
-          alert("Volunteer points saved successfully!");
+          setModalMessage("Volunteer points saved successfully!");
+          setModalOpen(true);
         } else {
-          console.error(
-            "Failed to save volunteer points:",
-            response.statusText
-          );
-          alert("Failed to save volunteer points.");
+          setModalMessage("Failed to save volunteer points.");
+          setModalOpen(true);
         }
       } catch (error) {
-        console.error("Error saving data:", error);
-        alert("Failed to save volunteer points.");
+        setModalMessage("Error saving data.");
+        setModalOpen(true);
       }
     } else {
-      console.log("Please select a member");
+      setModalMessage("Please select a member.");
+      setModalOpen(true);
     }
   };
 
@@ -271,8 +279,30 @@ function AddVolunteerPoints() {
     return `${hours} hours ${minutes} minutes`;
   };
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
   return (
     <div className="add-volunteer-container">
+
+    {/* Modal */}
+    {isModalOpen && (
+    <div className="modal-overlay" onClick={handleCloseModal}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <img src={sailImage} alt="Sail logo" className="modal-logo" /> {/* Image at the top */}
+        <span className="modal-close" onClick={handleCloseModal}>
+          &times;
+        </span>
+        <p className="success-message">{modalMessage}</p>
+        <button className="modal-button" onClick={handleCloseModal}>
+          OK
+        </button>
+      </div>
+    </div>
+  )}
+
+
       {/* Team Buttons */}
       <div className="team-buttons">
         {maintenanceTeams.map((team) => (

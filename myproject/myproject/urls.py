@@ -7,7 +7,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from events.views import (TeamMemberViewSet, EventViewSet, ChangePasswordView, UpdateProfileView,CreateAdminUserView,RegisterView,GetProfileView,UpdateProfileView, UserViewSet, TeamViewSet, TeamMemberViewSet, EventViewSet, VolunteerPointsViewSet,AllMembersPointsAPIView,LoginView,
                           PromoteLeaderView, import_csv,create_team,get_team_leaders,team_with_members,add_member_to_team,delete_team,delete_multiple_teams,
                           DetailedTeamViewSet, DetailedTeamMemberViewSet,
-                          get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView,get_user_counts
+                          get_activities_for_event,remove_member_from_team,update_team_members,PasswordResetRequestView,PasswordResetConfirmView,get_user_counts,admin_list
                           )
 
 router = DefaultRouter()
@@ -43,6 +43,8 @@ urlpatterns = [
     path('api/import-csv/', import_csv, name='import_csv'), 
     path('api/events/<int:event_id>/activities/', get_activities_for_event, name='event-activities'),
     path('api/user-counts/', get_user_counts, name='user-counts'),
+    path('api/admin-list/', admin_list, name='admin-list'),
+
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

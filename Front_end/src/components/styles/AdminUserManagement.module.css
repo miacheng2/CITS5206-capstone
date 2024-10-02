@@ -143,5 +143,24 @@
     opacity: 0.8;  /* Slight transparency to show it's clickable */
 }
 
+.searchInput {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
 
 
+.adminItem {
+    background-color: #635985;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+   
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.adminItem p {
+    margin: 5px 0;
+}

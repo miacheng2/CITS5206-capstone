@@ -12,7 +12,7 @@ const AdminUserManagement = () => {
     const [teamLeaderCount, setTeamLeaderCount] = useState(0);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    
+
 
     // State for creating new users
     const [newUser, setNewUser] = useState({
@@ -23,6 +23,33 @@ const AdminUserManagement = () => {
     });
     const [createSuccessMessage, setCreateSuccessMessage] = useState('');
     const [createErrorMessage, setCreateErrorMessage] = useState('');
+    const [admins, setAdmins] = useState([]); // State for admin list
+    const [searchQuery, setSearchQuery] = useState(""); // State for search input
+    const [loading, setLoading] = useState(true); // Loading state
+
+
+    const fetchAdminList = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.error('No token found');
+                return;
+            }
+            const response = await axios.get('http://localhost:8000/api/admin-list/', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setAdmins(response.data); // Assuming response.data contains the list of admins
+            setLoading(false); // Set loading to false after data is fetched
+        } catch (error) {
+            console.error('Error fetching admin list:', error);
+            setLoading(false); // Set loading to false in case of error
+        }
+    };
+
+    // Fetch the list when the component mounts
+    useEffect(() => {
+        fetchAdminList();
+    }, []);
 
     useEffect(() => {
         fetchCurrentUser();
@@ -30,24 +57,32 @@ const AdminUserManagement = () => {
         // fetchRecentActivities();  // Disable or comment out this function for now
     }, []);
 
+    // Filter admins based on search query or show all if searchQuery is empty
+    const filteredAdmins = admins.filter(admin =>
+        (admin.username?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+        (admin.email?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
+        (admin.user_type?.toLowerCase().includes(searchQuery.toLowerCase()) || '')
+    );
+
+
     // Fetch logged-in user profile
     const fetchCurrentUser = async () => {
         try {
             const token = localStorage.getItem('token'); // Get the token from localStorage
-    
+
             if (!token) {
                 setErrorMessage('No token found. Please log in again.');
                 return;
             }
-    
+
             const response = await axios.get('http://localhost:8000/api/get-profile/', {
                 headers: {
                     Authorization: `Bearer ${token}`,  // Add the token to the Authorization header
                 },
             });
-    
+
             console.log('Profile Response:', response.data);  // Log the response to check if avatar is included
-    
+
             setCurrentUser(response.data.username);
             setUser({
                 username: response.data.username,
@@ -59,7 +94,7 @@ const AdminUserManagement = () => {
             setErrorMessage('Failed to load profile information.');
         }
     };
-    
+
 
 
     // Fetch admin and team leader counts
@@ -84,42 +119,42 @@ const AdminUserManagement = () => {
 
     // Handle profile update
     // Handle profile update
-const handleProfileSubmit = async (event) => {
-    event.preventDefault();
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setErrorMessage('Token not found. Please log in again.');
-            return;
+    const handleProfileSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setErrorMessage('Token not found. Please log in again.');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('new_username', user.username);
+            formData.append('email', user.email);
+            if (user.avatar) {
+                formData.append('avatar', user.avatar);  // Append avatar file if selected
+            }
+
+            const response = await axios.put('http://localhost:8000/api/update-profile/', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'  // Set content type to handle files
+                },
+            });
+
+            setSuccessMessage('Profile updated successfully');
+            setErrorMessage('');
+
+            // Update avatar in the state with the new avatar URL from response
+            if (response.data.avatar) {
+                setUser((prev) => ({ ...prev, avatar: response.data.avatar }));  // Update avatar in the state
+            }
+        } catch (error) {
+            setErrorMessage('Failed to update profile. Please try again.');
+            console.error('Error details:', error.response ? error.response.data : error.message);
         }
-
-        // Prepare form data
-        const formData = new FormData();
-        formData.append('new_username', user.username);
-        formData.append('email', user.email);
-        if (user.avatar) {
-            formData.append('avatar', user.avatar);  // Append avatar file if selected
-        }
-
-        const response = await axios.put('http://localhost:8000/api/update-profile/', formData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data'  // Set content type to handle files
-            },
-        });
-
-        setSuccessMessage('Profile updated successfully');
-        setErrorMessage('');
-
-        // Update avatar in the state with the new avatar URL from response
-        if (response.data.avatar) {
-            setUser((prev) => ({ ...prev, avatar: response.data.avatar }));  // Update avatar in the state
-        }
-    } catch (error) {
-        setErrorMessage('Failed to update profile. Please try again.');
-        console.error('Error details:', error.response ? error.response.data : error.message);
-    }
-};
+    };
 
 
     // Handle input change to capture avatar
@@ -187,6 +222,31 @@ const handleProfileSubmit = async (event) => {
                 <p>Welcome to the Admin User Management Dashboard</p>
             </header>
 
+            {/* Search Input */}
+            <input
+                type="text"
+                placeholder="Search Admins or Team Leaders"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={styles.searchInput}
+            />
+
+            {searchQuery && (
+                <div className={styles.adminList}>
+                    {filteredAdmins.length > 0 ? (
+                        filteredAdmins.map(admin => (
+                            <div key={admin.id} className={`${styles.adminItem} ${styles[admin.role]}`}>
+                                <p><strong>Username:</strong> {admin.username}</p>
+                                <p><strong>Email:</strong> {admin.email}</p>
+                                <p><strong>Role:</strong> {admin.user_type ? admin.user_type : "Role not available"}</p>
+
+                            </div>
+                        ))
+                    ) : (
+                        <p>No admins or team leaders found</p>
+                    )}
+                </div>
+            )}
             {/* Admin/Team Leader Statistics */}
             <section className={styles.statsSection}>
                 <div className={styles.statItem}>
