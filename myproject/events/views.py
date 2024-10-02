@@ -69,7 +69,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
     
     def post(self, request):
         username = request.data.get('username')
@@ -79,6 +79,11 @@ class LoginView(APIView):
         if not username or not password:
             return Response({'detail': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Check if the username exists
+        if not User.objects.filter(username=username).exists():
+            return Response({'detail': 'Username does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticate the user (check the password)
         user = authenticate(username=username, password=password)
         if user is not None:
             # Generate JWT tokens for authenticated user
@@ -91,8 +96,8 @@ class LoginView(APIView):
                 'user_role': user_role  # Include the user role in the response
             }, status=status.HTTP_200_OK)
         
-        # Return 401 Unauthorized for invalid credentials
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        # If authentication fails, it means the password is incorrect
+        return Response({'detail': 'Incorrect password'}, status=status.HTTP_401_UNAUTHORIZED)
     
     
 class CustomAuthToken(APIView):
