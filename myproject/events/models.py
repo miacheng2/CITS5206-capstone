@@ -74,6 +74,7 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+    
 class TeamMember(models.Model):
     I_WILL_VOLUNTEER = 'I will volunteer'
     I_WILL_PAY_LEVY = 'I will pay the levy'
@@ -118,6 +119,7 @@ class Event(models.Model):
     name = models.CharField(max_length=100)
     event_type = models.CharField(max_length=10, choices=EVENT_TYPE_CHOICES)
     date = models.DateField()
+    team = models.ForeignKey(Team,on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     activities = models.ManyToManyField(Activity, related_name='events', blank=True)
 

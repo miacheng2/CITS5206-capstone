@@ -6,6 +6,7 @@ import "./EventDetailsModal.css";
 
 function CheckEventHistory() {
   const [user, setUser] = useState([]);
+  const [teams, setTeams] = useState([]);
   const [events, setEvents] = useState([]);
   const [filterName, setFilterName] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
@@ -35,13 +36,22 @@ function CheckEventHistory() {
 
         setUser(usersData.data);
 
-        const response = await api.get("events/", {
+        const eventData = await api.get("events/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        setEvents(response.data);
+        setEvents(eventData.data);
+
+        // Fetch teams
+        const teamsData = await api.get("teams/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (teamsData) setTeams(teamsData.data);
       } catch (error) {
         if (error.response && error.response.status === 401) {
           console.error("Unauthorized: Redirecting to login.");
@@ -168,6 +178,7 @@ function CheckEventHistory() {
             <th>Event Name</th>
             <th>Date</th>
             <th>Event Type</th>
+            <th>Team</th>
             <th>Created By</th>
             <th>Activities</th>
             <th>Actions</th>
@@ -181,6 +192,11 @@ function CheckEventHistory() {
                 <td>{event.date}</td>
                 <td>{event.event_type}</td>
                 <td>
+                  {teams.find((team) => team.id === event.team)?.name ||
+                    "Unknown"}
+                </td>
+                <td>
+                  teams
                   {user.find((user) => user.id === event.created_by)
                     ?.username || "Unknown"}
                 </td>
