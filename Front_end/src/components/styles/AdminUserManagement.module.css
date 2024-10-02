@@ -103,15 +103,15 @@
 }
 .statsSection {
     display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
-    background-color: #635985;  /* Match the purple color */
-    padding: 20px;  /* Add padding to make it look more balanced */
-    border-radius: 8px;  /* Add rounded corners */
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #635985;
+    border-radius: 8px;
+    margin-top: 20px;  /* Optional: Add margin at the top to ensure spacing */
 }
 
 .statItem {
-    flex-basis: 48%;
+    flex: 1;  /* Allow each item to take equal space */
     text-align: center;
     background-color: transparent;  /* Make individual items transparent to inherit the section's background */
     color: white;  /* Adjust text color to white to stand out on the purple background */
@@ -164,3 +164,183 @@
 .adminItem p {
     margin: 5px 0;
 }
+.rowContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;  /* Align items to the top */
+    gap: 20px;
+    width: 100%;  /* Ensure the container takes full width */
+}
+
+
+.profileSection {
+    width: 30%;  /* Width of the profile section */
+    min-width: 300px;
+}
+
+
+.mainContent {
+    width: 755%;
+}
+
+.weatherSection {
+    background-color: #635985;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;  /* Add margin at the bottom for spacing */
+    text-align: center;
+    color: white;
+}
+
+.weatherInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.weatherIcon {
+    width: 50px;
+    height: 50px;
+}
+.clockSection {
+    background-color: #635985;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;  /* Add margin at the bottom for spacing */
+    text-align: center;
+    color: white;
+}
+
+.clockSection p {
+    font-size: 1.5em;
+    margin: 0;
+}
+.adminList {
+    margin-top: 20px;
+    background-color: #635985;
+    padding: 15px;
+    border-radius: 8px;
+    color: white;
+}
+
+.adminList ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.adminList li {
+    margin: 5px 0;
+}
+
+/* Modal overlay to cover the entire screen */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it is above everything else */
+}
+
+/* Modal content box */
+.modalContent {
+    background-color: #635985;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px; /* Adjust width as needed */
+    max-height: 70%; /* Make sure the modal doesn't overflow the screen */
+    overflow-y: auto; /* Allow scrolling if the content is too long */
+    position: relative;
+}
+
+/* Close button style */
+.closeButton {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modalContent ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.modalContent li {
+    margin: 5px 0;
+}
+/* Ensure the file input container aligns the content to the left */
+.fileInputContainer {
+    display: flex; /* Ensure flex alignment */
+    justify-content: flex-start; /* Align to the left */
+    margin-bottom: 20px;
+    width: 100%; /* Ensure full width is available */
+}
+
+/* Hidden file input */
+.hiddenFileInput {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* Custom button for file upload */
+.customFileButton {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    display: block; /* Ensure it behaves like a block-level element */
+}
+
+/* Hover effect for the button */
+.customFileButton:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+.forecastList {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.forecastList li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.weatherIcon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+.eventSection {
+    background-color: #635985; /* Lighter purple */
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px; /* Add spacing between this section and others */
+}
+
+.eventList {
+    list-style-type: disc; /* Customize the bullet style */
+    margin-left: 20px;
+    color: #ffffff; /* Make text color white */
+}
+
+.eventItem {
+    font-size: 14px;
+    margin-bottom: 8px; /* Spacing between event items */
+}
+
