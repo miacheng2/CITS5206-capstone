@@ -168,7 +168,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'in-v3.mailjet.com'
 EMAIL_PORT = 587  #  prefer SSL
 EMAIL_USE_TLS = True  # using SSL
-EMAIL_HOST_USER = '081007e42eae254d2c9c8d85e9cf9978'  # Replace with API Key
-EMAIL_HOST_PASSWORD = '2c2b25067ba8d05e453443e9dd4fafeb'  # Replace with Secret Key
-DEFAULT_FROM_EMAIL = '23813666@student.uwa.edu.au'  # Replace with sender email
+EMAIL_HOST_USER = '68672bb6051e4a695f5a3c2e9fcd5aa0'  # Replace with API Key
+EMAIL_HOST_PASSWORD = '2831a8bd877f192e4f236cb9a564bb93'  # Replace with Secret Key
+DEFAULT_FROM_EMAIL = 'tersorbeauge@gmail.com'  # Replace with sender email
 
