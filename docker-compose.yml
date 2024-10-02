@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./myproject
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+      - static-data:/app/static
+      - db-data:/app/db/
+  frontend:
+    build:
+      context: ./Front_end
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    volumes:
+      - static-data:/backend-static/
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
+  static-data:

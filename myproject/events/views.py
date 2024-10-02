@@ -477,6 +477,7 @@ def add_member_to_team(request, pk):
     serializer = DetailedTeamSerializer(team)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+# get, create and delete events
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
