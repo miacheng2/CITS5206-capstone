@@ -1,81 +1,86 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./styles/AddEventForm.css";
 
 function AddEventForm() {
-  const [users, setUsers] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [teams, setTeams] = useState([]);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     eventName: "",
     date: "",
-    teamLeader: "",
+    team: "",
     eventType: "",
     activities: [],
   });
 
+  const fetchWithToken = async (url) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found, redirecting to login.");
+      // Handle the absence of token (e.g., redirect to login)
+      navigate("/login");
+      return null;
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 401) {
+      console.error("Unauthorized: Redirecting to login.");
+      // Handle unauthorized access (e.g., redirect to login)
+      navigate("/login");
+      return null;
+    }
+
+    return response.json();
+  };
+
+  // Decode JWT to extract user info (assuming user info is in the payload)
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const token = localStorage.getItem("token"); // Get the token from localStorage
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        // Fetch users
-        const usersResponse = await fetch("http://localhost:8000/api/users/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (usersResponse.ok) {
-          const usersData = await usersResponse.json();
-          setUsers(usersData);
+        const token = localStorage.getItem("token");
+        if (token) {
+          const userData = decodeToken(token);
+          setCurrentUser(userData);
         } else {
-          console.error(
-            "Failed to fetch users:",
-            usersResponse.status,
-            usersResponse.statusText
-          );
-          if (usersResponse.status === 401) {
-            console.error("Unauthorized: Redirecting to login.");
-            window.location.href = "/login"; // Redirect to login if unauthorized
-          }
+          navigate("/login");
         }
 
-        // Fetch events
-        const eventsResponse = await fetch(
-          "http://localhost:8000/api/events/",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Set the Authorization header
-              "Content-Type": "application/json",
-            },
-          }
+        // Fetch teams
+        const teamsData = await fetchWithToken(
+          "http://localhost:8000/api/teams/"
         );
-
-        if (eventsResponse.ok) {
-          const eventsData = await eventsResponse.json();
-          console.log("Fetched events:", eventsData);
-          // You can do something with the events data if needed
-        } else {
-          console.error(
-            "Failed to fetch events:",
-            eventsResponse.status,
-            eventsResponse.statusText
-          );
-          if (eventsResponse.status === 401) {
-            console.error("Unauthorized: Redirecting to login.");
-            window.location.href = "/login"; // Redirect to login if unauthorized
-          }
-        }
+        if (teamsData) setTeams(teamsData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -95,16 +100,16 @@ function AddEventForm() {
       }));
     }
   };
-    // Function to remove an activity
-    const removeActivityField = (index) => {
-      const updatedActivities = formData.activities.filter(
-        (activity, i) => i !== index
-      );
-      setFormData((prevState) => ({
-        ...prevState,
-        activities: updatedActivities,
-      }));
-    };
+  // Function to remove an activity
+  const removeActivityField = (index) => {
+    const updatedActivities = formData.activities.filter(
+      (activity, i) => i !== index
+    );
+    setFormData((prevState) => ({
+      ...prevState,
+      activities: updatedActivities,
+    }));
+  };
 
   const addActivityField = () => {
     setFormData((prevState) => ({
@@ -116,18 +121,14 @@ function AddEventForm() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    const { eventName, date, teamLeader, eventType, activities } = formData;
+    if (!currentUser) {
+      alert("Unable to submit, current user not found.");
+      return;
+    }
+
+    const { eventName, date, team, eventType, activities } = formData;
 
     try {
-      const userId = users.find(
-        (user) =>
-          user.username.trim().toLowerCase() === teamLeader.toLowerCase()
-      )?.id;
-
-      if (!userId) {
-        throw new Error("User ID not found");
-      }
-
       const formattedActivities = activities.map((activityName) => ({
         name: activityName,
       }));
@@ -136,7 +137,8 @@ function AddEventForm() {
         name: eventName,
         event_type: eventType,
         date: date,
-        created_by: userId,
+        team: team,
+        created_by: currentUser.user_id, // Use the user ID from the decoded token
         activities: formattedActivities,
       };
 
@@ -144,18 +146,16 @@ function AddEventForm() {
         delete formattedData.activities;
       }
 
-      // Get the JWT token from localStorage
       const token = localStorage.getItem("token");
       if (!token) {
         throw new Error("No token found");
       }
 
-      // Make the POST request with the Authorization header
       const response = await fetch("http://localhost:8000/api/events/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formattedData),
       });
@@ -210,7 +210,7 @@ function AddEventForm() {
           </div>
 
           <div className="form-group">
-            <label>Team Leader:</label>
+            <label>Team:</label>
             <select
               name="teamLeader"
               value={formData.teamLeader}
@@ -218,10 +218,10 @@ function AddEventForm() {
               required
               className="form-input"
             >
-              <option value="">Select a Team Leader</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.username}>
-                  {user.username}
+              <option value="">Select a Team</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.name}>
+                  {team.name}
                 </option>
               ))}
             </select>
@@ -247,16 +247,16 @@ function AddEventForm() {
               <label>Activities:</label>
               {formData.activities.map((activity, index) => (
                 <div key={index} className="activity-item">
-                <input
-                  key={index}
-                  type="text"
-                  name={`activity-${index}`}
-                  value={activity}
-                  onChange={handleChange}
-                  placeholder={`Activity ${index + 1}`}
-                  className="form-input"
-                />
-                <button
+                  <input
+                    key={index}
+                    type="text"
+                    name={`activity-${index}`}
+                    value={activity}
+                    onChange={handleChange}
+                    placeholder={`Activity ${index + 1}`}
+                    className="form-input"
+                  />
+                  <button
                     type="button"
                     className="remove-activity-btn"
                     onClick={() => removeActivityField(index)}
@@ -264,11 +264,8 @@ function AddEventForm() {
                     &times;
                   </button>
                 </div>
-                
-                
-              
               ))}
-              
+
               <button
                 type="button"
                 className="add-activity-btn"
