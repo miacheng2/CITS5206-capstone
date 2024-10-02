@@ -137,10 +137,12 @@ function AddEventForm() {
         name: eventName,
         event_type: eventType,
         date: date,
-        team: team,
+        team: Number(team),
         created_by: currentUser.user_id, // Use the user ID from the decoded token
         activities: formattedActivities,
       };
+
+      console.log(formattedData);
 
       if (eventType === "off_water") {
         delete formattedData.activities;
@@ -168,7 +170,7 @@ function AddEventForm() {
       setFormData({
         eventName: "",
         date: "",
-        teamLeader: "",
+        team: "",
         eventType: "",
         activities: [],
       });
@@ -212,15 +214,15 @@ function AddEventForm() {
           <div className="form-group">
             <label>Team:</label>
             <select
-              name="teamLeader"
-              value={formData.teamLeader}
+              name="team"
+              value={formData.team}
               onChange={handleChange}
               required
               className="form-input"
             >
               <option value="">Select a Team</option>
               {teams.map((team) => (
-                <option key={team.id} value={team.name}>
+                <option key={team.id} value={team.id}>
                   {team.name}
                 </option>
               ))}
