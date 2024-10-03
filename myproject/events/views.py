@@ -222,6 +222,8 @@ def team_with_members(request):
             'name': team.name,
             'description': team.description,
             'team_leader': team.team_leader.username if team.team_leader else None,  # Fetch the username
+            'creation_date': team.creation_date,  # Add creation_date to the response
+            'last_modified_date': team.last_modified_date,  
             'members': members
         })
     return Response(data)
@@ -352,6 +354,37 @@ class ChangePasswordView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Adjust permission as needed
+def remove_members(request, team_id):
+    try:
+        # Get the team by its ID
+        team = Team.objects.get(id=team_id)
+
+        # Get the list of members to be removed from the request data
+        member_ids = request.data.get('members', [])
+
+        if not member_ids:
+            return Response({'detail': 'No members provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Iterate over the member IDs and remove them from the team
+        for member_id in member_ids:
+            try:
+                member = TeamMember.objects.get(australian_sailing_number=member_id)
+                team.members.remove(member)  # Remove the member from the team's members
+            except TeamMember.DoesNotExist:
+                return Response({'detail': f'Team member with ID {member_id} does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        team.save()  # Save changes to the team
+
+        return Response({'detail': 'Members removed successfully.'}, status=status.HTTP_200_OK)
+
+    except Team.DoesNotExist:
+        return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'detail': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
 def get_team_leaders(request):
     team_leaders = User.objects.filter(user_type='team_leader')  # select team_leader 
