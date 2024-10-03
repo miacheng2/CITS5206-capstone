@@ -99,7 +99,19 @@ class LoginView(APIView):
         
         # If authentication fails, it means the password is incorrect
         return Response({'detail': 'Incorrect password'}, status=status.HTTP_401_UNAUTHORIZED)
-    
+@api_view(['DELETE'])
+def delete_user(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+        
+        # Check if the user is 'admin' and prevent deletion
+        if user.username == 'admin':
+            return Response({"error": "The 'admin' user cannot be deleted."}, status=status.HTTP_403_FORBIDDEN)
+        
+        user.delete()
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
 class CustomAuthToken(APIView):
     def post(self, request, *args, **kwargs):
