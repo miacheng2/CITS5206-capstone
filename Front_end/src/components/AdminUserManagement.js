@@ -24,7 +24,6 @@ const AdminUserManagement = () => {
     const [createErrorMessage, setCreateErrorMessage] = useState('');
     const [admins, setAdmins] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
-    const [loading, setLoading] = useState(true);
     const [weather, setWeather] = useState({ temp: '', description: '', icon: '' });
     const [locationError, setLocationError] = useState(null);
     const [currentTime, setCurrentTime] = useState('');
@@ -36,6 +35,8 @@ const AdminUserManagement = () => {
     const [forecast, setForecast] = useState([]);
     const navigate = useNavigate(); // For navigation
     const hasAlerted = useRef(false); // Prevent multiple alerts
+    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         const checkPermissions = async () => {
@@ -123,6 +124,37 @@ const AdminUserManagement = () => {
             return "Good Night";
         }
     };
+    const handleDeleteUser = async (id, userType) => {
+        const confirmDelete = window.confirm(`Are you sure you want to delete this ${userType}?`);
+        if (!confirmDelete) return;
+    
+        setLoading(true); // Start loading
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(`http://localhost:8000/api/delete-user/${id}/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+    
+            if (response.status === 200) {
+                alert(`${userType} deleted successfully`);
+                window.location.reload(); // Reload the page to refresh the user list
+            } else {
+                alert(`Failed to delete ${userType}. Please try again.`);
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            alert(`This 'admin' username cannot be deleted.`);
+        } finally {
+            setLoading(false); // Stop loading
+        }
+    };
+    
+    
+    
+    
+
 
     const formatTime = (date) => {
         let hours = date.getHours();
@@ -348,25 +380,36 @@ const AdminUserManagement = () => {
             if (response.status === 201) {
                 setCreateSuccessMessage(`${newUser.role === 'admin' ? 'Admin' : 'Team leader'} user created successfully!`);
                 setNewUser({ username: '', password: '', email: '', role: 'admin' });
+
+                // Re-fetch the user lists
+                fetchAdminList();
+                fetchTeamLeaderList();
             }
         } catch (error) {
             setCreateErrorMessage('Failed to create user. Please try again.');
         }
     };
 
+
     return (
         <div className={styles.container}>
+            {loading && (
+            <div className={styles.loadingOverlay}>
+                <div className={styles.spinner}></div>
+            </div>
+        )}
             <div className={styles.rowContainer}>
                 {/* Profile Section */}
                 <div className={styles.profileSection}>
                     <header className={styles.header}>
                         <h1>Hello, {currentUser}!</h1>
+                        <h4>Welcome to the Admin Management</h4>
                         {user.avatar && typeof user.avatar === 'string' ? (
                             <img src={`http://localhost:8000${user.avatar.replace(/\\/g, '/')}`} alt="User Avatar" className={styles.avatar} />
                         ) : (
                             <p>No Avatar Available</p>
                         )}
-                        <p>Welcome to the Admin User Management</p>
+                        
                     </header>
                     <div className={styles.clockSection}>
                         <p>{timeOfDay}</p>
@@ -501,20 +544,34 @@ const AdminUserManagement = () => {
                             <div className={styles.adminList}>
                                 {filteredAdmins.length > 0 || teamLeaders.length > 0 ? (
                                     <ul>
-                                        {/* Display matching admins */}
                                         {filteredAdmins.map(admin => (
                                             <li key={admin.id} className={`${styles.adminItem} ${styles[admin.role]}`}>
-                                                <p><strong>Username:</strong> {admin.username}</p>
-                                                <p><strong>Email:</strong> {admin.email}</p>
-                                                <p><strong>Role:</strong> {admin.user_type}</p>
+                                                <div className={styles.userDetails}>
+                                                    <div>
+                                                        <p><strong>Username:</strong> {admin.username}</p>
+                                                        <p><strong>Email:</strong> {admin.email}</p>
+                                                        <p><strong>Role:</strong> {admin.user_type}</p>
+                                                    </div>
+                                                    {/* Pass 'admin' as the user type */}
+                                                    <button onClick={() => handleDeleteUser(admin.id, 'admin')} className={styles.deleteButton}>
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </li>
                                         ))}
-                                        {/* Display matching team leaders */}
                                         {teamLeaders.map(leader => (
                                             <li key={leader.id} className={`${styles.adminItem} ${styles[leader.role]}`}>
-                                                <p><strong>Username:</strong> {leader.username}</p>
-                                                <p><strong>Email:</strong> {leader.email}</p>
-                                                <p><strong>Role:</strong> {leader.user_type}</p>
+                                                <div className={styles.userDetails}>
+                                                    <div>
+                                                        <p><strong>Username:</strong> {leader.username}</p>
+                                                        <p><strong>Email:</strong> {leader.email}</p>
+                                                        <p><strong>Role:</strong> {leader.user_type}</p>
+                                                    </div>
+                                                    {/* Pass 'team_leader' as the user type */}
+                                                    <button onClick={() => handleDeleteUser(leader.id, 'team_leader')} className={styles.deleteButton}>
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </li>
                                         ))}
                                     </ul>
@@ -523,6 +580,7 @@ const AdminUserManagement = () => {
                                 )}
                             </div>
                         )}
+
                     </div>
 
                     {/* Profile Update Form */}
