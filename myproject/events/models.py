@@ -87,7 +87,7 @@ class TeamMember(models.Model):
     australian_sailing_number = models.IntegerField(primary_key=True)
     first_name = models.CharField(max_length=100,default='DEFAULT VALUE')
     last_name = models.CharField(max_length=100,default='DEFAULT VALUE')
-    mobile = models.IntegerField(null=True)
+    mobile = models.CharField(max_length=20)  
     email = models.EmailField()
     membership_category = models.CharField(max_length=50)
     will_volunteer_or_pay_levy = models.CharField(

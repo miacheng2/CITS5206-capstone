@@ -709,25 +709,20 @@ def import_csv(request):
                 ]
 
                 # Check if the CSV has all required columns
-                if not all(col in reader.fieldnames for col in required_columns):
-                    return JsonResponse({'status': 'error', 'message': 'Invalid CSV format. Missing required columns.'}, status=400)
+                missing_columns = [col for col in required_columns if col not in reader.fieldnames]
+                if missing_columns:
+                    return JsonResponse({'status': 'error', 'message': f'Invalid CSV format. Missing required columns: {", ".join(missing_columns)}'}, status=400)
 
                 for row_number, row in enumerate(reader, start=2):  # Start at row 2 (header is row 1)
-                    # Map CSV fields to variables
-                    asn = row['AustralianSailing number'].strip()
-                    first_name = row['Firstname'].strip()
-                    last_name = row['Last name'].strip()
-                    email = row['Email address'].strip()
-                    mobile = row['Mobile'].strip()
-                    membership_category = row['Payment status'].strip()
-                    will_volunteer_or_pay_levy = row['Will you be volunteering or pay the volunteer levy?'].strip()
-                    team_names = row['Which volunteer team do you wish to join?'].split(',')
-                    
-
-                    # Validate mobile number (e.g., only digits, 5-15 characters)
-                    if not re.match(r'^\d{5,15}$', mobile):
-                        validation_errors.append(f"Row {row_number}: Invalid mobile number '{mobile}'. It should contain only digits and be between 10 and 15 characters.")
-                        continue  # Skip this row
+                    # Map CSV fields to variables based on their actual column names
+                    asn = row.get('AustralianSailing number', '').strip()
+                    first_name = row.get('Firstname', '').strip()
+                    last_name = row.get('Last name', '').strip()
+                    email = row.get('Email address', '').strip()
+                    mobile = row.get('Mobile', '').strip()
+                    membership_category = row.get('Payment status', '').strip()
+                    will_volunteer_or_pay_levy = row.get('Will you be volunteering or pay the volunteer levy?', '').strip()
+                    team_names = row.get('Which volunteer team do you wish to join?', '').split(',')
 
                     # Validate email format
                     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
@@ -741,7 +736,7 @@ def import_csv(request):
                             'first_name': first_name,
                             'last_name': last_name,
                             'email': email,
-                            'mobile': mobile,
+                            'mobile': mobile,  # Accept mobile as it is (any format)
                             'membership_category': membership_category,
                             'will_volunteer_or_pay_levy': will_volunteer_or_pay_levy,
                         }
@@ -750,12 +745,14 @@ def import_csv(request):
                     if created:
                         new_records += 1
                     else:
+                        # Check if any updates are needed
                         if (teammember.first_name != first_name or
                             teammember.last_name != last_name or
                             teammember.email != email or
                             teammember.mobile != mobile or
                             teammember.membership_category != membership_category or
                             teammember.will_volunteer_or_pay_levy != will_volunteer_or_pay_levy):
+                            # Update fields if they differ
                             teammember.first_name = first_name
                             teammember.last_name = last_name
                             teammember.email = email
@@ -791,6 +788,7 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
 
 
 @api_view(['GET'])

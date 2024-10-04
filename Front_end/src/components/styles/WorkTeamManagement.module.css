@@ -155,8 +155,25 @@ td>button:last-child {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    max-height: 80vh; /* Set maximum height relative to the viewport */
+    max-height: none; /* Set maximum height relative to the viewport */
     overflow-y: auto;
+}
+.scrollableMembers {
+    max-height: 300px; /* Set the maximum height for the table */
+    overflow-y: auto; /* Enable vertical scrolling when content overflows */
+    margin-top: 1em;
+    border: 1px solid #ccc; /* Optional: Add a border to the container */
+}
+
+.scrollableMembers table {
+    width: 100%; /* Ensure the table takes the full width of the container */
+    border-collapse: collapse; /* Make table borders look nice */
+}
+
+.scrollableMembers th, .scrollableMembers td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* Optional: Add a bottom border to table rows */
 }
 
 .popupContent {
@@ -225,3 +242,4 @@ table {
         transform: rotate(360deg);
     }
 }
+
