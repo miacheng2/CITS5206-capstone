@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from 'file-saver';
 
 
@@ -7,6 +7,10 @@ import styles from './styles/WorkTeamManagement.module.css';
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
+    const popupRef = useRef(null); 
+    const [shouldScrollMembers, setShouldScrollMembers] = useState(false); // Track when to scroll the members list
+
+
 
 
 
@@ -26,6 +30,7 @@ const WorkTeamManagement = () => {
 
 
 
+
     const [editedTeam, setEditedTeam] = useState({
         Members: []
     });
@@ -40,6 +45,7 @@ const WorkTeamManagement = () => {
         LastModifyDate: '',
         Members: [],
     });
+
 
 
 
@@ -104,7 +110,7 @@ const WorkTeamManagement = () => {
             try {
                 const response = await fetchWithAuth('http://localhost:8000/api/teams-with-members/');
                 const data = await response.json();
-                console.log('Fetched team data:', data); 
+                console.log('Fetched team data:', data);
 
 
                 if (Array.isArray(data)) {
@@ -140,6 +146,8 @@ const WorkTeamManagement = () => {
         };
         fetchTeamLeaders();
     }, []);
+
+    
 
     const handleEditClick = (member) => {
         setEditingMember(member);
@@ -305,6 +313,7 @@ const WorkTeamManagement = () => {
         // Viewing logic without selecting the team
         console.log("Viewing team:", team);
         setSelectedTeam(team);
+        
         // Set the popup to open for viewing
         localStorage.setItem('selectedTeamId', team.id);
         localStorage.setItem('isPopupOpen', 'true');
@@ -315,14 +324,14 @@ const WorkTeamManagement = () => {
 
 
     const handleClosePopup = () => {
-        setIsUpdating(false); 
+        setIsUpdating(false);
         setNewTeam({
             TeamName: '',
             Description: '',
             TeamLeader: '',
-        }); 
+        });
     };
-    
+
 
     const ClosePopup = () => {
         setSelectedTeam(null); // Close the popup and clear the selected team
@@ -373,12 +382,12 @@ const WorkTeamManagement = () => {
             const team = teams.find(t => t.id === parseInt(savedTeamId));
 
             if (team) {
-                setSelectedTeam(team);  
-                setIsEditing(true);  
+                setSelectedTeam(team);
+                setIsEditing(true);
             }
         }
     }, [teams]);
-    
+
 
 
     const handleAddMember = async () => {
@@ -401,15 +410,18 @@ const WorkTeamManagement = () => {
                 }),
             });
 
-            if (response.ok) {
+            if (response.ok&&popupRef.current) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
                 setMemberSelected(false);  // Ensure the member selection state is reset
-
+                
 
                 // Save the add member state and search query to localStorage
                 localStorage.setItem('isAddingMember', 'true');
                 localStorage.setItem('isEditing', 'true');
+                setShouldScrollMembers(true);  // Set flag to scroll members list
+
+
 
                 window.location.reload();
             } else {
@@ -425,12 +437,12 @@ const WorkTeamManagement = () => {
     useEffect(() => {
         const savedIsAddingMember = localStorage.getItem('isAddingMember');
         const savedIsEditing = localStorage.getItem('isEditing');
-    
+
         if (savedIsAddingMember === 'true') {
-            setIsAddingMember(true);  
+            setIsAddingMember(true);
         }
         if (savedIsEditing === 'true') {
-            setIsEditing(true);  
+            setIsEditing(true);
         }
 
         return () => {
@@ -438,7 +450,15 @@ const WorkTeamManagement = () => {
             localStorage.removeItem('isEditing');
         };
     }, []);
+
+    useEffect(() => {
+        if (shouldScrollMembers && popupRef.current) {
+            popupRef.current.scrollTop = popupRef.current.scrollHeight;  // Scroll to the bottom
+            setShouldScrollMembers(false);  // Reset flag after scrolling
+        }
+    }, [shouldScrollMembers]);
     
+
 
 
 
@@ -504,7 +524,7 @@ const WorkTeamManagement = () => {
 
     const handleAddTeam = () => {
         setIsAdding(true);
-       
+
 
     };
 
@@ -568,7 +588,7 @@ const WorkTeamManagement = () => {
         setSearchQuery('');        // Clear search bar
 
         localStorage.removeItem('isAddingMember');
-        localStorage.removeItem('isEditing');  
+        localStorage.removeItem('isEditing');
     };
 
 
@@ -657,6 +677,7 @@ const WorkTeamManagement = () => {
             }
         }
     };
+
 
     const handleRemoveMember = async () => {
         setIsAddingMember(false);  // Ensure adding member is turned off when deleting
@@ -808,7 +829,7 @@ const WorkTeamManagement = () => {
 
             {selectedTeam && (
                 <div className={styles.popupBack}>
-                    <div className={styles.popup}>
+                    <div className={styles.popup} >
                         <div className={styles.popupContent}>
                             <div className={styles.subdivPopup}>
                                 <div>
@@ -822,13 +843,15 @@ const WorkTeamManagement = () => {
                             <h4>Description: </h4>
                             <p> {selectedTeam.description}</p>
                             <h4>Team Leader: </h4>
-                            <p>{selectedTeam.team_leader || "No leader assigned"}</p> 
-                           
+                            <p>{selectedTeam.team_leader || "No leader assigned"}</p>
+
                             <h4>Creation Date:</h4>
-                            <p>{selectedTeam.creation_date || "No date available"}</p> 
-                             
-                  
+                            <p>{selectedTeam.creation_date || "No date available"}</p>
+
+
                             <h3>Members:</h3>
+                            <div className={styles.scrollableMembers} ref={popupRef}>
+
                             <table>
                                 <thead>
                                     <tr>
@@ -840,7 +863,7 @@ const WorkTeamManagement = () => {
                                         <th>mobile</th>
                                         <th>membershipCategory</th>
                                         <th>volunteerOrPay</th>
-{/*                                         <th>Actions</th>
+                                        {/*                                         <th>Actions</th>
  */}                                    </tr>
                                 </thead>
                                 <tbody>
@@ -876,6 +899,7 @@ const WorkTeamManagement = () => {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
 
                             {/* {isModalOpen && (
                                 <div className={styles.modal}>
@@ -1033,7 +1057,7 @@ const WorkTeamManagement = () => {
                                             Clear
                                         </button>
                                         <button className={styles.cancelButton} onClick={handleCancel}>
-                                            
+
                                             Cancel
                                         </button>
 

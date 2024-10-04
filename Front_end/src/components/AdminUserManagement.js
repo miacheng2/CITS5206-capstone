@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Make sure to import 
+import { useNavigate } from 'react-router-dom';
 import styles from './styles/AdminUserManagement.module.css';
 import api from '../api';
 
@@ -100,7 +100,7 @@ const AdminUserManagement = () => {
             const dailyForecast = forecastData.filter((entry) => {
                 const date = new Date(entry.dt_txt);
                 return date.getHours() === 12;  // Get the forecast at noon for each day
-            }).slice(0, 7);  // Get only the next 3 days
+            }).slice(1, 7);  // Get only the next 3 days
 
             setForecast(dailyForecast.map((entry) => ({
                 day: new Date(entry.dt_txt).toLocaleDateString('en-US', { weekday: 'long' }),
@@ -393,6 +393,8 @@ const AdminUserManagement = () => {
 
     return (
         <div className={styles.container}>
+                <div className={styles.blob}></div>  {/* Ensure this blob div is added */}
+
             {loading && (
             <div className={styles.loadingOverlay}>
                 <div className={styles.spinner}></div>
@@ -436,6 +438,7 @@ const AdminUserManagement = () => {
                         ) : (
                             <p>Loading weather...</p>
                         )}
+                        
                     </div>
 
                     <section className={styles.eventSection}>
@@ -515,7 +518,7 @@ const AdminUserManagement = () => {
                     {/* Search and Admin List */}
 
                     <div className={styles.feature}>
-                        <h3>7-Day Weather Forecast</h3>
+                        <h3>Coming Day Weather Forecast</h3>
                         <ul className={styles.forecastList}>
                             {forecast.map((day, index) => (
                                 <li key={index}>
@@ -668,7 +671,9 @@ const AdminUserManagement = () => {
                 </div>
             </div>
         </div>
+        
     );
 };
+
 
 export default AdminUserManagement;
