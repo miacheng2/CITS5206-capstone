@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import ConfirmationModal from "./ConfirmationModal"; 
+import "./EventDetailsModal.css"; 
 
 function MemberVolunteerHistory() {
   const { uid } = useParams(); // Get the uid from the URL
   const [history, setHistory] = useState([]);
   const [editIndex, setEditIndex] = useState(null); // To track which row is being edited
   const [updatedEntry, setUpdatedEntry] = useState({ points: "", hours: "" });
+  const [showModal, setShowModal] = useState(false); // Modal state for confirming deletion
+  const [selectedEntryId, setSelectedEntryId] = useState(null); // To store the ID of the entry to delete
+  const [filterName, setFilterName] = useState(""); // New state for filtering by name
+  const [filterMonth, setFilterMonth] = useState(""); // New state for filtering by month
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -103,8 +109,13 @@ function MemberVolunteerHistory() {
     }
   };
 
-  // Function to handle deletion
-  const handleDeleteClick = async (id) => {
+  // Function to handle deletion with confirmation
+  const handleDeleteClick = (id) => {
+    setSelectedEntryId(id);
+    setShowModal(true); // Show the confirmation modal
+  };
+
+  const handleConfirmDelete = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No token found, redirecting to login.");
@@ -112,13 +123,14 @@ function MemberVolunteerHistory() {
       return;
     }
 
-    const updatedHistory = history.filter((entry) => entry.id !== id);
+    const updatedHistory = history.filter((entry) => entry.id !== selectedEntryId);
     setHistory(updatedHistory);
+    setShowModal(false); // Hide the modal
 
     // Delete the entry from the server (API call)
     try {
       const response = await fetch(
-        `http://localhost:8000/api/volunteer-points/${id}/`,
+        `http://localhost:8000/api/volunteer-points/${selectedEntryId}/`,
         {
           method: "DELETE",
           headers: {
@@ -135,10 +147,52 @@ function MemberVolunteerHistory() {
     }
   };
 
+  // Filter logic for the history table
+  const filteredHistory = history.filter((entry) => {
+    const matchesName = entry.event_name.toLowerCase().includes(filterName.toLowerCase());
+    const matchesMonth = !filterMonth || entry.event_date.startsWith(filterMonth);
+    return matchesName && matchesMonth;
+  });
+
   return (
     <div>
-      <h2>Volunteer History for Member {uid}</h2>
-      <table>
+      <header className="event-section">
+        <div className="overlay">
+          <div className="text-container">
+            <h2>Report History</h2>
+          </div>
+        </div>
+      </header>
+
+      <div className="filter-controls">
+        <input
+          type="text"
+          placeholder="Search by event name"
+          value={filterName}
+          onChange={(e) => setFilterName(e.target.value)}
+        />
+        <select
+          value={filterMonth}
+          onChange={(e) => setFilterMonth(e.target.value)}
+        >
+          <option value="">All Months</option>
+          {/* Month options */}
+          <option value="01">January</option>
+          <option value="02">February</option>
+          <option value="03">March</option>
+          <option value="04">April</option>
+          <option value="05">May</option>
+          <option value="06">June</option>
+          <option value="07">July</option>
+          <option value="08">August</option>
+          <option value="09">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+
+      <table className="event-table">
         <thead>
           <tr>
             <th>Event ID</th>
@@ -152,63 +206,87 @@ function MemberVolunteerHistory() {
           </tr>
         </thead>
         <tbody>
-          {history.map((entry, index) => (
-            <tr key={entry.id}>
-              <td>{entry.id}</td>
-              <td>{entry.event_name}</td>
-              <td>{entry.event_date}</td>
-              <td>{entry.activity}</td>
+          {filteredHistory.length > 0 ? (
+            filteredHistory.map((entry, index) => (
+              <tr key={entry.id}>
+                <td>{entry.id}</td>
+                <td>{entry.event_name}</td>
+                <td>{entry.event_date}</td>
+                <td>{entry.activity}</td>
 
-              {/* Conditionally render input fields for editing */}
-              {editIndex === index ? (
-                <>
-                  <td>
-                    <input
-                      type="number"
-                      name="points"
-                      value={updatedEntry.points}
-                      onChange={handleInputChange}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="number"
-                      name="hours"
-                      value={updatedEntry.hours}
-                      onChange={handleInputChange}
-                    />
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{entry.points}</td>
-                  <td>{entry.hours}</td>
-                </>
-              )}
-              <td>{entry.created_by}</td>
-              <td>
+                {/* Conditionally render input fields for editing */}
                 {editIndex === index ? (
                   <>
-                    <button onClick={() => handleSaveClick(index, entry.id)}>
-                      Save
-                    </button>
-                    <button onClick={() => setEditIndex(null)}>Cancel</button>
+                    <td>
+                      <input
+                        type="number"
+                        name="points"
+                        value={updatedEntry.points}
+                        onChange={handleInputChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        name="hours"
+                        value={updatedEntry.hours}
+                        onChange={handleInputChange}
+                      />
+                    </td>
                   </>
                 ) : (
                   <>
-                    <button onClick={() => handleEditClick(index, entry)}>
-                      Edit
-                    </button>
-                    <button onClick={() => handleDeleteClick(entry.id)}>
-                      Delete
-                    </button>
+                    <td>{entry.points}</td>
+                    <td>{entry.hours}</td>
                   </>
                 )}
+                <td>{entry.created_by}</td>
+                <td>
+                  {editIndex === index ? (
+                    <>
+                      <button
+                        onClick={() => handleSaveClick(index, entry.id)}
+                        className="confirm-btn"
+                      >
+                        Save
+                      </button>
+                      <button onClick={() => setEditIndex(null)} className="cancel-btn">
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => handleEditClick(index, entry)} className="confirm-btn">
+                        Edit
+                      </button>
+                      <button onClick={() => handleDeleteClick(entry.id)} className="cancel-btn">
+                        Delete
+                      </button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan="8" className="no-events-message">
+                No events found
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
+
+      {/* Confirmation Modal for Delete */}
+      {showModal && (
+        <ConfirmationModal
+          isOpen={showModal}
+          message="Are you sure you want to delete this entry?"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setShowModal(false)}
+          showConfirmButtons={true}
+        />
+      )}
     </div>
   );
 }

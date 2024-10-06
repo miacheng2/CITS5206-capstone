@@ -12,6 +12,8 @@ function AddVolunteerPoints() {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
+  const navigate = useNavigate(); 
+
 
   const [modalMessage, setModalMessage] = useState(""); // Modal message state
   const [isModalOpen, setModalOpen] = useState(false);  // Modal visibility state
@@ -21,6 +23,7 @@ function AddVolunteerPoints() {
     if (!token) {
       console.error("No token found, redirecting to login.");
       // Handle the absence of token (e.g., redirect to login)
+      navigate("/login");
       return null;
     }
 
@@ -34,6 +37,7 @@ function AddVolunteerPoints() {
     if (response.status === 401) {
       console.error("Unauthorized: Redirecting to login.");
       // Handle unauthorized access (e.g., redirect to login)
+      navigate("/login");
       return null;
     }
 

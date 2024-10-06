@@ -32,6 +32,7 @@ from django.db import IntegrityError
 import logging
 import csv
 import os
+import re
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
@@ -69,7 +70,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
     
     def post(self, request):
         username = request.data.get('username')
@@ -79,6 +80,11 @@ class LoginView(APIView):
         if not username or not password:
             return Response({'detail': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Check if the username exists
+        if not User.objects.filter(username=username).exists():
+            return Response({'detail': 'Username does not exist'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Authenticate the user (check the password)
         user = authenticate(username=username, password=password)
         if user is not None:
             # Generate JWT tokens for authenticated user
@@ -91,9 +97,21 @@ class LoginView(APIView):
                 'user_role': user_role  # Include the user role in the response
             }, status=status.HTTP_200_OK)
         
-        # Return 401 Unauthorized for invalid credentials
-        return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-    
+        # If authentication fails, it means the password is incorrect
+        return Response({'detail': 'Incorrect password'}, status=status.HTTP_401_UNAUTHORIZED)
+@api_view(['DELETE'])
+def delete_user(request, pk):
+    try:
+        user = User.objects.get(pk=pk)
+        
+        # Check if the user is 'admin' and prevent deletion
+        if user.username == 'admin':
+            return Response({"error": "The 'admin' user cannot be deleted."}, status=status.HTTP_403_FORBIDDEN)
+        
+        user.delete()
+        return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
 class CustomAuthToken(APIView):
     def post(self, request, *args, **kwargs):
@@ -126,6 +144,19 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         
         return data
 
+@api_view(['GET'])
+def admin_list(request):
+    # Fetch all users who are either admins or team leaders
+    users = User.objects.filter(user_type__in=['admin', 'team_leader'])  # Adjust based on your roles
+    user_data = []
+    for user in users:
+        user_data.append({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'user_type': user.user_type,  # Assuming user_type is either 'admin' or 'team_leader'
+        })
+    return Response(user_data)
 
 class GetProfileView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
@@ -203,6 +234,8 @@ def team_with_members(request):
             'name': team.name,
             'description': team.description,
             'team_leader': team.team_leader.username if team.team_leader else None,  # Fetch the username
+            'creation_date': team.creation_date,  # Add creation_date to the response
+            'last_modified_date': team.last_modified_date,  
             'members': members
         })
     return Response(data)
@@ -333,6 +366,37 @@ class ChangePasswordView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Adjust permission as needed
+def remove_members(request, team_id):
+    try:
+        # Get the team by its ID
+        team = Team.objects.get(id=team_id)
+
+        # Get the list of members to be removed from the request data
+        member_ids = request.data.get('members', [])
+
+        if not member_ids:
+            return Response({'detail': 'No members provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Iterate over the member IDs and remove them from the team
+        for member_id in member_ids:
+            try:
+                member = TeamMember.objects.get(australian_sailing_number=member_id)
+                team.members.remove(member)  # Remove the member from the team's members
+            except TeamMember.DoesNotExist:
+                return Response({'detail': f'Team member with ID {member_id} does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        team.save()  # Save changes to the team
+
+        return Response({'detail': 'Members removed successfully.'}, status=status.HTTP_200_OK)
+
+    except Team.DoesNotExist:
+        return Response({'detail': 'Team not found.'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'detail': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
 def get_team_leaders(request):
     team_leaders = User.objects.filter(user_type='team_leader')  # select team_leader 
@@ -366,7 +430,17 @@ class TeamViewSet(viewsets.ModelViewSet):
     serializer_class = TeamSerializer
     permission_classes = [IsAuthenticated] 
 
-
+@api_view(['POST'])
+def create_team(request):
+    # Use the serializer for validation and team creation
+    serializer = DetailedTeamSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class DetailedTeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
     serializer_class = DetailedTeamSerializer
@@ -374,8 +448,10 @@ class DetailedTeamViewSet(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def create_team(request):
+    
     team_leader_id = request.data.get('team_leader')
     description = request.data.get('description')
+    
 
     # pass team_leader ID
     team_leader = None
@@ -452,6 +528,7 @@ def add_member_to_team(request, pk):
     serializer = DetailedTeamSerializer(team)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
+# get, create and delete events
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all()
     serializer_class = EventSerializer
@@ -597,8 +674,9 @@ class AllMembersPointsAPIView(APIView):
         
         return Response(results)
 
+
 @csrf_exempt
-@permission_classes([IsAuthenticated,IsAdminUser])  #  to require authentication
+@permission_classes([IsAuthenticated, IsAdminUser])  # Require authentication
 def import_csv(request):
     if request.method == 'POST' and request.FILES.get('file'):
         file = request.FILES['file']
@@ -613,30 +691,52 @@ def import_csv(request):
         new_records = 0
         updated_records = 0
         unchanged_records = 0
+        validation_errors = []
 
         try:
             with open(file_path, newline='', encoding='utf-8') as csvfile:
-                reader = csv.reader(csvfile)
-                next(reader, None)  # Skip the header
+                reader = csv.DictReader(csvfile)  # Use DictReader to map column names dynamically
 
-                for row in reader:
-                    asn = row[0].strip()
-                    first_name = row[1].strip()
-                    last_name = row[2].strip()
-                    email = row[4].strip()
-                    mobile = row[3].strip()
-                    membership_category = row[5].strip()
-                    will_volunteer_or_pay_levy = row[6].strip()
-                    team_names = row[7].split(',')
-                    
+                required_columns = [
+                    'AustralianSailing number',
+                    'Firstname',
+                    'Last name',
+                    'Mobile',
+                    'Payment status',
+                    'Will you be volunteering or pay the volunteer levy?',
+                    'Which volunteer team do you wish to join?',
+                    'Email address'
+                ]
 
+                # Check if the CSV has all required columns
+                missing_columns = [col for col in required_columns if col not in reader.fieldnames]
+                if missing_columns:
+                    return JsonResponse({'status': 'error', 'message': f'Invalid CSV format. Missing required columns: {", ".join(missing_columns)}'}, status=400)
+
+                for row_number, row in enumerate(reader, start=2):  # Start at row 2 (header is row 1)
+                    # Map CSV fields to variables based on their actual column names
+                    asn = row.get('AustralianSailing number', '').strip()
+                    first_name = row.get('Firstname', '').strip()
+                    last_name = row.get('Last name', '').strip()
+                    email = row.get('Email address', '').strip()
+                    mobile = row.get('Mobile', '').strip()
+                    membership_category = row.get('Payment status', '').strip()
+                    will_volunteer_or_pay_levy = row.get('Will you be volunteering or pay the volunteer levy?', '').strip()
+                    team_names = row.get('Which volunteer team do you wish to join?', '').split(',')
+
+                    # Validate email format
+                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                        validation_errors.append(f"Row {row_number}: Invalid email '{email}'.")
+                        continue  # Skip this row
+
+                    # Process and create or update the team member
                     teammember, created = TeamMember.objects.get_or_create(
                         australian_sailing_number=asn,
                         defaults={
                             'first_name': first_name,
                             'last_name': last_name,
                             'email': email,
-                            'mobile': mobile,
+                            'mobile': mobile,  # Accept mobile as it is (any format)
                             'membership_category': membership_category,
                             'will_volunteer_or_pay_levy': will_volunteer_or_pay_levy,
                         }
@@ -645,12 +745,14 @@ def import_csv(request):
                     if created:
                         new_records += 1
                     else:
+                        # Check if any updates are needed
                         if (teammember.first_name != first_name or
                             teammember.last_name != last_name or
                             teammember.email != email or
                             teammember.mobile != mobile or
                             teammember.membership_category != membership_category or
                             teammember.will_volunteer_or_pay_levy != will_volunteer_or_pay_levy):
+                            # Update fields if they differ
                             teammember.first_name = first_name
                             teammember.last_name = last_name
                             teammember.email = email
@@ -662,6 +764,7 @@ def import_csv(request):
                         else:
                             unchanged_records += 1
 
+                    # Add teams
                     for team_name in team_names:
                         team_name = team_name.strip()
                         if team_name:
@@ -672,7 +775,8 @@ def import_csv(request):
                 'status': 'success',
                 'new_records': new_records,
                 'updated_records': updated_records,
-                'unchanged_records': unchanged_records
+                'unchanged_records': unchanged_records,
+                'validation_errors': validation_errors
             })
 
         except csv.Error as e:
@@ -684,6 +788,8 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated,IsAdminUser])

@@ -56,7 +56,7 @@ class DetailedTeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ['id', 'name', 'description', 'team_leader', 'team_leader_name', 'creation_date', 'last_modified_date', 'total_members','members']
+        fields = ['id', 'name', 'description', 'team_leader', 'team_leader_name', 'creation_date', 'last_modified_date', 'total_members', 'members']
 
     def get_total_members(self, obj):
         return obj.members.count()
@@ -65,32 +65,42 @@ class DetailedTeamSerializer(serializers.ModelSerializer):
         if obj.team_leader:
             return obj.team_leader.username  
         return "No leader"
-    
+
+    # Remove validation that requires leader
+    def validate_team_leader(self, value):
+        if value is None:
+            return None
+        if not User.objects.filter(id=value.id).exists():
+            raise serializers.ValidationError("The selected team leader does not exist.")
+        return value
+    def get_creation_date(self, obj):
+        if obj.creation_date:
+            return obj.creation_date.strftime('%Y-%m-%d')  # 以 YYYY-MM-DD 格式返回
+        return "No creation date available"
+
     def create(self, validated_data):
         members_data = validated_data.pop('members', [])  
         team = Team.objects.create(**validated_data)
-
-      
+        
         for member_data in members_data:
-            member = TeamMember.objects.get(australian_sailing_number=member_data['australian_sailing_number'])
+            member = TeamMember.objects.get(australian_sailing_number=member_data.australian_sailing_number)
             team.members.add(member)
 
         return team
-
-    
 
     def update(self, instance, validated_data):
         members_data = validated_data.pop('members', [])
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
+        # Allow updating the team without changing the team leader
         instance.team_leader = validated_data.get('team_leader', instance.team_leader)
         instance.save()
 
-      
         if members_data:
             instance.members.set(members_data)
 
         return instance
+
     
 class DetailedTeamMemberSerializer(serializers.ModelSerializer):
     teams = DetailedTeamSerializer(many=True, read_only=True)
@@ -135,7 +145,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Event
-        fields = ['id', 'name', 'event_type', 'date', 'created_by', 'activities']
+        fields = ['id', 'name', 'event_type', 'date', 'team','created_by', 'activities']
 
     def create(self, validated_data):
         activities_data = validated_data.pop('activities', [])

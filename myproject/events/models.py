@@ -74,6 +74,7 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+    
 class TeamMember(models.Model):
     I_WILL_VOLUNTEER = 'I will volunteer'
     I_WILL_PAY_LEVY = 'I will pay the levy'
@@ -86,7 +87,7 @@ class TeamMember(models.Model):
     australian_sailing_number = models.IntegerField(primary_key=True)
     first_name = models.CharField(max_length=100,default='DEFAULT VALUE')
     last_name = models.CharField(max_length=100,default='DEFAULT VALUE')
-    mobile = models.IntegerField(null=True)
+    mobile = models.CharField(max_length=20)  
     email = models.EmailField()
     membership_category = models.CharField(max_length=50)
     will_volunteer_or_pay_levy = models.CharField(
@@ -118,6 +119,7 @@ class Event(models.Model):
     name = models.CharField(max_length=100)
     event_type = models.CharField(max_length=10, choices=EVENT_TYPE_CHOICES)
     date = models.DateField()
+    team = models.ForeignKey(Team,on_delete=models.CASCADE, null=True, blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     activities = models.ManyToManyField(Activity, related_name='events', blank=True)
 
@@ -138,5 +140,5 @@ class VolunteerPoints(models.Model):
         elif self.event.event_type == 'on_water':
             # Custom logic for on-water events
             self.points = 20  # Fixed points for on-water events
-            self.hours = 3  # Set hours to zero for on-water events
+            self.hours = 3  # Set hours to three for on-water events
         super().save(*args, **kwargs)

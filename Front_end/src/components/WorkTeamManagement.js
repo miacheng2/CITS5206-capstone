@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { saveAs } from 'file-saver';
 
 
@@ -7,6 +7,10 @@ import styles from './styles/WorkTeamManagement.module.css';
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
+    const popupRef = useRef(null); 
+    const [shouldScrollMembers, setShouldScrollMembers] = useState(false); // Track when to scroll the members list
+
+
 
 
 
@@ -22,10 +26,7 @@ const WorkTeamManagement = () => {
 
     const [memberSelected, setMemberSelected] = useState(false);  // Flag to prevent multiple Enter presses
     const [loading, setLoading] = useState(false);
-
-
-
-
+    const [isAddingMember, setIsAddingMember] = useState(false);
 
 
 
@@ -44,6 +45,7 @@ const WorkTeamManagement = () => {
         LastModifyDate: '',
         Members: [],
     });
+
 
 
 
@@ -108,6 +110,8 @@ const WorkTeamManagement = () => {
             try {
                 const response = await fetchWithAuth('http://localhost:8000/api/teams-with-members/');
                 const data = await response.json();
+                console.log('Fetched team data:', data);
+
 
                 if (Array.isArray(data)) {
                     setTeams(data);
@@ -142,6 +146,8 @@ const WorkTeamManagement = () => {
         };
         fetchTeamLeaders();
     }, []);
+
+    
 
     const handleEditClick = (member) => {
         setEditingMember(member);
@@ -286,76 +292,60 @@ const WorkTeamManagement = () => {
             console.error("Invalid team or team ID:", team);
             return;
         }
-    
-        console.log("Selected team:", team);
-    
+        // Toggle the team's selection
         const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
-    
+
         if (isAlreadySelected) {
             setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
-            console.log("Removing team with ID:", team.id);
+            console.log("Removing team from selected:", team.id);
         } else {
             setSelectedTeams([...selectedTeams, team]);
-            console.log("Adding team with ID:", team.id);
+            console.log("Selecting team:", team.id);
         }
     };
+
     const handleViewClick = (team) => {
         if (!team || !team.id) {
             console.error("Invalid team or team ID:", team);
             return;
         }
 
-        console.log("Selected team:", team);
-
-        const isAlreadySelected = selectedTeams.some(selected => selected.id === team.id);
-
-        if (isAlreadySelected) {
-            setSelectedTeams(selectedTeams.filter(selected => selected.id !== team.id));
-            console.log("Deleting team with ID:", team.id);
-
-            localStorage.removeItem('selectedTeamId');
-            localStorage.removeItem('isPopupOpen');
-
-     
-            setSelectedTeam(null);
-        } else {
-            setSelectedTeams([...selectedTeams, team]);
-            console.log("Adding team with ID:", team.id);
-
-            // store team ID  localStorage
-            localStorage.setItem('selectedTeamId', team.id);
-            localStorage.setItem('isPopupOpen', 'true');
-
-     
-            setSelectedTeam(team);
-        }
-
-
+        // Viewing logic without selecting the team
+        console.log("Viewing team:", team);
+        setSelectedTeam(team);
+        
+        // Set the popup to open for viewing
+        localStorage.setItem('selectedTeamId', team.id);
+        localStorage.setItem('isPopupOpen', 'true');
     };
+
 
 
 
 
     const handleClosePopup = () => {
-        setSelectedTeam(null);
-        setIsEditing(false);
-        setEditedTeam(null);
-
-        localStorage.removeItem('selectedTeamId');
-        localStorage.removeItem('isPopupOpen');
-        window.location.reload();
-
+        setIsUpdating(false);
+        setNewTeam({
+            TeamName: '',
+            Description: '',
+            TeamLeader: '',
+        });
     };
+
 
     const ClosePopup = () => {
-        setSelectedTeam(null);
+        setSelectedTeam(null); // Close the popup and clear the selected team
         setIsEditing(false);
         setEditedTeam(null);
+
+        // Remove the team from the selectedTeams state
+        setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter((team) => team.id !== selectedTeam?.id));
+
+        // Clear local storage
         localStorage.removeItem('selectedTeamId');
         localStorage.removeItem('isPopupOpen');
-      
-
     };
+
     useEffect(() => {
         // loading
         const handleInitialLoad = () => {
@@ -372,9 +362,15 @@ const WorkTeamManagement = () => {
         };
     }, []);
 
+    const handleAddMemberState = () => {
+        setIsAddingMember(true); // Use a separate state for adding a member
+        setIsEditing(false); // Disable editing state when adding a member
+    };
+
 
     const handleEditTeam = () => {
         setIsEditing(true);
+        setIsAddingMember(true); // Disable adding member state when editing a team
     };
 
     useEffect(() => {
@@ -386,15 +382,17 @@ const WorkTeamManagement = () => {
             const team = teams.find(t => t.id === parseInt(savedTeamId));
 
             if (team) {
-                setSelectedTeam(team);  
-                setIsEditing(true);  
+                setSelectedTeam(team);
+                setIsEditing(true);
             }
         }
-    }, [teams]); 
+    }, [teams]);
+
 
 
     const handleAddMember = async () => {
-        setLoading(true); 
+        setLoading(true);
+
         try {
             const token = localStorage.getItem('token');
             if (!token) {
@@ -412,23 +410,58 @@ const WorkTeamManagement = () => {
                 }),
             });
 
-            if (response.ok) {
+            if (response.ok&&popupRef.current) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
+                setMemberSelected(false);  // Ensure the member selection state is reset
+                
+
+                // Save the add member state and search query to localStorage
+                localStorage.setItem('isAddingMember', 'true');
+                localStorage.setItem('isEditing', 'true');
+                setShouldScrollMembers(true);  // Set flag to scroll members list
+
+
+
                 window.location.reload();
             } else {
                 const errorData = await response.json();
                 alert(`Failed to add member: ${JSON.stringify(errorData)}`);
-                setLoading(false); 
+                setLoading(false);
             }
         } catch (error) {
             console.error('Error adding member:', error);
-            setLoading(false); 
+            setLoading(false);
         }
     };
+    useEffect(() => {
+        const savedIsAddingMember = localStorage.getItem('isAddingMember');
+        const savedIsEditing = localStorage.getItem('isEditing');
 
- 
+        if (savedIsAddingMember === 'true') {
+            setIsAddingMember(true);
+        }
+        if (savedIsEditing === 'true') {
+            setIsEditing(true);
+        }
+
+        return () => {
+            localStorage.removeItem('isAddingMember');
+            localStorage.removeItem('isEditing');
+        };
+    }, []);
+
+    useEffect(() => {
+        if (shouldScrollMembers && popupRef.current) {
+            popupRef.current.scrollTop = popupRef.current.scrollHeight;  // Scroll to the bottom
+            setShouldScrollMembers(false);  // Reset flag after scrolling
+        }
+    }, [shouldScrollMembers]);
     
+
+
+
+
 
 
 
@@ -491,6 +524,8 @@ const WorkTeamManagement = () => {
 
     const handleAddTeam = () => {
         setIsAdding(true);
+
+
     };
 
 
@@ -547,22 +582,31 @@ const WorkTeamManagement = () => {
         }
         setIsUpdating(true);
     };
+    const handleCancel = () => {
+        setIsAddingMember(false);  // Return to adding a team member
+        setIsEditing(false);      // Disable editing
+        setSearchQuery('');        // Clear search bar
+
+        localStorage.removeItem('isAddingMember');
+        localStorage.removeItem('isEditing');
+    };
+
 
 
 
 
     const handleCreateTeam = async () => {
         const trimmedTeamName = newTeam.TeamName.trim(); // Remove whitespace
-    
+
         if (!trimmedTeamName || trimmedTeamName === "Default Team Name") {
             alert("Please enter a team name.");
             return;
         }
-    
+
         const existingTeam = teams.find(team => team.name === newTeam.TeamName);
-    
+
         const currentMembers = existingTeam ? existingTeam.members.map(member => member.australian_sailing_number) : [];
-    
+
         const teamPayload = {
             name: newTeam.TeamName,
             description: newTeam.Description || "No description available",
@@ -589,6 +633,8 @@ const WorkTeamManagement = () => {
                         prevTeams.map(team => (team.id === updatedTeam.id ? updatedTeam : team))
                     );
                     handleClosePopup();
+                    window.location.reload();  // Optional: Reload the page to reflect the changes
+
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to update team: ${JSON.stringify(errorData)}`);
@@ -620,6 +666,7 @@ const WorkTeamManagement = () => {
                     });
                     setSelectedMembers([]);
                     handleClosePopup();
+                    window.location.reload();
                 } else {
                     const errorData = await response.json();
                     alert(`Failed to create team: ${JSON.stringify(errorData)}`);
@@ -631,46 +678,64 @@ const WorkTeamManagement = () => {
         }
     };
 
+
     const handleRemoveMember = async () => {
-        if (!selectedMember) {
-            alert('Please select a member to remove.');
+        setIsAddingMember(false);  // Ensure adding member is turned off when deleting
+        setIsEditing(false); // Disable editing when deleting a member
+
+
+        if (selectedMembers.length === 0) {
+            alert('Please select at least one member to remove.');
             return;
         }
-    
+
+        const confirmRemove = window.confirm(`Are you sure you want to remove the selected ${selectedMembers.length} member(s)?`);
+        if (!confirmRemove) return;
+
         try {
-            const token = localStorage.getItem('token');  //from localStorage token
+            const token = localStorage.getItem('token');  // Get token from localStorage
             if (!token) {
                 throw new Error('No token found');
             }
-    
-            const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-member/`, {
+
+            // Send request to remove multiple members
+            const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/remove-members/`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,  
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ member: selectedMember }), 
+                body: JSON.stringify({ members: selectedMembers }), // Send the selected members array
             });
-    
+
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-                alert('Member removed successfully!');
-                localStorage.setItem('selectedTeamId', selectedTeam.id);
-                localStorage.setItem('isPopupOpen', 'true'); 
-    
-        
-                window.location.reload();
+                alert('Members removed successfully!');
+                setSelectedMember(null);
+
+                window.location.reload();  // Optional: Reload the page to reflect the changes
             } else {
                 const errorData = await response.json();
-                alert(`Failed to remove member: ${JSON.stringify(errorData)}`);
+                alert(`Failed to remove members: ${JSON.stringify(errorData)}`);
             }
         } catch (error) {
-            console.error('Error removing member:', error);
-            alert('An error occurred while removing the member.');
+            console.error('Error removing members:', error);
+            alert('An error occurred while removing the members.');
         }
     };
-    
+
+
+
+    const handleMemberSelection = (e, memberId) => {
+        if (e.target.checked) {
+            setSelectedMembers(prev => [...prev, memberId]); // Add member ID to the selected list
+        } else {
+            setSelectedMembers(prev => prev.filter(id => id !== memberId)); // Remove member ID from the selected list
+        }
+    };
+
+
 
 
 
@@ -691,67 +756,70 @@ const WorkTeamManagement = () => {
             </div>
         )}
             <div id="main-content" style={{ display: loading ? 'none' : 'block' }}>
-            <div className={styles.container}>
-                <h1>NYC Work Team Management</h1>
-                <div className={styles.feature}>
-                    <div>
+                <div className={styles.container}>
+                    <h1>NYC Work Team Management</h1>
+                    <div className={styles.feature}>
                         <div>
-                            <button onClick={handleSelectAll}>Select All</button>
-                            <button onClick={handleSelectInverse}>Select Inverse</button>
-                            <button onClick={handleUnselectAll}>Unselect All</button>
-                            <button onClick={handleExportToCSV}>Export Selected to CSV</button>
+                            <div>
+                                <button onClick={handleSelectAll}>Select All</button>
+                                <button onClick={handleSelectInverse}>Select Inverse</button>
+                                <button onClick={handleUnselectAll}>Unselect All</button>
+                                <button onClick={handleExportToCSV}>Export Selected to CSV</button>
+                            </div>
+                            <div>
+                                <button onClick={handleAddTeam}>Add +</button>
+                                <button onClick={handleRemoveSelectedTeams}>Remove -</button>
+                            </div>
                         </div>
-                        <div>
-                            <button onClick={handleAddTeam}>Add +</button>
-                            <button onClick={handleRemoveSelectedTeams}>Remove -</button>
+
+                        <div className={styles.teams}>
+                            {teams && teams.length > 0 ? (
+                                teams.map(team => (
+                                    <div
+                                        key={team.id}
+                                        className={`${styles.teamCard} ${selectedTeams.some(t => t.id === team.id) ? styles.selected : ''}`}
+                                        onClick={() => handleTeamCardClick(team)}
+                                    >
+                                        <div className={styles.teamCardUp}>
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedTeams.some(t => t.id === team.id)}
+                                                readOnly
+                                            />
+                                            <h2>{team.name}</h2>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleViewClick(team);
+                                                }}
+                                            >
+                                                View
+                                            </button>
+
+
+
+
+                                        </div>
+                                        <div className={styles.teamCardDown}>
+                                            <div>
+                                                <h4>Description:</h4>
+                                                <p>{team.description || "No description available"}</p>
+                                            </div>
+                                            <div>
+                                                <h4>Team Leader:</h4>
+                                                <p>{team.team_leader || "No leader assigned"}</p>
+                                            </div>
+                                            <div>
+                                                <h4>Total Members:</h4>
+                                                <p>{team.members ? team.members.length : 0}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No teams available</p>
+                            )}
                         </div>
-                    </div>
-
-                    <div className={styles.teams}>
-                        {teams && teams.length > 0 ? (
-                            teams.map(team => (
-                                <div
-                                    key={team.id}
-                                    className={`${styles.teamCard} ${selectedTeams.some(t => t.id === team.id) ? styles.selected : ''}`}
-                                    onClick={() => handleTeamCardClick(team)}
-                                >
-                                    <div className={styles.teamCardUp}>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedTeams.some(t => t.id === team.id)}
-                                            readOnly
-                                        />
-                                        <h2>{team.name}</h2>
-                                        <button
-                                            onClick={() => handleViewClick(team)}
-                                        >
-                                            View
-                                        </button>
-                                        
-
-
-
-                                    </div>
-                                    <div className={styles.teamCardDown}>
-                                        <div>
-                                            <h4>Description:</h4>
-                                            <p>{team.description || "No description available"}</p>
-                                        </div>
-                                        <div>
-                                            <h4>Team Leader:</h4>
-                                            <p>{team.team_leader || "No leader assigned"}</p>
-                                        </div>
-                                        <div>
-                                            <h4>Total Members:</h4>
-                                            <p>{team.members ? team.members.length : 0}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No teams available</p>
-                        )}
-                    </div>
                     </div>
 
 
@@ -761,7 +829,7 @@ const WorkTeamManagement = () => {
 
             {selectedTeam && (
                 <div className={styles.popupBack}>
-                    <div className={styles.popup}>
+                    <div className={styles.popup} >
                         <div className={styles.popupContent}>
                             <div className={styles.subdivPopup}>
                                 <div>
@@ -772,9 +840,18 @@ const WorkTeamManagement = () => {
                                     <button onClick={handleUpdateTeam}>Edit Team</button>
                                 </div>
                             </div>
-                            <p>Description: {selectedTeam.description}</p>
-                            <p>Team Leader: {selectedTeam.team_leader_name}</p>
+                            <h4>Description: </h4>
+                            <p> {selectedTeam.description}</p>
+                            <h4>Team Leader: </h4>
+                            <p>{selectedTeam.team_leader || "No leader assigned"}</p>
+
+                            <h4>Creation Date:</h4>
+                            <p>{selectedTeam.creation_date || "No date available"}</p>
+
+
                             <h3>Members:</h3>
+                            <div className={styles.scrollableMembers} ref={popupRef}>
+
                             <table>
                                 <thead>
                                     <tr>
@@ -786,8 +863,8 @@ const WorkTeamManagement = () => {
                                         <th>mobile</th>
                                         <th>membershipCategory</th>
                                         <th>volunteerOrPay</th>
-                                        <th>Actions</th>
-                                    </tr>
+                                        {/*                                         <th>Actions</th>
+ */}                                    </tr>
                                 </thead>
                                 <tbody>
                                     {selectedTeam.members && selectedTeam.members.length > 0 ? (
@@ -795,13 +872,11 @@ const WorkTeamManagement = () => {
                                             <tr key={index}>
                                                 <td>
                                                     <input
-                                                        type="radio"
+                                                        type="checkbox"
                                                         name="selectedMember"
                                                         value={member.australian_sailing_number}
-                                                        onChange={() => {
-                                                            console.log('Selected Member Australian Sailing Number:', member.australian_sailing_number); // Debug log
-                                                            setSelectedMember(member.australian_sailing_number);  // Update selected member's ID
-                                                        }}
+                                                        checked={selectedMembers.includes(member.australian_sailing_number)}
+                                                        onChange={(e) => handleMemberSelection(e, member.australian_sailing_number)}
                                                     />
                                                 </td>
                                                 <td>{member.australian_sailing_number}</td>
@@ -811,10 +886,10 @@ const WorkTeamManagement = () => {
                                                 <td>{member.mobile}</td>
                                                 <td>{member.membership_category}</td>
                                                 <td>{member.will_volunteer_or_pay_levy}</td>
-                                                <td>
+                                                {/* <td>
                                                     <button onClick={() => handleEditClick(member)}>Edit</button>
 
-                                                </td>
+                                                </td> */}
                                             </tr>
                                         ))
                                     ) : (
@@ -824,8 +899,9 @@ const WorkTeamManagement = () => {
                                     )}
                                 </tbody>
                             </table>
+                            </div>
 
-                            {isModalOpen && (
+                            {/* {isModalOpen && (
                                 <div className={styles.modal}>
                                     <div className={styles.modalContent}>
                                         <h2>Edit Member</h2>
@@ -866,17 +942,17 @@ const WorkTeamManagement = () => {
                                         </form>
                                         <div className={styles.modalButtons}>
                                             <button onClick={handleEditSubmit}>Update</button>
-                                             <button onClick={ClosePopup}>
-                                            Cancel
-                                        </button>
+                                            <button onClick={ClosePopup}>
+                                                Cancel
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            )} */}
 
 
 
-                            {isEditing && (
+                            {isEditing && isAddingMember && (
                                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative', width: '100%' }}>
                                     {/* Define state */}
 
@@ -963,22 +1039,28 @@ const WorkTeamManagement = () => {
 
 
                             <div className={styles.popupButtons}>
-                                {isEditing ? (
+                                {isEditing && isAddingMember ? (
                                     <>
                                         <button className={styles.saveButton} onClick={handleAddMember}>
                                             Save
                                         </button>
-                                        
-                                        <button
-                                            onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
 
+                                        {/* Clear the search bar content instead of removing a member */}
+                                        <button
+                                            onClick={() => {
+                                                setSearchQuery('');        // Clear the search query
+                                                setFilteredMembers([]);    // Clear the filtered members list
+                                                setHighlightedIndex(-1);   // Reset the highlighted index
+                                                setMemberSelected(false);  // Reset member selected flag
+                                            }}
                                         >
-                                            Remove
+                                            Clear
                                         </button>
-                                        <button className={styles.cancelButton} onClick={ClosePopup}>
+                                        <button className={styles.cancelButton} onClick={handleCancel}>
+
                                             Cancel
                                         </button>
-                                        
+
                                     </>
                                 ) : (
                                     <>
@@ -993,7 +1075,7 @@ const WorkTeamManagement = () => {
                                         <button onClick={ClosePopup}>Close</button>
                                     </>
                                 )}
-                                
+
                             </div>
                         </div>
                     </div>
@@ -1139,11 +1221,11 @@ const WorkTeamManagement = () => {
                         </div>
                     </div>
                 </div>
-                
+
             )}
         </>
     );
-    
+
 };
 
 export default WorkTeamManagement;
