@@ -5,6 +5,8 @@ from rest_framework.authtoken.models import Token
 from django.urls import reverse
 from django.utils import timezone
 from .models import User, Team, TeamMember, Activity, Event, VolunteerPoints
+from io import BytesIO
+import csv
 
 
 class UserRegistrationTestCase(TestCase):
@@ -198,6 +200,190 @@ class VolunteerPointsModelTest(TestCase):
         self.assertEqual(points.points, 40)  # 6 hours * (20/3) = 40 points
 
 # test apis
+class CSVImportTests(APITestCase):
+    def setUp(self):
+        self.login_url = '/api/login/'
+        # Create a test user for each test to ensure isolation
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword',
+            user_type='admin'
+        )
+        data = {'username': 'testuser', 'password': 'testpassword'}
+        response = self.client.post(self.login_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        # Define the import URL endpoint
+        self.import_csv_url = '/api/import-csv/'
+
+    def test_import_csv_file(self):
+        """Test importing team members from a CSV file"""
+
+        # Create a sample CSV file in memory
+        csv_content = (
+        "AustralianSailing number,Firstname,Last name,Email address,Mobile,Payment status,Will you be volunteering or pay the volunteer levy?,Which volunteer team do you wish to join?\n"
+        "12345,John,Doe,johndoe@example.com,0400000000,Gold,I will volunteer,Alpha\n"
+        "67890,Jane,Smith,janesmith@example.com,0400000001,Silver,I will pay the levy,Beta\n"
+    )
+        csv_file = BytesIO(csv_content.encode())
+        csv_file.name = 'team_members.csv'  # Required for Django file uploads
+
+        # Make POST request to import the CSV file
+        response = self.client.post(self.import_csv_url, {'file': csv_file}, format='multipart')
+        response_data = response.json()
+
+        # Validate the response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('new_records', response_data)
+        self.assertIn('updated_records', response_data)
+        self.assertIn('unchanged_records', response_data)
+
+    # Check if two new records were created
+        self.assertEqual(response_data['new_records'], 2)
+        self.assertEqual(TeamMember.objects.count(), 2)  
+
+class RemoveMemberFromTeamTest(APITestCase):
+    def setUp(self):
+        self.login_url = '/api/login/'
+        # Create a test user for each test to ensure isolation
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword',
+            user_type='admin'
+        )
+        data = {'username': 'testuser', 'password': 'testpassword'}
+        response = self.client.post(self.login_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+ 
+        self.team = Team.objects.create(name="Team Alpha", description="Test Team")
+        self.member = TeamMember.objects.create(
+            australian_sailing_number="12345", first_name="John", last_name="Doe", email="johndoe@example.com"
+        )
+        self.team.members.add(self.member)
+
+        # URL for removing a member from the team
+        self.url = reverse('remove_member_from_team', kwargs={'pk': self.team.pk})
+
+    def test_remove_member_from_team(self):
+        data = {'member': self.member.australian_sailing_number}
+        response = self.client.post(self.url, data, format='json')
+
+        # Check that the response is successful
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Verify that the member has been removed from the team
+        self.team.refresh_from_db()
+        self.assertNotIn(self.member, self.team.members.all())
+
+        # Check the response data for accuracy
+        response_data = response.json()
+        self.assertEqual(response_data['id'], self.team.id)
+        self.assertEqual(response_data['name'], self.team.name)
+
+
+class DeleteUserTests(APITestCase):
+    def setUp(self):
+        # Create a test admin user for authentication
+        self.admin_user = User.objects.create_user(
+            username='testadmin_unique',
+            email='testadmin_unique@example.com',  
+            password='adminpass',
+            user_type='admin'
+        )
+        # Log in and retrieve the token
+        data = {'username': 'testadmin_unique', 'password': 'adminpass'}
+        response = self.client.post('/api/login/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.token = response.data['access']
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        # Create a user to be deleted in the test
+        self.user_to_delete = User.objects.create_user(
+            username='user123_unique',
+            email='user123@example.com',
+            password='userpass',
+            user_type='admin' 
+
+        )
+
+        # Create an 'admin' user to test the deletion restriction
+        self.restricted_user = User.objects.create_user(
+            username='restricted_admin_unique',
+            email='admin_unique@example.com',  
+            password='adminpass',
+            user_type='admin'
+        )
+
+    def test_delete_user_success(self):
+        url = reverse('delete_user', kwargs={'pk': self.user_to_delete.pk})
+        response = self.client.delete(url)
+
+        # Verify that the response indicates successful deletion
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["message"], "User deleted successfully")
+
+        # Check that the user no longer exists in the database
+        with self.assertRaises(User.DoesNotExist):
+            User.objects.get(pk=self.user_to_delete.pk)
+
+    def test_delete_nonexistent_user(self):
+        url = reverse('delete_user', kwargs={'pk': 9999})  # Non-existent user ID
+        response = self.client.delete(url)
+
+        # Verify that the response indicates the user was not found
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data["error"], "User not found")
+
+   
+class GetProfileViewTests(APITestCase):
+    def setUp(self):
+        self.login_url = '/api/login/'
+        # Create a test user with an avatar
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='testuser@example.com',
+            password='testpassword',
+            user_type='admin' 
+
+        )
+
+        # Add an avatar to the test user (assuming an avatar field is available)
+        self.user.avatar = 'path/to/avatar.jpg'  # Simulate an avatar file path
+        self.user.save()
+
+        # Log in the user to get the authentication token
+        login_data = {'username': 'testuser', 'password': 'testpassword'}
+        response = self.client.post(self.login_url, login_data, format='json')
+        
+        # Store the token to authenticate future requests
+        self.token = response.data['access']  # Assuming JWT returns 'access' token
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.token}')
+
+        # URL for the get profile API
+        self.get_profile_url = reverse('get-profile')
+
+    def test_get_profile_success(self):
+        response = self.client.get(self.get_profile_url)
+
+        # Validate the response
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        profile_data = response.json()
+        self.assertEqual(profile_data['username'], self.user.username)
+        self.assertEqual(profile_data['email'], self.user.email)
+        self.assertEqual(profile_data['avatar'], self.user.avatar.url if self.user.avatar else None)
+
+    def test_get_profile_unauthenticated(self):
+        # Log out the user to test unauthenticated access
+        self.client.logout()
+        response = self.client.get(self.get_profile_url)
+        # Validate that the response indicates an unauthorized request
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 # test event view set
 class EventViewSetTests(APITestCase):
     def setUp(self):

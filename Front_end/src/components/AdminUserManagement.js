@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/AdminUserManagement.module.css';
 import api from '../api';
+import Calendar from 'react-calendar';  // Import the calendar component
+import 'react-calendar/dist/Calendar.css';  // Import the calendar CSS
 
 const AdminUserManagement = () => {
     const [user, setUser] = useState({
@@ -127,7 +129,7 @@ const AdminUserManagement = () => {
     const handleDeleteUser = async (id, userType) => {
         const confirmDelete = window.confirm(`Are you sure you want to delete this ${userType}?`);
         if (!confirmDelete) return;
-    
+
         setLoading(true); // Start loading
         try {
             const token = localStorage.getItem('token');
@@ -136,7 +138,7 @@ const AdminUserManagement = () => {
                     Authorization: `Bearer ${token}`
                 }
             });
-    
+
             if (response.status === 200) {
                 alert(`${userType} deleted successfully`);
                 window.location.reload(); // Reload the page to refresh the user list
@@ -150,10 +152,10 @@ const AdminUserManagement = () => {
             setLoading(false); // Stop loading
         }
     };
-    
-    
-    
-    
+
+
+
+
 
 
     const formatTime = (date) => {
@@ -364,6 +366,8 @@ const AdminUserManagement = () => {
 
 
 
+
+
     const handleNewUserSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -393,13 +397,13 @@ const AdminUserManagement = () => {
 
     return (
         <div className={styles.container}>
-                <div className={styles.blob}></div>  {/* Ensure this blob div is added */}
+            <div className={styles.blob}></div>  {/* Ensure this blob div is added */}
 
             {loading && (
-            <div className={styles.loadingOverlay}>
-                <div className={styles.spinner}></div>
-            </div>
-        )}
+                <div className={styles.loadingOverlay}>
+                    <div className={styles.spinner}></div>
+                </div>
+            )}
             <div className={styles.rowContainer}>
                 {/* Profile Section */}
                 <div className={styles.profileSection}>
@@ -411,7 +415,7 @@ const AdminUserManagement = () => {
                         ) : (
                             <p>No Avatar Available</p>
                         )}
-                        
+
                     </header>
                     <div className={styles.clockSection}>
                         <p>{timeOfDay}</p>
@@ -438,7 +442,7 @@ const AdminUserManagement = () => {
                         ) : (
                             <p>Loading weather...</p>
                         )}
-                        
+
                     </div>
 
                     <section className={styles.eventSection}>
@@ -454,6 +458,13 @@ const AdminUserManagement = () => {
                         ) : (
                             <p>No events available</p>
                         )}
+                    </section>
+                    {/* Calendar Section */}
+                    <section className={styles.calendarSection}>
+                        <div className={styles.calendarItem}>
+                            <h3>Calendar</h3>
+                            <Calendar className={styles.reactCalendar} />
+                        </div>
                     </section>
 
 
@@ -671,7 +682,7 @@ const AdminUserManagement = () => {
                 </div>
             </div>
         </div>
-        
+
     );
 };
 
