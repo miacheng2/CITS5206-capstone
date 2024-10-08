@@ -3,6 +3,7 @@ from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.urls import reverse
+from django.utils import timezone
 from .models import User, Team, TeamMember, Activity, Event, VolunteerPoints
 
 
@@ -363,3 +364,72 @@ class VolunteerPointsViewSetTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(VolunteerPoints.objects.count(), 0)
+
+class AllMembersPointsAPIViewTest(APITestCase):
+    def setUp(self):
+        # Create a test user
+        self.login_url = '/api/login/'
+        
+        # Create test user
+        self.user = User.objects.create_user(
+            username='testuser',
+            email='test@example.com',
+            password='testpassword',
+            user_type='admin'
+        )
+
+        # Log in and get token
+        data = {'username': 'testuser', 'password': 'testpassword'}
+        response = self.client.post(self.login_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Get the JWT token from the response
+        token = response.data['access']  # JWT access token
+        
+        # Set the authorization header for subsequent requests
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token)
+
+        # Create a test team member
+        self.member = TeamMember.objects.create(
+            australian_sailing_number=123456,
+            first_name="John",
+            last_name="Doe",
+            mobile="0400000000",
+            email="john.doe@example.com",
+            membership_category="Full Member"
+        )
+
+        # Create a test event
+        self.event = Event.objects.create(
+            name="Test Event",
+            event_type="on_water",
+            date="2024-10-01"
+        )
+
+        # Create a test volunteer point
+        VolunteerPoints.objects.create(
+            member=self.member,
+            event=self.event,
+            points=20,
+            hours=3,
+            created_by=self.user
+        )
+
+    def test_get_all_members_points(self):
+        url = reverse('all-members-points')
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)  # Expecting 1 result
+        result = response.data[0]
+        
+        # Check the response structure and values
+        self.assertEqual(result['name'], "John Doe")
+        self.assertEqual(result['id'], "123456__2025")  # Financial year would be 2025 for event in 2024
+        self.assertEqual(result['uid'], 123456)
+        self.assertEqual(result['membership_category'], "Full Member")
+        self.assertEqual(result['total_points'], 20)
+        self.assertEqual(result['total_hours'], 3)
+
+    def tearDown(self):
+        self.client.logout()

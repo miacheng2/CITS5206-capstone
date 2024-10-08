@@ -119,8 +119,8 @@ class Event(models.Model):
     name = models.CharField(max_length=100)
     event_type = models.CharField(max_length=10, choices=EVENT_TYPE_CHOICES)
     date = models.DateField()
-    team = models.ForeignKey(Team,on_delete=models.CASCADE, null=True, blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    team = models.ForeignKey(Team,on_delete=models.SET_NULL, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     activities = models.ManyToManyField(Activity, related_name='events', blank=True)
 
     def __str__(self):
@@ -128,10 +128,10 @@ class Event(models.Model):
     
 class VolunteerPoints(models.Model):
     member = models.ForeignKey(TeamMember, on_delete=models.CASCADE)
-    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.SET_NULL, null=True)
     points = models.FloatField()  # Allow decimal points for finer calculations
     hours = models.FloatField(null=True, blank=True)  
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     activity = models.ForeignKey(Activity, on_delete=models.SET_NULL, null=True, blank=True)
 
     def save(self, *args, **kwargs):

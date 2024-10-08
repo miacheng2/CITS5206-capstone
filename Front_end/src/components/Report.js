@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback,useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bar,Line, Pie } from "react-chartjs-2";
+import { Bar, Line, Pie } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +12,6 @@ import {
   Tooltip,
   Legend,
   ArcElement,
-  
 } from "chart.js";
 import "./report.css";
 
@@ -43,7 +42,7 @@ function VolunteerHistory() {
   const [selectAll, setSelectAll] = useState(false); // State for "Select All"
   const [showTeamPerformanceGraph, setShowTeamPerformanceGraph] =
     useState(false);
-  
+
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [showYearwiseLineGraph, setShowYearwiseLineGraph] = useState(false);
   const [showPieCharts, setShowPieCharts] = useState(false);
@@ -53,7 +52,7 @@ function VolunteerHistory() {
     navigate(`/volunteer-history/${uid}`); // Navigate to new page with uid
   };
   const hasAlerted = useRef(false);
-  
+
   const togglePieCharts = () => {
     setShowPieCharts(!showPieCharts);
   };
@@ -74,7 +73,6 @@ function VolunteerHistory() {
     };
   };
 
-  
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
     (data) => {
@@ -98,31 +96,32 @@ function VolunteerHistory() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const userRole = localStorage.getItem('user_role');
+        const userRole = localStorage.getItem("user_role");
         const token = localStorage.getItem("token");
-        
+
         if (!token) {
           console.error("No token found, redirecting to login.");
           navigate("/login");
           return;
         }
-        if (userRole !== 'admin') {
+        if (userRole !== "admin") {
           if (!hasAlerted.current) {
-              alert('Access denied: This section is for admin users only.');
-              hasAlerted.current = true; // Ensure alert is only shown once
+            alert("Access denied: This section is for admin users only.");
+            hasAlerted.current = true; // Ensure alert is only shown once
           }
-          console.error('Unauthorized: Admin role required.');
-          navigate('/login'); 
+          console.error("Unauthorized: Admin role required.");
+          navigate("/login");
           return;
-      }
+        }
 
-        
-
-        const response = await fetch("http://localhost:8000/api/members-points-all/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/members-points-all/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
@@ -182,16 +181,9 @@ function VolunteerHistory() {
     fetchTeams();
   }, [navigate]);
 
-
-
-
-  
   useEffect(() => {
     const uniqueMembers = new Set();
     const filtered = members.filter((member) => {
-      console.log("selectedMember", member);
-      console.log("selectedYear", selectedYear);
-      console.log("selectedPoint", selectedTotalPoints);
       const matchesSearchQuery =
         member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.id.toString().includes(searchQuery);
@@ -321,13 +313,10 @@ function VolunteerHistory() {
         });
       }
     });
-
-    
   };
 
   // Prepare data for volunteer hours graph
- 
-  
+
   // Function to calculate the points for each team dynamically
   const calculateTeamPoints = () => {
     return maintenanceTeams.map((team) => {
@@ -343,8 +332,6 @@ function VolunteerHistory() {
       return totalPointsForTeam;
     });
   };
-   
-
 
   // Data for the chart
   const teamPerformanceData = {
@@ -357,7 +344,6 @@ function VolunteerHistory() {
       },
     ],
   };
-
 
   const teamPerformanceOptions = {
     responsive: true,
@@ -372,7 +358,6 @@ function VolunteerHistory() {
     },
   };
 
- 
   const calculateYearwiseTeamPoints = () => {
     const years = [...new Set(members.map((member) => member.year))]; // Get unique years from members
     const teamYearPoints = maintenanceTeams.map((team) => {
@@ -391,29 +376,28 @@ function VolunteerHistory() {
   };
   const { years, teamYearPoints } = calculateYearwiseTeamPoints();
 
-const lineChartData = {
-  labels: years,
-  datasets: teamYearPoints.map((teamData, index) => ({
-    label: teamData.teamName,
-    data: teamData.data,
-    borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'][index % 4], // Dynamic colors
-    fill: false,
-  })),
-};
+  const lineChartData = {
+    labels: years,
+    datasets: teamYearPoints.map((teamData, index) => ({
+      label: teamData.teamName,
+      data: teamData.data,
+      borderColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0"][index % 4], // Dynamic colors
+      fill: false,
+    })),
+  };
 
-const lineChartOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top',
+  const lineChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top",
+      },
+      title: {
+        display: true,
+        text: "Year-wise Comparison of Team Points",
+      },
     },
-    title: {
-      display: true,
-      text: 'Year-wise Comparison of Team Points',
-    },
-  },
-};
-
+  };
 
   const uniqueCategories = [
     ...new Set(members.map((member) => member.membership_category)),
@@ -424,22 +408,24 @@ const lineChartOptions = {
     <div className="volunteer-history-container">
       {/* Team Buttons */}
       <div className="team-buttons">
-         {maintenanceTeams.map((team) => (
-        <button
-         key={team.id}
-          onClick={() => handleTeamFilter(team.id)}
-          className={selectedTeamId === team.id ? "team-btn selected" : "team-btn"}
+        {maintenanceTeams.map((team) => (
+          <button
+            key={team.id}
+            onClick={() => handleTeamFilter(team.id)}
+            className={
+              selectedTeamId === team.id ? "team-btn selected" : "team-btn"
+            }
           >
-          {team.name}
+            {team.name}
           </button>
-          ))}
+        ))}
         <button
-        onClick={() => handleTeamFilter("")}
-        className={selectedTeamId === "" ? "team-btn selected" : "team-btn"}
+          onClick={() => handleTeamFilter("")}
+          className={selectedTeamId === "" ? "team-btn selected" : "team-btn"}
         >
-        All Teams
-       </button>
-        </div>
+          All Teams
+        </button>
+      </div>
       {/* Filter section */}
       <div className="filter-dropdowns-container">
         <div className="filter-group">
@@ -551,36 +537,37 @@ const lineChartOptions = {
         </tbody>
       </table>
 
-
-      
-          {/* Toggle buttons for graphs and top performers */}
+      {/* Toggle buttons for graphs and top performers */}
       <div className="toggle-buttons">
-      <button
-        onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
-      >
-        {showTeamPerformanceGraph
-          ? "Hide Team Performance Graph"
-          : "Show Team Performance Graph"}
-      </button>
-      
-      <button onClick={() => setShowYearwiseLineGraph(!showYearwiseLineGraph)}>
-        {showYearwiseLineGraph ? "Hide Year-wise Line Graph" : "Show Year-wise Line Graph"}
-      </button>
+        <button
+          onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
+        >
+          {showTeamPerformanceGraph
+            ? "Hide Team Performance Graph"
+            : "Show Team Performance Graph"}
+        </button>
 
-      <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
-        {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
-      </button>
+        <button
+          onClick={() => setShowYearwiseLineGraph(!showYearwiseLineGraph)}
+        >
+          {showYearwiseLineGraph
+            ? "Hide Year-wise Line Graph"
+            : "Show Year-wise Line Graph"}
+        </button>
 
-      <button onClick={togglePieCharts}>
-  {showPieCharts ? "Hide Team Members Stats" : "Show Team Members Stats"}
-</button>
+        <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
+          {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
+        </button>
 
-    </div>
-
-
+        <button onClick={togglePieCharts}>
+          {showPieCharts
+            ? "Hide Team Members Stats"
+            : "Show Team Members Stats"}
+        </button>
+      </div>
 
       {/* Section for top performers by team in table format */}
-    
+
       {showTopPerformers && (
         <div className="grouped-volunteers-section">
           <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
@@ -620,29 +607,34 @@ const lineChartOptions = {
       {/* Section for graphs */}
 
       <div className="chart-section">
-  
-  {showTeamPerformanceGraph && (
-    <div className="chart-container">
-      <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
-    </div>
-  )}
-     {/* Line chart for year-wise comparison */}
-     {showYearwiseLineGraph && (
-        <div className="chart-container">
-          <Line data={lineChartData} options={lineChartOptions} />
-        </div>
-      )}
-      {showPieCharts && (
-  <div className="pie-charts-container">
-    {maintenanceTeams.map((team) => (
-      <div key={team.id} style={{ marginBottom: '20px',width: '25%', display: 'inline-block'  }}>
-        <h2 style={{ color: 'black' }}>{team.name}</h2>
-        <Pie data={groupPieData(team)} />
-      </div>
-    ))}
-  </div>
-)}
-
+        {showTeamPerformanceGraph && (
+          <div className="chart-container">
+            <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
+          </div>
+        )}
+        {/* Line chart for year-wise comparison */}
+        {showYearwiseLineGraph && (
+          <div className="chart-container">
+            <Line data={lineChartData} options={lineChartOptions} />
+          </div>
+        )}
+        {showPieCharts && (
+          <div className="pie-charts-container">
+            {maintenanceTeams.map((team) => (
+              <div
+                key={team.id}
+                style={{
+                  marginBottom: "20px",
+                  width: "25%",
+                  display: "inline-block",
+                }}
+              >
+                <h2 style={{ color: "black" }}>{team.name}</h2>
+                <Pie data={groupPieData(team)} />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

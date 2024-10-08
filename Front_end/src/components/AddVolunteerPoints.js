@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
-import { useNavigate } from "react-router-dom"; 
-import sailImage from "./yacht.jpg";
+import sailImage from "./NYC.jpg";
+import { useNavigate } from "react-router-dom";
 
 function AddVolunteerPoints() {
   const [adminsAndLeaders, setUser] = useState([]); // To store users data
@@ -13,11 +13,10 @@ function AddVolunteerPoints() {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
-  const navigate = useNavigate(); 
-
+  const navigate = useNavigate();
 
   const [modalMessage, setModalMessage] = useState(""); // Modal message state
-  const [isModalOpen, setModalOpen] = useState(false);  // Modal visibility state
+  const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
 
   const fetchWithToken = async (url) => {
     const token = localStorage.getItem("token");
@@ -67,9 +66,21 @@ function AddVolunteerPoints() {
         const eventsData = await fetchWithToken(
           "http://localhost:8000/api/events/"
         );
-        if (eventsData) setEvents(eventsData);
+        if (eventsData) {
+          const today = new Date();
+          const oneMonthAgo = new Date();
+          oneMonthAgo.setMonth(today.getMonth() - 1); // Get date one month ago
+
+          const filteredEvents = eventsData.filter((event) => {
+            const eventDate = new Date(event.date); // Assuming event.date is in a proper format
+            return eventDate >= oneMonthAgo && eventDate >= today; // Only past month and upcoming events
+          });
+
+          setEvents(filteredEvents);
+        }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        setModalMessage("Error fetching data.");
+        setModalOpen(true);
       }
     };
 
@@ -155,7 +166,8 @@ function AddVolunteerPoints() {
           volunteerPoints: points,
         }));
       } else {
-        console.error("No event selected or event not found");
+        setModalMessage("No event selected or event not found");
+        setModalOpen(true);
       }
     } else if (field === "maintenanceEvent") {
       const selectedEvent = maintenanceEvents.find(
@@ -198,7 +210,8 @@ function AddVolunteerPoints() {
         selectedMember.volunteerHours < 0 ||
         selectedMember.volunteerPoints < 0
       ) {
-        alert("Volunteer hours and points must be non-negative.");
+        setModalMessage("Volunteer hours and points must be non-negative.");
+        setModalOpen(true);
         return;
       }
       setSelectedMember((prevState) => ({
@@ -212,7 +225,8 @@ function AddVolunteerPoints() {
       );
 
       if (!selectedAdmin) {
-        alert("Error: No matching admin found for editorName.");
+        setModalMessage("Error: No matching admin found for editorName.");
+        setModalOpen(true);
         return;
       }
 
@@ -285,23 +299,22 @@ function AddVolunteerPoints() {
 
   return (
     <div className="add-volunteer-container">
-
-    {/* Modal */}
-    {isModalOpen && (
-    <div className="modal-overlay" onClick={handleCloseModal}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <img src={sailImage} alt="Sail logo" className="modal-logo" /> {/* Image at the top */}
-        <span className="modal-close" onClick={handleCloseModal}>
-          &times;
-        </span>
-        <p className="success-message">{modalMessage}</p>
-        <button className="modal-button" onClick={handleCloseModal}>
-          OK
-        </button>
-      </div>
-    </div>
-  )}
-
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <img src={sailImage} alt="Sail logo" className="modal-logo" />{" "}
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Team Buttons */}
       <div className="team-buttons">
