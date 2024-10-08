@@ -9,17 +9,15 @@ body {
     min-height: 70px;
     display: flex;
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
     background-color: #00004D;
     align-items: center;
     position: relative;
-    flex-wrap: wrap;
 }
 
 .rightDiv {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
 }
 
 .rightDiv h2 {
@@ -78,7 +76,7 @@ body {
     margin: 0;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 2px;
 }
 
 .navList li {

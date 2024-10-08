@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./stylesAdd.css";
 import sailImage from "./NYC.jpg";
+import { useNavigate } from "react-router-dom";
 
 function AddVolunteerPoints() {
   const [adminsAndLeaders, setUser] = useState([]); // To store users data
