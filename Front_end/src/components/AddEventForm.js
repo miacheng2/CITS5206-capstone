@@ -121,28 +121,43 @@ function AddEventForm() {
   async function handleSubmit(event) {
     event.preventDefault();
 
+    // Sanitize input values
+    const sanitizedEventName = formData.eventName.trim();
+    const sanitizedActivities = formData.activities
+      .map((activity) => activity.trim()) // Remove leading/trailing spaces
+      .filter((activity) => activity !== ""); // Remove empty activities
+
     if (!currentUser) {
       alert("Unable to submit, current user not found.");
       return;
     }
 
-    const { eventName, date, team, eventType, activities } = formData;
+    if (sanitizedEventName === "") {
+      alert("Event name cannot be empty or just spaces.");
+      return;
+    }
+
+    // Ensure that activities are added for on-water events
+    if (formData.eventType === "on_water" && sanitizedActivities.length === 0) {
+      alert("Please add at least one activity for an on-water event.");
+      return;
+    }
+
+    const { date, team, eventType } = formData;
 
     try {
-      const formattedActivities = activities.map((activityName) => ({
+      const formattedActivities = sanitizedActivities.map((activityName) => ({
         name: activityName,
       }));
 
       const formattedData = {
-        name: eventName,
+        name: sanitizedEventName,
         event_type: eventType,
         date: date,
         team: Number(team),
         created_by: currentUser.user_id, // Use the user ID from the decoded token
         activities: formattedActivities,
       };
-
-      console.log(formattedData);
 
       if (eventType === "off_water") {
         delete formattedData.activities;
