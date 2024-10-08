@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import ConfirmationModal from "./ConfirmationModal"; 
-import "./EventDetailsModal.css"; 
+import ConfirmationModal from "./ConfirmationModal";
+import "./EventDetailsModal.css";
 
 function MemberVolunteerHistory() {
   const { uid } = useParams(); // Get the uid from the URL
@@ -102,8 +102,7 @@ function MemberVolunteerHistory() {
       if (!response.ok) {
         throw new Error("Failed to update entry.");
       }
-      const data = await response.json();
-      console.log("Update successful:", data);
+      window.location.reload();
     } catch (error) {
       console.error("Error updating entry:", error);
     }
@@ -123,7 +122,9 @@ function MemberVolunteerHistory() {
       return;
     }
 
-    const updatedHistory = history.filter((entry) => entry.id !== selectedEntryId);
+    const updatedHistory = history.filter(
+      (entry) => entry.id !== selectedEntryId
+    );
     setHistory(updatedHistory);
     setShowModal(false); // Hide the modal
 
@@ -142,6 +143,7 @@ function MemberVolunteerHistory() {
       if (!response.ok) {
         throw new Error("Failed to delete entry.");
       }
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting entry:", error);
     }
@@ -149,8 +151,11 @@ function MemberVolunteerHistory() {
 
   // Filter logic for the history table
   const filteredHistory = history.filter((entry) => {
-    const matchesName = entry.event_name.toLowerCase().includes(filterName.toLowerCase());
-    const matchesMonth = !filterMonth || entry.event_date.startsWith(filterMonth);
+    const matchesName = entry.event_name
+      .toLowerCase()
+      .includes(filterName.toLowerCase());
+    const matchesMonth =
+      !filterMonth || entry.event_date.startsWith(filterMonth);
     return matchesName && matchesMonth;
   });
 
@@ -250,16 +255,25 @@ function MemberVolunteerHistory() {
                       >
                         Save
                       </button>
-                      <button onClick={() => setEditIndex(null)} className="cancel-btn">
+                      <button
+                        onClick={() => setEditIndex(null)}
+                        className="cancel-btn"
+                      >
                         Cancel
                       </button>
                     </>
                   ) : (
                     <>
-                      <button onClick={() => handleEditClick(index, entry)} className="confirm-btn">
+                      <button
+                        onClick={() => handleEditClick(index, entry)}
+                        className="confirm-btn"
+                      >
                         Edit
                       </button>
-                      <button onClick={() => handleDeleteClick(entry.id)} className="cancel-btn">
+                      <button
+                        onClick={() => handleDeleteClick(entry.id)}
+                        className="cancel-btn"
+                      >
                         Delete
                       </button>
                     </>

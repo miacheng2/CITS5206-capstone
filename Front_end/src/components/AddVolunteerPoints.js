@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./stylesAdd.css";
 import sailImage from "./NYC.jpg";
 import { useNavigate } from "react-router-dom";
@@ -15,9 +16,8 @@ function AddVolunteerPoints() {
   const [selectedTeam, setSelectedTeam] = useState(""); // For team filtering
   const navigate = useNavigate();
 
-
   const [modalMessage, setModalMessage] = useState(""); // Modal message state
-  const [isModalOpen, setModalOpen] = useState(false);  // Modal visibility state
+  const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
 
   const fetchWithToken = async (url) => {
     const token = localStorage.getItem("token");
@@ -67,7 +67,18 @@ function AddVolunteerPoints() {
         const eventsData = await fetchWithToken(
           "http://localhost:8000/api/events/"
         );
-        if (eventsData) setEvents(eventsData);
+        if (eventsData) {
+          const today = new Date();
+          const oneMonthAgo = new Date();
+          oneMonthAgo.setMonth(today.getMonth() - 1); // Get date one month ago
+
+          const filteredEvents = eventsData.filter((event) => {
+            const eventDate = new Date(event.date); // Assuming event.date is in a proper format
+            return eventDate >= oneMonthAgo && eventDate >= today; // Only past month and upcoming events
+          });
+
+          setEvents(filteredEvents);
+        }
       } catch (error) {
         setModalMessage("Error fetching data.");
         setModalOpen(true);
@@ -156,7 +167,6 @@ function AddVolunteerPoints() {
           volunteerPoints: points,
         }));
       } else {
-
         setModalMessage("No event selected or event not found");
         setModalOpen(true);
       }
@@ -201,7 +211,6 @@ function AddVolunteerPoints() {
         selectedMember.volunteerHours < 0 ||
         selectedMember.volunteerPoints < 0
       ) {
-
         setModalMessage("Volunteer hours and points must be non-negative.");
         setModalOpen(true);
         return;
@@ -217,7 +226,6 @@ function AddVolunteerPoints() {
       );
 
       if (!selectedAdmin) {
-
         setModalMessage("Error: No matching admin found for editorName.");
         setModalOpen(true);
         return;
@@ -292,12 +300,12 @@ function AddVolunteerPoints() {
 
   return (
     <div className="add-volunteer-container">
-
       {/* Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={handleCloseModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <img src={sailImage} alt="Sail logo" className="modal-logo" /> {/* Image at the top */}
+            <img src={sailImage} alt="Sail logo" className="modal-logo" />{" "}
+            {/* Image at the top */}
             <span className="modal-close" onClick={handleCloseModal}>
               &times;
             </span>
@@ -308,7 +316,6 @@ function AddVolunteerPoints() {
           </div>
         </div>
       )}
-
 
       {/* Team Buttons */}
       <div className="team-buttons">
@@ -372,7 +379,7 @@ function AddVolunteerPoints() {
                 <select
                   value={
                     selectedMember?.australian_sailing_number ===
-                      member.australian_sailing_number
+                    member.australian_sailing_number
                       ? selectedMember.maintenanceEvent
                       : ""
                   }
@@ -396,7 +403,7 @@ function AddVolunteerPoints() {
                 <select
                   value={
                     selectedMember?.australian_sailing_number ===
-                      member.australian_sailing_number
+                    member.australian_sailing_number
                       ? selectedMember.selectedActivity
                       : ""
                   }
@@ -425,7 +432,7 @@ function AddVolunteerPoints() {
                   type="time"
                   value={
                     selectedMember?.australian_sailing_number ===
-                      member.australian_sailing_number
+                    member.australian_sailing_number
                       ? selectedMember.startTime
                       : ""
                   }
@@ -443,7 +450,7 @@ function AddVolunteerPoints() {
                   type="time"
                   value={
                     selectedMember?.australian_sailing_number ===
-                      member.australian_sailing_number
+                    member.australian_sailing_number
                       ? selectedMember.endTime
                       : ""
                   }
@@ -456,13 +463,13 @@ function AddVolunteerPoints() {
               </td>
               <td>
                 {selectedMember?.australian_sailing_number ===
-                  member.australian_sailing_number
+                member.australian_sailing_number
                   ? formatHoursAndMinutes(selectedMember.volunteerHours)
                   : ""}
               </td>
               <td>
                 {selectedMember?.australian_sailing_number ===
-                  member.australian_sailing_number
+                member.australian_sailing_number
                   ? Math.round(selectedMember.volunteerPoints)
                   : ""}
               </td>
@@ -471,7 +478,7 @@ function AddVolunteerPoints() {
                 <select
                   value={
                     selectedMember?.australian_sailing_number ===
-                      member.australian_sailing_number
+                    member.australian_sailing_number
                       ? selectedMember.editorName
                       : ""
                   }
