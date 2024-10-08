@@ -66,7 +66,18 @@ function AddVolunteerPoints() {
         const eventsData = await fetchWithToken(
           "http://localhost:8000/api/events/"
         );
-        if (eventsData) setEvents(eventsData);
+        if (eventsData) {
+          const today = new Date();
+          const oneMonthAgo = new Date();
+          oneMonthAgo.setMonth(today.getMonth() - 1); // Get date one month ago
+
+          const filteredEvents = eventsData.filter((event) => {
+            const eventDate = new Date(event.date); // Assuming event.date is in a proper format
+            return eventDate >= oneMonthAgo && eventDate >= today; // Only past month and upcoming events
+          });
+
+          setEvents(filteredEvents);
+        }
       } catch (error) {
         setModalMessage("Error fetching data.");
         setModalOpen(true);
