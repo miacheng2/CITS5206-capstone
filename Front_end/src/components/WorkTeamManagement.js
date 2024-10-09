@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { saveAs } from 'file-saver';
-
-
 import styles from './styles/WorkTeamManagement.module.css';
 
 const WorkTeamManagement = () => {
@@ -9,11 +6,6 @@ const WorkTeamManagement = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const popupRef = useRef(null); 
     const [shouldScrollMembers, setShouldScrollMembers] = useState(false); // Track when to scroll the members list
-
-
-
-
-
     const [teams, setTeams] = useState([]);
     const [selectedTeams, setSelectedTeams] = useState([]);
 
@@ -29,11 +21,6 @@ const WorkTeamManagement = () => {
     const [isAddingMember, setIsAddingMember] = useState(false);
 
 
-
-
-    const [editedTeam, setEditedTeam] = useState({
-        Members: []
-    });
     const [isEditing, setIsEditing] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -46,13 +33,7 @@ const WorkTeamManagement = () => {
         Members: [],
     });
 
-
-
-
-    const [newTeamName, setNewTeamName] = useState('');
-    const [editingMember, setEditingMember] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
+   
     const fetchWithAuth = async (url, options = {}) => {
         const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
@@ -146,59 +127,6 @@ const WorkTeamManagement = () => {
         };
         fetchTeamLeaders();
     }, []);
-
-    
-
-    const handleEditClick = (member) => {
-        setEditingMember(member);
-        setIsModalOpen(true);
-    };
-
-    const handleEditSubmit = async () => {
-        const { australian_sailing_number } = editingMember;
-        try {
-            const token = localStorage.getItem('token'); // Get the token from localStorage
-            if (!token) {
-                throw new Error('No token found');
-            }
-
-            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${australian_sailing_number}/`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(editingMember),
-            });
-
-            if (response.ok) {
-                alert('Member updated successfully!');
-                setIsModalOpen(false);
-                setEditingMember(null);
-                // Update the selected team with the updated member data
-                setSelectedTeam((prevTeam) => ({
-                    ...prevTeam,
-                    members: prevTeam.members.map((member) =>
-                        member.australian_sailing_number === australian_sailing_number ? editingMember : member
-                    ),
-                }));
-            } else {
-                alert('Failed to update member.');
-            }
-        } catch (error) {
-            console.error('Error updating member:', error);
-        }
-    };
-
-
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setEditingMember((prevMember) => ({
-            ...prevMember,
-            [name]: name === 'teams' ? value.split(',').map((v) => v.trim()) : value,
-        }));
-    };
 
     const availableMembers = teamMembers.filter(
         (member) => selectedTeam && selectedTeam.members && !selectedTeam.members.some(
@@ -336,8 +264,6 @@ const WorkTeamManagement = () => {
     const ClosePopup = () => {
         setSelectedTeam(null); // Close the popup and clear the selected team
         setIsEditing(false);
-        setEditedTeam(null);
-
         // Remove the team from the selectedTeams state
         setSelectedTeams((prevSelectedTeams) => prevSelectedTeams.filter((team) => team.id !== selectedTeam?.id));
 
@@ -361,11 +287,6 @@ const WorkTeamManagement = () => {
             window.removeEventListener('load', handleInitialLoad);
         };
     }, []);
-
-    const handleAddMemberState = () => {
-        setIsAddingMember(true); // Use a separate state for adding a member
-        setIsEditing(false); // Disable editing state when adding a member
-    };
 
 
     const handleEditTeam = () => {
@@ -460,68 +381,6 @@ const WorkTeamManagement = () => {
     
 
 
-
-
-
-
-
-
-
-    const handleSaveTeam = () => {
-        setTeams((prevTeams) =>
-            prevTeams.map((team) => (team.TeamName === editedTeam.TeamName ? editedTeam : team))
-        );
-        setIsEditing(false);
-        setSelectedTeam(null);
-        setEditedTeam(null);
-    };
-
-    const handleDeleteTeam = async () => {
-        if (!selectedTeam || !selectedTeam.id) {
-            alert("No team selected to delete.");
-            return;
-        }
-
-        const confirmDelete = window.confirm(`Are you sure you want to delete the team "${selectedTeam.name}"?`);
-        if (!confirmDelete) return;
-
-        try {
-            const token = localStorage.getItem('token'); // Get the token from localStorage
-            if (!token) {
-                throw new Error('No token found');
-            }
-
-            const response = await fetch(`http://localhost:8000/api/teams/${selectedTeam.id}/`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,  // Set the Authorization header
-                },
-            });
-
-            if (response.ok) {
-                alert('Team deleted successfully!');
-                setTeams((prevTeams) => prevTeams.filter((team) => team.id !== selectedTeam.id));
-                setSelectedTeam(null);
-            } else {
-                const errorData = await response.json();
-                alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
-            }
-        } catch (error) {
-            console.error('Error deleting team:', error);
-            alert('An error occurred while deleting the team.');
-        }
-    };
-
-
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setEditedTeam((prevTeam) => ({
-            ...prevTeam,
-            [name]: value,
-        }));
-    };
-
     const handleAddTeam = () => {
         setIsAdding(true);
 
@@ -574,7 +433,7 @@ const WorkTeamManagement = () => {
 
 
     const handleUpdateTeam = () => {
-        if (selectedTeam.name != "") {
+        if (selectedTeam.name !== "") {
             setNewTeam({
                 TeamName: selectedTeam.name,
                 Description: selectedTeam.description,

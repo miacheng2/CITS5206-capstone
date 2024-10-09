@@ -6,14 +6,13 @@ import api from '../api';
 import Calendar from 'react-calendar';  // Import the calendar component
 import 'react-calendar/dist/Calendar.css';  // Import the calendar CSS
 
+
 const AdminUserManagement = () => {
     const [user, setUser] = useState({
         username: '',
         email: '',
     });
     const [currentUser, setCurrentUser] = useState('');
-    const [adminCount, setAdminCount] = useState(0);
-    const [teamLeaderCount, setTeamLeaderCount] = useState(0);
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [newUser, setNewUser] = useState({
@@ -416,6 +415,9 @@ const AdminUserManagement = () => {
                             <p>No Avatar Available</p>
                         )}
 
+                        
+
+
                     </header>
                     <div className={styles.clockSection}>
                         <p>{timeOfDay}</p>
@@ -449,11 +451,18 @@ const AdminUserManagement = () => {
                         <h3>All Events</h3>
                         {events.length > 0 ? (
                             <ul className={styles.eventList}>
-                                {events.map((event) => (
-                                    <li key={event.id} className={styles.eventItem}>
-                                        {event.name} - {new Date(event.date).toLocaleDateString()}
-                                    </li>
-                                ))}
+                                {events
+                                    .filter((event) => {
+                                        const eventDate = new Date(event.date);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        return eventDate >= today; // Only include today's and future events
+                                    })
+                                    .map((event) => (
+                                        <li key={event.id} className={styles.eventItem}>
+                                            {event.name} - {new Date(event.date).toLocaleDateString()}
+                                        </li>
+                                    ))}
                             </ul>
                         ) : (
                             <p>No events available</p>
@@ -523,6 +532,9 @@ const AdminUserManagement = () => {
 
                     </section>
                 </div>
+
+
+
 
                 {/* Main Content */}
                 <div className={styles.mainContent}>

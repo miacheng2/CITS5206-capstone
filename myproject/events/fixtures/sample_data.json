@@ -1,12 +1,14 @@
 [
   {
+    "__comment": "Passwords are 'adminpassword' for Admin1 and 'leaderpassword' for TeamLeader1. Remove this key before loading.",
+
     "model": "events.user",
     "pk": 1,
     "fields": {
       "email": "admin@example.com",
       "username": "Admin1",
       "user_type": "admin",
-      "password": "adminpassword"
+      "password": "pbkdf2_sha256$870000$T14v1PXJ4fnktC7mVdhVRm$ReL7YyqDEldFw1051tpSpiaIVwR4/vKrHiA9RxQcndU="
     }
   },
   {
@@ -16,7 +18,8 @@
       "email": "teamleader@example.com",
       "username": "TeamLeader1",
       "user_type": "team_leader",
-      "password": "leaderpassword"
+      "password": "pbkdf2_sha256$870000$sEv1z61K4OqyVfW8y1yHPO$j0nmoikj3ntzhvL7RXL6DdcWOhXniGgR+oZZZ56JrxU="
+      
     }
   },
   {
