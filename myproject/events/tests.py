@@ -104,6 +104,25 @@ class UserModelTest(TestCase):
     def test_string_representation(self):
         self.assertEqual(str(self.user), 'testuser')
 
+class TeamMemberModelTest(TestCase):
+
+    def setUp(self):
+        self.member = TeamMember.objects.create(
+            australian_sailing_number=123456,
+            first_name="John",
+            last_name="Doe",
+            mobile="1234567890",
+            email="john.doe@example.com",
+            membership_category="Regular Member",
+        )
+
+    def test_create_member(self):
+        self.assertEqual(self.member.name, "John Doe")
+        self.assertEqual(self.member.australian_sailing_number, 123456)
+
+    def test_str(self):
+        self.assertEqual(str(self.member), f"{self.member.name} - {self.member.australian_sailing_number}")
+
 
 class TeamModelTest(TestCase):
     def setUp(self):
@@ -198,6 +217,45 @@ class VolunteerPointsModelTest(TestCase):
             created_by=self.user
         )
         self.assertEqual(points.points, 40)  # 6 hours * (20/3) = 40 points
+
+class ActivityModelTest(TestCase):
+
+    def setUp(self):
+        self.activity = Activity.objects.create(name="Sailing")
+
+    def test_create_activity(self):
+        self.assertEqual(self.activity.name, "Sailing")
+
+    def test_str(self):
+        self.assertEqual(str(self.activity), self.activity.name)
+
+class EventModelTest(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='event_creator',
+            email='creator@example.com',
+            user_type=User.ADMIN
+        )
+        self.team = Team.objects.create(
+            name="Bravo Team",
+            description="Team for Bravo project",
+        )
+        self.event = Event.objects.create(
+            name="Water Event",
+            event_type='on_water',
+            date='2024-01-01',
+            team=self.team,
+            created_by=self.user
+        )
+
+    def test_create_event(self):
+        self.assertEqual(self.event.name, "Water Event")
+        self.assertEqual(self.event.event_type, 'on_water')
+        self.assertEqual(self.event.team.name, "Bravo Team")
+
+    def test_str(self):
+        self.assertEqual(str(self.event), self.event.name)
 
 # test apis
 class CSVImportTests(APITestCase):

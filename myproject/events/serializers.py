@@ -161,6 +161,25 @@ class VolunteerPointsSerializer(serializers.ModelSerializer):
         model = VolunteerPoints
         fields = ['id','member', 'event', 'points', 'hours', 'created_by','activity']
 
+    def validate(self, data):
+        member = data['member']
+        event = data['event']
+        activity = data.get('activity')
+
+        # For off-water events, prevent multiple records for the same event
+        if event.event_type == 'off_water' and VolunteerPoints.objects.filter(member=member, event=event).exists():
+            raise serializers.ValidationError(
+                "This member already has a record for this off-water event."
+            )
+
+        # For on-water events, prevent multiple records for the same activity
+        if event.event_type == 'on_water' and VolunteerPoints.objects.filter(member=member, event=event, activity=activity).exists():
+            raise serializers.ValidationError(
+                "This member already has a record for this activity in the on-water event."
+            )
+
+        return data
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
