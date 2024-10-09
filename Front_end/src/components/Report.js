@@ -57,22 +57,44 @@ function VolunteerHistory() {
   const togglePieCharts = () => {
     setShowPieCharts(!showPieCharts);
   };
+  
   const groupPieData = (team) => {
-    const teamMembers = members.filter((member) => member.teams === team.id); // Filter members for this team
-    if (!teamMembers.length) return { labels: [], datasets: [] }; // If no members in the team, return empty data
-
+    // Filter members for this team
+    let teamMembers = members.filter((member) => member.teams === team.id);
+  
+    // If a year is selected, filter by the selected year
+    if (selectedYear) {
+      teamMembers = teamMembers.filter((member) => member.year === selectedYear);
+    }
+  
+    // Prevent showing the same member multiple times across different years
+    // Aggregate by member name and their points within the same year
+    const aggregatedData = {};
+    teamMembers.forEach((member) => {
+      if (!aggregatedData[member.name]) {
+        aggregatedData[member.name] = 0;
+      }
+      aggregatedData[member.name] += member.total_points;
+    });
+  
+    // Generate the pie chart data with aggregated points
+    const labels = Object.keys(aggregatedData);
+    const dataPoints = Object.values(aggregatedData);
+  
+    // Return the data for the pie chart
     return {
-      labels: teamMembers.map((member) => member.name),
+      labels,
       datasets: [
         {
-          data: teamMembers.map((member) => member.total_points),
-          backgroundColor: teamMembers.map(
+          data: dataPoints,
+          backgroundColor: labels.map(
             () => "#" + ((Math.random() * 0xffffff) << 0).toString(16)
           ), // Random colors
         },
       ],
     };
   };
+  
 
   
   // Memoized function to calculate top performers by team
@@ -250,6 +272,7 @@ function VolunteerHistory() {
     setSelectedTotalPoints(pointsFilter);
   };
 
+  
   const handleMemberSelect = (memberId) => {
     setSelectedMembers((prevSelected) => {
       const updatedSelection = new Set(prevSelected);
@@ -374,7 +397,7 @@ function VolunteerHistory() {
 
  
   const calculateYearwiseTeamPoints = () => {
-    const years = [...new Set(members.map((member) => member.year))]; // Get unique years from members
+    const years = [...new Set(members.map((member) => member.year))].sort(); // Get unique years from members
     const teamYearPoints = maintenanceTeams.map((team) => {
       const teamDataByYear = years.map((year) => {
         const teamMembers = members.filter(
