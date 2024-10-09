@@ -56,16 +56,18 @@ function VolunteerHistory() {
   const togglePieCharts = () => {
     setShowPieCharts(!showPieCharts);
   };
-  
+
   const groupPieData = (team) => {
     // Filter members for this team
     let teamMembers = members.filter((member) => member.teams === team.id);
-  
+
     // If a year is selected, filter by the selected year
     if (selectedYear) {
-      teamMembers = teamMembers.filter((member) => member.year === selectedYear);
+      teamMembers = teamMembers.filter(
+        (member) => member.year === selectedYear
+      );
     }
-  
+
     // Prevent showing the same member multiple times across different years
     // Aggregate by member name and their points within the same year
     const aggregatedData = {};
@@ -75,11 +77,11 @@ function VolunteerHistory() {
       }
       aggregatedData[member.name] += member.total_points;
     });
-  
+
     // Generate the pie chart data with aggregated points
     const labels = Object.keys(aggregatedData);
     const dataPoints = Object.values(aggregatedData);
-  
+
     // Return the data for the pie chart
     return {
       labels,
@@ -93,7 +95,6 @@ function VolunteerHistory() {
       ],
     };
   };
-  
 
   // Memoized function to calculate top performers by team
   const calculateTopPerformers = useCallback(
@@ -264,7 +265,6 @@ function VolunteerHistory() {
     setSelectedTotalPoints(pointsFilter);
   };
 
-  
   const handleMemberSelect = (memberId) => {
     setSelectedMembers((prevSelected) => {
       const updatedSelection = new Set(prevSelected);
@@ -559,6 +559,11 @@ function VolunteerHistory() {
           ))}
         </tbody>
       </table>
+
+      {/* Download Button */}
+      <button className="download-btn" onClick={downloadCSV}>
+        Download CSV
+      </button>
 
       {/* Toggle buttons for graphs and top performers */}
       <div className="toggle-buttons">
