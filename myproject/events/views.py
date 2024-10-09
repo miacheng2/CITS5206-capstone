@@ -1,6 +1,6 @@
 from time import timezone
 from rest_framework import viewsets  # viewsets
-from rest_framework import status
+from rest_framework import status,serializers
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny,IsAdminUser
 from rest_framework.response import Response
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -554,15 +554,15 @@ class EventViewSet(viewsets.ModelViewSet):
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # to require authentication
 
     def create(self, request, *args, **kwargs):
-        """Create new volunteer points entry."""
-        serializer = VolunteerPointsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
@@ -780,7 +780,6 @@ def import_csv(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated,IsAdminUser])
 def get_activities_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity
