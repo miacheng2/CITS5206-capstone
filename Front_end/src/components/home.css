@@ -1,4 +1,4 @@
-/* Main background and header section */
+/* Header Section */
 .home-section {
   position: relative;
   background-image: url('nycimg8.jpg');
@@ -11,15 +11,30 @@
   color: white;
   text-align: center;
   margin-bottom: -50px;
+  animation: backgroundFade 1.5s ease-in-out;
 }
 
 .overlay {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border-radius: 8px;
 }
 
-/* Card section */
+.fade-in {
+  animation: fadeInText 1.5s ease;
+}
+
+@keyframes fadeInText {
+  0% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes backgroundFade {
+  0% { filter: brightness(0.7); }
+  100% { filter: brightness(1); }
+}
+
+/* Card Container */
 .homepage-card-container {
   display: flex;
   justify-content: space-between;
@@ -28,6 +43,13 @@
   transform: translateY(-50px);
 }
 
+/* Slide-in animation for cards */
+@keyframes slideIn {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Card styles */
 .homepage-card {
   background-color: rgba(255, 255, 255, 0.9);
   flex: 1;
@@ -38,11 +60,10 @@
   text-align: center;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s ease, background-color 0.3s ease;
   cursor: pointer;
+  transform-origin: bottom;
 }
 
-/* Specific colors for each card */
 .yellow-card { background-color: #FFEB3B; }
 .green-card { background-color: #8BC34A; }
 .orange-card { background-color: #FF9800; }
@@ -50,8 +71,8 @@
 
 .homepage-card-content {
   transition: opacity 0.3s ease;
-  color: white; /* Ensure text is always white and visible */
-  z-index: 1; /* Keep text on top */
+  color: white;
+  z-index: 1;
 }
 
 .homepage-card-hover {
@@ -59,7 +80,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: rgba(0, 0, 0, 0.8); /* Dark background for contrast */
+  background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 20px;
   transform: translateY(100%);
@@ -69,13 +90,14 @@
 }
 
 .homepage-card:hover .homepage-card-content {
-  opacity: 0.9; /* Slightly fade the content but keep text readable */
+  opacity: 0.9;
 }
 
 .homepage-card:hover .homepage-card-hover {
-  transform: translateY(0); /* Slide up the hover section */
+  transform: translateY(0);
 }
 
 .homepage-card:hover {
   transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
