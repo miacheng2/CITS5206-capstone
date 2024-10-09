@@ -183,3 +183,21 @@ CITS5206-capstone/
 ├── package.json                   # Project metadata and dependencies
 └── README.md                      # Project README file
 ```
+
+## Deploying the App on Windows 11
+
+### Prerequisites
+- WSL version 1.1.3.0 or later
+- Docker Desktop for Windows installed
+
+### Steps
+1. **Start the Containers**
+
+    ```bash
+    docker-compose up
+    ```
+
+2. **Access the App**
+
+    Open [http://localhost:3000](http://localhost:3000)
+
