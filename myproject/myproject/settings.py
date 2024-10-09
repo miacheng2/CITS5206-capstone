@@ -87,7 +87,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / "db" / 'db.sqlite3',
     }
 }
 AUTHENTICATION_BACKENDS = (
@@ -156,6 +156,7 @@ CORS_ALLOW_CREDENTIALS = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -171,4 +172,4 @@ EMAIL_USE_TLS = True  # using SSL
 EMAIL_HOST_USER = '68672bb6051e4a695f5a3c2e9fcd5aa0'  # Replace with API Key
 EMAIL_HOST_PASSWORD = '2831a8bd877f192e4f236cb9a564bb93'  # Replace with Secret Key
 DEFAULT_FROM_EMAIL = 'tersorbeauge@gmail.com'  # Replace with sender email
-
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000']
