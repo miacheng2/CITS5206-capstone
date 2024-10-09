@@ -1,37 +1,38 @@
-from time import timezone
-from rest_framework import viewsets  # viewsets
-from rest_framework import status,serializers
-from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny,IsAdminUser
-from rest_framework.response import Response
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth.hashers import make_password
-from rest_framework.decorators import api_view, permission_classes
-from django.utils.http import urlsafe_base64_decode,urlsafe_base64_encode
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.hashers import check_password
-
-from django.core.files.storage import FileSystemStorage
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-# from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from rest_framework.views import APIView
-from .utils import send_password_reset_email
-from rest_framework.decorators import api_view
-from .models import User, Team, TeamMember, Event, VolunteerPoints, Activity
-from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer,DetailedTeamSerializer,DetailedTeamMemberSerializer,AuthTokenSerializer,ActivitySerializer
-from django.db.models import Sum, F, IntegerField,Value,Case, When, ExpressionWrapper
-from django.contrib.auth import get_user_model
-from django.db.models.functions import ExtractYear,Concat
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.parsers import MultiPartParser, FormParser
-import logging
-import csv
+# Standard Libraries
 import os
 import re
+import csv
+import logging
+from time import timezone
+
+# Django Imports
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.models import User  # Uncomment if needed
+from django.core.files.storage import FileSystemStorage
+from django.db.models import Sum, F, IntegerField, Value, Case, When, ExpressionWrapper
+from django.db.models.functions import ExtractYear, Concat
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.views.decorators.csrf import csrf_exempt
+
+# Third-party Imports
+from rest_framework import status, serializers, viewsets
+from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes, action
+
+# Local App Imports
+from .models import User, Team, TeamMember, Event, VolunteerPoints, Activity
+from .serializers import UserSerializer, TeamSerializer, TeamMemberSerializer, EventSerializer, VolunteerPointsSerializer, DetailedTeamSerializer, DetailedTeamMemberSerializer, AuthTokenSerializer, ActivitySerializer
+from .utils import send_password_reset_email
+
 
 logger = logging.getLogger(__name__)
 from .serializers import (
