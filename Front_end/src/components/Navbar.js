@@ -25,7 +25,7 @@ function Navbar({ logout }) {
                     <li><NavLink to="/memberManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Member Management</b></NavLink></li>
                     <li><NavLink to="/WorkTeamManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Team Member Management</b></NavLink></li>
                     <li><NavLink to="/AdminUserManagement" className={({ isActive }) => getNavLinkClass(isActive)}><b>Admin Management</b></NavLink></li>
-                    <li><NavLink to="/volunteer-points" className={({ isActive }) => getNavLinkClass(isActive)}><b>Volunteer Points</b></NavLink></li>
+                    <li><NavLink to="/add-points" className={({ isActive }) => getNavLinkClass(isActive)}><b>Volunteer Points</b></NavLink></li>
                     <li><NavLink to="/events" className={({ isActive }) => getNavLinkClass(isActive)}><b>Events</b></NavLink></li>
                     <li><NavLink to="/reports" className={({ isActive }) => getNavLinkClass(isActive)}><b>Reports</b></NavLink></li>
                 </ul>
