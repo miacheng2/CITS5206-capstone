@@ -25,7 +25,7 @@ const Home = () => {
         <div className="homepage-card yellow-card">
           <div className="homepage-card-content">
             <h2>Volunteer Points</h2>
-            <p>Track volunteer hours, assign points, and reward contributions.</p>
+            <p>Easily manage and assign points for volunteer activities and efforts.</p>
           </div>
           <div className="homepage-card-hover">
             <button onClick={() => window.location.href='/volunteer-points'}>Learn More</button>
@@ -55,7 +55,7 @@ const Home = () => {
         <div className="homepage-card blue-card">
           <div className="homepage-card-content">
             <h2>Performance Reports</h2>
-            <p>Generate and analyze volunteer performance and event impact.</p>
+            <p>Analyze volunteer performance and compare team contributions.</p>
           </div>
           <div className="homepage-card-hover">
             <button onClick={() => window.location.href='/reports'}>Learn More</button>
