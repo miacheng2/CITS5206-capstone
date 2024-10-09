@@ -566,7 +566,6 @@ class EventViewSet(viewsets.ModelViewSet):
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
     queryset = VolunteerPoints.objects.all()
     serializer_class = VolunteerPointsSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]  # to require authentication
 
     def create(self, request, *args, **kwargs):
         """Create new volunteer points entry."""
@@ -792,7 +791,6 @@ def import_csv(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated,IsAdminUser])
 def get_activities_for_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     activities = event.activities.all() # Assuming Event has a ForeignKey relationship with Activity

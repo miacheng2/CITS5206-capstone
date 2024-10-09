@@ -4,7 +4,7 @@ import sailImage from "./NYC.jpg";
 import { useNavigate } from "react-router-dom";
 
 function AddVolunteerPoints() {
-  const [adminsAndLeaders, setUser] = useState([]); // To store users data
+  const [selectedAdmin, setUser] = useState([]); // To store current user data
   const [members, setMembers] = useState([]); // To store members data
   const [maintenanceTeams, setTeams] = useState([]); // To store teams data
   const [maintenanceEvents, setEvents] = useState([]); // To store events data
@@ -44,14 +44,35 @@ function AddVolunteerPoints() {
     return response.json();
   };
 
+  // Decode JWT to extract user info (assuming user info is in the payload)
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+
   // Fetch users, members, teams, and events
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const usersData = await fetchWithToken(
-          "http://localhost:8000/api/users/"
-        );
-        if (usersData) setUser(usersData);
+        const token = localStorage.getItem("token");
+        if (token) {
+          const userData = decodeToken(token);
+          setUser(userData);
+        } else {
+          navigate("/login");
+        }
 
         const membersData = await fetchWithToken(
           "http://localhost:8000/api/team-members/"
@@ -218,14 +239,9 @@ function AddVolunteerPoints() {
         ...prevState,
         editTime: new Date().toLocaleString(),
       }));
-      const editorName = selectedMember.editorName.replace(/\s+/g, " ").trim();
-      const selectedAdmin = adminsAndLeaders.find(
-        (user) =>
-          user.username.trim().toLowerCase() === editorName.toLowerCase()
-      );
 
       if (!selectedAdmin) {
-        setModalMessage("Error: No matching admin found for editorName.");
+        setModalMessage("Error: No matching admin found for current user.");
         setModalOpen(true);
         return;
       }
@@ -243,8 +259,9 @@ function AddVolunteerPoints() {
         points: selectedMember.volunteerPoints,
         hours: selectedMember.volunteerHours,
         activity: selectedActivity ? selectedActivity.id : null, // Use activity ID or null
-        created_by: selectedAdmin.id,
+        created_by: selectedAdmin.user_id,
       };
+      console.log(data);
 
       try {
         const token = localStorage.getItem("token");
@@ -357,7 +374,6 @@ function AddVolunteerPoints() {
             <th>End Time</th>
             <th>Volunteering Hours</th>
             <th>Points</th>
-            <th>Edited By</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -473,30 +489,6 @@ function AddVolunteerPoints() {
                   : ""}
               </td>
 
-              <td>
-                <select
-                  value={
-                    selectedMember?.australian_sailing_number ===
-                    member.australian_sailing_number
-                      ? selectedMember.editorName
-                      : ""
-                  }
-                  onChange={(e) =>
-                    handleInputChange("editorName", e.target.value)
-                  }
-                  disabled={
-                    selectedMember?.australian_sailing_number !==
-                    member.australian_sailing_number
-                  }
-                >
-                  <option value="">Select Name</option>
-                  {adminsAndLeaders.map((user) => (
-                    <option key={user.username} value={user.username}>
-                      {user.username}
-                    </option>
-                  ))}
-                </select>
-              </td>
               <td>
                 <button
                   onClick={handleSave}
