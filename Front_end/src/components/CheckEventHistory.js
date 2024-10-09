@@ -163,13 +163,7 @@ function CheckEventHistory() {
           value={filterName}
           onChange={(e) => setFilterName(e.target.value)}
         />
-        <select
-          value={filterMonth}
-          onChange={(e) => setFilterMonth(e.target.value)}
-        >
-          <option value="">All Months</option>
-          {/* Month options */}
-        </select>
+
       </div>
 
       <table className="event-table">

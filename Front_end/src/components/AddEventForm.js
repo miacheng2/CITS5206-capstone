@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles/AddEventForm.css";
 
+
 function AddEventForm() {
   const [currentUser, setCurrentUser] = useState(null);
   const [teams, setTeams] = useState([]);
