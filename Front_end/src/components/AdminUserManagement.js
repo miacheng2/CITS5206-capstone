@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './styles/AdminUserManagement.module.css';
 import api from '../api';
 import Calendar from 'react-calendar';  // Import the calendar component
 import 'react-calendar/dist/Calendar.css';  // Import the calendar CSS
-
 
 const AdminUserManagement = () => {
     const [user, setUser] = useState({
@@ -37,8 +36,7 @@ const AdminUserManagement = () => {
     const navigate = useNavigate(); // For navigation
     const hasAlerted = useRef(false); // Prevent multiple alerts
     const [loading, setLoading] = useState(false);
-
-
+    
     useEffect(() => {
         const checkPermissions = async () => {
             try {
@@ -66,7 +64,6 @@ const AdminUserManagement = () => {
                 fetchAdminList();
                 fetchTeamLeaderList();
                 fetchCurrentUser();
-                fetchUserCounts();
 
             } catch (error) {
                 console.error("Error during permissions check!", error);
@@ -76,9 +73,24 @@ const AdminUserManagement = () => {
         checkPermissions(); // Call the permission check function on mount
     }, [navigate]); // Re-run if navigate changes
 
+    const formatTime = useCallback((date) => {
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const seconds = date.getSeconds();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const timeOfDay = getTimeOfDay(hours);
+    
+        hours = hours % 12 || 12; 
+        const strMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const strSeconds = seconds < 10 ? '0' + seconds : seconds;
+    
+        return {
+            formattedTime: `${hours}:${strMinutes}:${strSeconds} ${ampm}`,
+            timeOfDay: timeOfDay
+        };
+    }, []);
 
-
-    const fetchWeatherAndForecast = async (lat, lon) => {
+    const fetchWeatherAndForecast = useCallback(async (lat, lon) => {
         const apiKey = '1383a45cfb4f178ede34928341f3add4';  // Replace with API key
         const currentWeatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
         const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
@@ -112,19 +124,8 @@ const AdminUserManagement = () => {
         } catch (error) {
             console.error("Error fetching weather data:", error);
         }
-    };
-    // Function to format time in 12-hour format with AM/PM
-    const getTimeOfDay = (hours) => {
-        if (hours >= 5 && hours < 12) {
-            return "Good Morning";
-        } else if (hours >= 12 && hours < 17) {
-            return "Good Afternoon";
-        } else if (hours >= 17 && hours < 21) {
-            return "Good Evening";
-        } else {
-            return "Good Night";
-        }
-    };
+    }, []);
+
     const handleDeleteUser = async (id, userType) => {
         const confirmDelete = window.confirm(`Are you sure you want to delete this ${userType}?`);
         if (!confirmDelete) return;
@@ -152,30 +153,19 @@ const AdminUserManagement = () => {
         }
     };
 
-
-
-
-
-
-    const formatTime = (date) => {
-        let hours = date.getHours();
-        const minutes = date.getMinutes();
-        const seconds = date.getSeconds();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const timeOfDay = getTimeOfDay(hours);
-
-        hours = hours % 12;
-        hours = hours ? hours : 12;  // The hour '0' should be '12'
-        const strMinutes = minutes < 10 ? '0' + minutes : minutes;
-        const strSeconds = seconds < 10 ? '0' + seconds : seconds;
-
-        return {
-            formattedTime: `${hours}:${strMinutes}:${strSeconds} ${ampm}`,
-            timeOfDay: timeOfDay
-        };
+    // Function to format time in 12-hour format with AM/PM
+    const getTimeOfDay = (hours) => {
+        if (hours >= 5 && hours < 12) {
+            return "Good Morning";
+        } else if (hours >= 12 && hours < 17) {
+            return "Good Afternoon";
+        } else if (hours >= 17 && hours < 21) {
+            return "Good Evening";
+        } else {
+            return "Good Night";
+        }
     };
 
-    // Update the current time every second
     useEffect(() => {
         const interval = setInterval(() => {
             const now = new Date();
@@ -183,18 +173,14 @@ const AdminUserManagement = () => {
             setCurrentTime(formattedTime);
             setTimeOfDay(timeOfDay);
         }, 1000);
-        return () => clearInterval(interval);  // Clean up the interval on component unmount
-    }, []);
-    useEffect(() => {
-        getLocationAndFetchWeather();
-    }, []);
+        return () => clearInterval(interval);
+    }, [formatTime]);
 
-    const getLocationAndFetchWeather = () => {
+    const getLocationAndFetchWeather = useCallback(() => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    fetchWeatherAndForecast(latitude, longitude);  // Use the new function to get both current weather and forecast
+                ({ coords: { latitude, longitude } }) => {
+                    fetchWeatherAndForecast(latitude, longitude);
                 },
                 (error) => {
                     console.error('Error getting location:', error);
@@ -204,8 +190,7 @@ const AdminUserManagement = () => {
         } else {
             setLocationError('Geolocation is not supported by your browser.');
         }
-    };
-
+    }, [fetchWeatherAndForecast]);
 
     // Fetch Admin list (only admins)
     const fetchAdminList = async () => {
@@ -226,6 +211,9 @@ const AdminUserManagement = () => {
             console.error('Error fetching admin list:', error);
         }
     };
+    useEffect(() => {
+        getLocationAndFetchWeather();
+    }, [getLocationAndFetchWeather]);
 
     // Fetch Team Leader list (only team leaders)
     const fetchTeamLeaderList = async () => {
@@ -252,7 +240,6 @@ const AdminUserManagement = () => {
         fetchTeamLeaderList(); // Fetch team leaders on mount
 
         fetchCurrentUser();
-        fetchUserCounts();
     }, []);
     const toggleAdminList = () => {
         setShowAdmins(!showAdmins); // Toggle the visibility of the admin list modal
@@ -299,18 +286,7 @@ const AdminUserManagement = () => {
         }
     };
 
-    const fetchUserCounts = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/user-counts/', {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setAdminCount(response.data.admin_count);
-            setTeamLeaderCount(response.data.team_leader_count);
-        } catch (error) {
-            console.error('Error fetching user counts:', error);
-        }
-    };
+    
 
     const handleProfileSubmit = async (event) => {
         event.preventDefault();
@@ -363,10 +339,6 @@ const AdminUserManagement = () => {
         fetchAllEvents();
     }, []);
 
-
-
-
-
     const handleNewUserSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -393,7 +365,6 @@ const AdminUserManagement = () => {
         }
     };
 
-
     return (
         <div className={styles.container}>
             <div className={styles.blob}></div>  {/* Ensure this blob div is added */}
@@ -414,9 +385,6 @@ const AdminUserManagement = () => {
                         ) : (
                             <p>No Avatar Available</p>
                         )}
-
-                        
-
 
                     </header>
                     <div className={styles.clockSection}>
