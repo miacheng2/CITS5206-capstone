@@ -281,14 +281,34 @@ function AddVolunteerPoints() {
             body: JSON.stringify(data),
           }
         );
+
+        // Handle the response status
+        const responseData = await response.json(); // Parse the response data
+
         if (response.ok) {
+          // Success case
           setModalMessage("Volunteer points saved successfully!");
           setModalOpen(true);
         } else {
-          setModalMessage("Failed to save volunteer points.");
+          // Error handling - response is not ok (status 4xx or 5xx)
+          let errorMessage = "An error occurred";
+
+          // Check if the error contains non_field_errors
+          if (
+            responseData.non_field_errors &&
+            responseData.non_field_errors.length > 0
+          ) {
+            errorMessage = responseData.non_field_errors[0];
+          } else if (responseData.detail) {
+            errorMessage = responseData.detail;
+          }
+
+          setModalMessage(errorMessage);
           setModalOpen(true);
         }
       } catch (error) {
+        // General error (e.g., network failure)
+        console.error("Error occurred:", error);
         setModalMessage("Error saving data.");
         setModalOpen(true);
       }

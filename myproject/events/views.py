@@ -1,6 +1,6 @@
 from time import timezone
 from rest_framework import viewsets  # viewsets
-from rest_framework import status
+from rest_framework import status,serializers
 from rest_framework.permissions import IsAuthenticated, BasePermission,AllowAny,IsAdminUser
 from rest_framework.response import Response
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -556,12 +556,13 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     serializer_class = VolunteerPointsSerializer
 
     def create(self, request, *args, **kwargs):
-        """Create new volunteer points entry."""
-        serializer = VolunteerPointsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except serializers.ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         """Update points and hours for a specific volunteer entry."""
