@@ -169,10 +169,18 @@ function CheckEventHistory() {
       });
     } catch (error) {
       if (error.response && error.response.status === 403) {
-        alert("You do not have permission to view this event's history.");
+        setModalMessage(
+          "You do not have permission to view this event's history."
+        );
+        setIsModalOpen(true);
+        setShowConfirmButtons(false);
       } else {
         console.error("Error fetching event history!", error);
-        alert("Failed to fetch event history. Please try again later.");
+        setModalMessage(
+          "Failed to fetch event history. Please try again later."
+        );
+        setIsModalOpen(true);
+        setShowConfirmButtons(false);
       }
     }
   };
