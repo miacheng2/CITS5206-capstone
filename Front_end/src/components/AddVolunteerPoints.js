@@ -162,18 +162,21 @@ function AddVolunteerPoints() {
       const end = new Date(
         `1970-01-01T${field === "endTime" ? value : selectedMember.endTime}`
       );
-      // Calculate total time difference in milliseconds
       const hours = (end - start) / (1000 * 60 * 60);
-      // Get the selected event to determine points and hours
+
       const selectedEvent = maintenanceEvents.find(
         (event) => event.name === selectedMember.maintenanceEvent
       );
 
       if (selectedEvent) {
         const isOnWaterEvent = selectedEvent.event_type === "on_water";
-        const points = isOnWaterEvent ? 20 : (hours * (20 / 3)).toFixed(2);
-        // 20 points for 3 hours for off-water
-        const hoursToSet = isOnWaterEvent ? 3 : hours; // Set hours to 0 for on-water events
+        const hasSelectedActivity = !!selectedMember.selectedActivity;
+
+        let points =
+          hasSelectedActivity && isOnWaterEvent
+            ? 20
+            : (hours * (20 / 3)).toFixed(2);
+        let hoursToSet = hasSelectedActivity && isOnWaterEvent ? 3 : hours;
 
         setSelectedMember((prevState) => ({
           ...prevState,
@@ -194,25 +197,35 @@ function AddVolunteerPoints() {
       );
       fetchActivitiesForEvent(selectedEvent.id);
 
-      // Reset activity, points, and hours when event changes
       setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
         selectedActivity: "", // Reset selected activity
         volunteerPoints:
           selectedEvent?.event_type === "on_water"
-            ? 20
+            ? 0
             : prevState.volunteerPoints,
         volunteerHours:
           selectedEvent?.event_type === "on_water"
-            ? 3
+            ? 0
             : prevState.volunteerHours,
       }));
     } else if (field === "selectedActivity") {
-      // Assuming the logic for activity selection is handled elsewhere
+      const selectedEvent = maintenanceEvents.find(
+        (event) => event.name === selectedMember.maintenanceEvent
+      );
+      const isOnWaterEvent = selectedEvent?.event_type === "on_water";
+      const hasSelectedActivity = !!value;
+
       setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
+        volunteerPoints:
+          hasSelectedActivity && isOnWaterEvent
+            ? 20
+            : prevState.volunteerPoints,
+        volunteerHours:
+          hasSelectedActivity && isOnWaterEvent ? 3 : prevState.volunteerHours,
       }));
     } else {
       setSelectedMember((prevState) => ({
