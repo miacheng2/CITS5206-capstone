@@ -233,7 +233,6 @@ function CheckEventHistory() {
                     "Unknown"}
                 </td>
                 <td>
-                  teams
                   {user.find((user) => user.id === event.created_by)
                     ?.username || "Unknown"}
                 </td>
