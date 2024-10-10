@@ -5,7 +5,7 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";  // Corrected import statement
+import { jwtDecode } from "jwt-decode"; // Corrected import statement
 import TeamMemberList from "./components/TeamMemberList";
 import WorkTeamManagement from "./components/WorkTeamManagement";
 import AdminUserManagement from "./components/AdminUserManagement";
@@ -20,13 +20,11 @@ import Navbar from "./components/Navbar";
 import Report from "./components/Report";
 import Home from "./components/Home";
 import CheckEventHistory from "./components/CheckEventHistory";
-import ChangePassword from './components/ChangePassword';
+import ChangePassword from "./components/ChangePassword";
 import MemberVolunteerHistory from "./components/MemberVolunteerHistory";
-import PasswordResetConfirm from './components/PasswordResetConfirm';
-import PasswordResetRequest from './components/PasswordResetRequest'; 
-
-
-
+import PasswordResetConfirm from "./components/PasswordResetConfirm";
+import PasswordResetRequest from "./components/PasswordResetRequest";
+import EventVolunteerHistory from "./components/EventVolunteerJHistory";
 
 import "./assets/fonts/fonts.css";
 
@@ -66,13 +64,16 @@ function App() {
     <Router>
       {!token ? (
         <Routes>
-          <Route
-            path="/login"
-            element={<Login setToken={setToken} />}
-          />
+          <Route path="/login" element={<Login setToken={setToken} />} />
           <Route path="/register" element={<Register setToken={setToken} />} />
-          <Route path="/password-reset-confirm/:uidb64/:token" element={<PasswordResetConfirm />} />
-          <Route path="/password-reset-request" element={<PasswordResetRequest />} />
+          <Route
+            path="/password-reset-confirm/:uidb64/:token"
+            element={<PasswordResetConfirm />}
+          />
+          <Route
+            path="/password-reset-request"
+            element={<PasswordResetRequest />}
+          />
           <Route path="*" element={<Navigate replace to="/login" />} />
         </Routes>
       ) : (
@@ -88,7 +89,10 @@ function App() {
               }
             />
             <Route path="/memberManagement" element={<TeamMemberList />} />
-            <Route path="/WorkTeamManagement" element={<WorkTeamManagement />} />
+            <Route
+              path="/WorkTeamManagement"
+              element={<WorkTeamManagement />}
+            />
             <Route
               path="/AdminUserManagement"
               element={
@@ -97,7 +101,7 @@ function App() {
                 </PrivateRoute>
               }
             />
-            
+
             <Route path="/add-points" element={<AddVolunteerPoints />} />
             <Route path="/check-history" element={<CheckVolunteerHistory />} />
             <Route path="/events" element={<EventList />} />
@@ -107,10 +111,11 @@ function App() {
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/logout" element={<Navigate replace to="/login" />} />
             <Route path="/event-history" element={<CheckEventHistory />} />
+            <Route
+              path="/event-volunteer-history/:eventId"
+              element={<EventVolunteerHistory />}
+            />
             <Route path="*" element={<Navigate replace to="/" />} />
-            
-
-            
 
             <Route
               path="/volunteer-history/:uid"

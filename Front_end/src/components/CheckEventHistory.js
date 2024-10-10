@@ -146,6 +146,37 @@ function CheckEventHistory() {
     setSelectedEventId(null);
   };
 
+  const handleEventClick = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      // Fetch volunteer history for the event
+      const response = await api.get(
+        `volunteer-points/event-history/${eventId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Redirect to the page to display the history
+      navigate(`/event-volunteer-history/${eventId}`, {
+        state: { history: response.data },
+      });
+    } catch (error) {
+      if (error.response && error.response.status === 403) {
+        alert("You do not have permission to view this event's history.");
+      } else {
+        console.error("Error fetching event history!", error);
+        alert("Failed to fetch event history. Please try again later.");
+      }
+    }
+  };
+
   return (
     <div>
       <header className="event-section">
@@ -163,7 +194,6 @@ function CheckEventHistory() {
           value={filterName}
           onChange={(e) => setFilterName(e.target.value)}
         />
-
       </div>
 
       <table className="event-table">
@@ -182,7 +212,12 @@ function CheckEventHistory() {
           {filteredEvents.length > 0 ? (
             filteredEvents.map((event) => (
               <tr key={event.id}>
-                <td>{event.name}</td>
+                <td
+                  onClick={() => handleEventClick(event.id)}
+                  className="clickable"
+                >
+                  {event.name}
+                </td>
                 <td>{event.date}</td>
                 <td>{event.event_type}</td>
                 <td>

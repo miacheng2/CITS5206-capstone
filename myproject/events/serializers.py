@@ -20,9 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(**validated_data)
         return user
 
-
-
-
 class AuthTokenSerializer(serializers.Serializer):
     username = serializers.CharField(label="Username")
     password = serializers.CharField(
@@ -45,9 +42,6 @@ class TeamMemberUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember
         fields = ['name', 'email', 'membership_category']
-
-
-
 
 class DetailedTeamSerializer(serializers.ModelSerializer):
     total_members = serializers.SerializerMethodField()
@@ -100,7 +94,6 @@ class DetailedTeamSerializer(serializers.ModelSerializer):
             instance.members.set(members_data)
 
         return instance
-
     
 class DetailedTeamMemberSerializer(serializers.ModelSerializer):
     teams = DetailedTeamSerializer(many=True, read_only=True)
@@ -125,7 +118,7 @@ class DetailedTeamMemberSerializer(serializers.ModelSerializer):
 class TeamSerializer(serializers.ModelSerializer):
     class Meta:
         model = Team
-        fields = ['id', 'name', 'description', 'creation_date']
+        fields = ['id', 'name', 'description', 'creation_date','team_leader']
 
 class TeamMemberSerializer(serializers.ModelSerializer):
     teams = TeamSerializer(many=True, read_only=True)
