@@ -146,7 +146,7 @@ function CheckEventHistory() {
     setSelectedEventId(null);
   };
 
-  const handleEventClick = async (eventId) => {
+  const handleEventClick = async (eventId, eventName) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -165,7 +165,7 @@ function CheckEventHistory() {
 
       // Redirect to the page to display the history
       navigate(`/event-volunteer-history/${eventId}`, {
-        state: { history: response.data },
+        state: { history: response.data, eventName: eventName },
       });
     } catch (error) {
       if (error.response && error.response.status === 403) {
@@ -221,7 +221,7 @@ function CheckEventHistory() {
             filteredEvents.map((event) => (
               <tr key={event.id}>
                 <td
-                  onClick={() => handleEventClick(event.id)}
+                  onClick={() => handleEventClick(event.id, event.name)}
                   className="clickable"
                 >
                   {event.name}

@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import "./EventDetailsModal.css";
 
 function EventVolunteerHistory() {
-  const { state } = useLocation();
-  const history = state.history;
+  const location = useLocation();
+  const { history, eventName } = location.state || {};
   const [members, setMembers] = useState([]);
   const navigate = useNavigate();
   const [modalMessage, setModalMessage] = useState(""); // Modal message state
@@ -63,7 +63,11 @@ function EventVolunteerHistory() {
       <header className="event-section">
         <div className="overlay">
           <div className="text-container">
-            <h2>Volunteer History</h2>
+            <h2>
+              {eventName
+                ? `Volunteer History for ${eventName}`
+                : "Volunteer History"}
+            </h2>
           </div>
         </div>
       </header>
@@ -80,7 +84,6 @@ function EventVolunteerHistory() {
         <tbody>
           {history.map((entry) => (
             <tr key={entry.id}>
-              {/* <td>{entry.member}</td> */}
               <td>
                 {members.find(
                   (member) => member.australian_sailing_number === entry.member
