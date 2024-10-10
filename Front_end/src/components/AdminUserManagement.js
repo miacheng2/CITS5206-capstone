@@ -36,7 +36,7 @@ const AdminUserManagement = () => {
     const navigate = useNavigate(); // For navigation
     const hasAlerted = useRef(false); // Prevent multiple alerts
     const [loading, setLoading] = useState(false);
-    
+
     useEffect(() => {
         const checkPermissions = async () => {
             try {
@@ -79,11 +79,11 @@ const AdminUserManagement = () => {
         const seconds = date.getSeconds();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const timeOfDay = getTimeOfDay(hours);
-    
-        hours = hours % 12 || 12; 
+
+        hours = hours % 12 || 12;
         const strMinutes = minutes < 10 ? '0' + minutes : minutes;
         const strSeconds = seconds < 10 ? '0' + seconds : seconds;
-    
+
         return {
             formattedTime: `${hours}:${strMinutes}:${strSeconds} ${ampm}`,
             timeOfDay: timeOfDay
@@ -286,7 +286,7 @@ const AdminUserManagement = () => {
         }
     };
 
-    
+
 
     const handleProfileSubmit = async (event) => {
         event.preventDefault();
@@ -416,7 +416,7 @@ const AdminUserManagement = () => {
                     </div>
 
                     <section className={styles.eventSection}>
-                        <h3>All Events</h3>
+                        <h3>All Coming Events</h3>
                         {events.length > 0 ? (
                             <ul className={styles.eventList}>
                                 {events

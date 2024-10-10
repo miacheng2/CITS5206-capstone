@@ -4,7 +4,7 @@ import styles from './styles/WorkTeamManagement.module.css';
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
-    const popupRef = useRef(null); 
+    const popupRef = useRef(null);
     const [shouldScrollMembers, setShouldScrollMembers] = useState(false); // Track when to scroll the members list
     const [teams, setTeams] = useState([]);
     const [selectedTeams, setSelectedTeams] = useState([]);
@@ -33,7 +33,7 @@ const WorkTeamManagement = () => {
         Members: [],
     });
 
-   
+
     const fetchWithAuth = async (url, options = {}) => {
         const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
@@ -241,7 +241,7 @@ const WorkTeamManagement = () => {
         // Viewing logic without selecting the team
         console.log("Viewing team:", team);
         setSelectedTeam(team);
-        
+
         // Set the popup to open for viewing
         localStorage.setItem('selectedTeamId', team.id);
         localStorage.setItem('isPopupOpen', 'true');
@@ -331,11 +331,11 @@ const WorkTeamManagement = () => {
                 }),
             });
 
-            if (response.ok&&popupRef.current) {
+            if (response.ok && popupRef.current) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
                 setMemberSelected(false);  // Ensure the member selection state is reset
-                
+
 
                 // Save the add member state and search query to localStorage
                 localStorage.setItem('isAddingMember', 'true');
@@ -378,7 +378,7 @@ const WorkTeamManagement = () => {
             setShouldScrollMembers(false);  // Reset flag after scrolling
         }
     }, [shouldScrollMembers]);
-    
+
 
 
     const handleAddTeam = () => {
@@ -711,53 +711,53 @@ const WorkTeamManagement = () => {
                             <h3>Members:</h3>
                             <div className={styles.scrollableMembers} ref={popupRef}>
 
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Selection</th>
-                                        <th>numberId</th>
-                                        <th>firstName</th>
-                                        <th>lastName</th>
-                                        <th>Email</th>
-                                        <th>mobile</th>
-                                        <th>membershipCategory</th>
-                                        <th>volunteerOrPay</th>
-                                        {/*                                         <th>Actions</th>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Selection</th>
+                                            <th>numberId</th>
+                                            <th>firstName</th>
+                                            <th>lastName</th>
+                                            <th>Email</th>
+                                            <th>mobile</th>
+                                            <th>membershipCategory</th>
+                                            <th>volunteerOrPay</th>
+                                            {/*                                         <th>Actions</th>
  */}                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedTeam.members && selectedTeam.members.length > 0 ? (
-                                        selectedTeam.members.map((member, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    <input
-                                                        type="checkbox"
-                                                        name="selectedMember"
-                                                        value={member.australian_sailing_number}
-                                                        checked={selectedMembers.includes(member.australian_sailing_number)}
-                                                        onChange={(e) => handleMemberSelection(e, member.australian_sailing_number)}
-                                                    />
-                                                </td>
-                                                <td>{member.australian_sailing_number}</td>
-                                                <td>{member.first_name}</td>
-                                                <td>{member.last_name}</td>
-                                                <td>{member.email}</td>
-                                                <td>{member.mobile}</td>
-                                                <td>{member.membership_category}</td>
-                                                <td>{member.will_volunteer_or_pay_levy}</td>
-                                                {/* <td>
+                                    </thead>
+                                    <tbody>
+                                        {selectedTeam.members && selectedTeam.members.length > 0 ? (
+                                            selectedTeam.members.map((member, index) => (
+                                                <tr key={index}>
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            name="selectedMember"
+                                                            value={member.australian_sailing_number}
+                                                            checked={selectedMembers.includes(member.australian_sailing_number)}
+                                                            onChange={(e) => handleMemberSelection(e, member.australian_sailing_number)}
+                                                        />
+                                                    </td>
+                                                    <td>{member.australian_sailing_number}</td>
+                                                    <td>{member.first_name}</td>
+                                                    <td>{member.last_name}</td>
+                                                    <td>{member.email}</td>
+                                                    <td>{member.mobile}</td>
+                                                    <td>{member.membership_category}</td>
+                                                    <td>{member.will_volunteer_or_pay_levy}</td>
+                                                    {/* <td>
                                                     <button onClick={() => handleEditClick(member)}>Edit</button>
 
                                                 </td> */}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7">No members available</td>
                                             </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="7">No members available</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
 
                             {/* {isModalOpen && (
@@ -929,7 +929,7 @@ const WorkTeamManagement = () => {
                                             onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
 
                                         >
-                                            Delete Team Member
+                                            Remove Team Member
                                         </button>
                                         <button onClick={ClosePopup}>Close</button>
                                     </>
