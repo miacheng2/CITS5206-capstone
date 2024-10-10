@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
 import sailImage from "./NYC.jpg";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
 
 function AddVolunteerPoints() {
   const [selectedAdmin, setUser] = useState([]); // To store current user data
@@ -92,12 +91,10 @@ function AddVolunteerPoints() {
           const today = new Date();
           const oneMonthAgo = new Date();
           oneMonthAgo.setMonth(today.getMonth() - 1); // Get date one month ago
-
           const filteredEvents = eventsData.filter((event) => {
             const eventDate = new Date(event.date); // Assuming event.date is in a proper format
-            return eventDate >= oneMonthAgo && eventDate >= today; // Only past month and upcoming events
+            return eventDate >= oneMonthAgo || eventDate >= today; // Only past month and upcoming events
           });
-
           setEvents(filteredEvents);
         }
       } catch (error) {
