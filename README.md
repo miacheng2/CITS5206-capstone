@@ -191,13 +191,19 @@ CITS5206-capstone/
 - Docker Desktop for Windows installed
 
 ### Steps
-1. **Start the Containers**
+1. **Build the docker Containers**
+
+    ```bash
+    docker-compose build
+    ```
+
+2. **Start the Containers**
 
     ```bash
     docker-compose up
     ```
 
-2. **Access the App**
+3. **Access the Services**
 
-    Open [http://localhost:3000](http://localhost:3000)
-
+   Django Backend: Open a browser and navigate to [http://localhost:8000](http://localhost:8000)
+   React Frontend: Open [http://localhost:3000](http://localhost:3000)
