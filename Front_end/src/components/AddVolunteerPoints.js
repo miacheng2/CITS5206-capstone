@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./stylesAdd.css";
 import sailImage from "./NYC.jpg";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
 
 function AddVolunteerPoints() {
   const [selectedAdmin, setUser] = useState([]); // To store current user data
@@ -92,12 +91,10 @@ function AddVolunteerPoints() {
           const today = new Date();
           const oneMonthAgo = new Date();
           oneMonthAgo.setMonth(today.getMonth() - 1); // Get date one month ago
-
           const filteredEvents = eventsData.filter((event) => {
             const eventDate = new Date(event.date); // Assuming event.date is in a proper format
-            return eventDate >= oneMonthAgo && eventDate >= today; // Only past month and upcoming events
+            return eventDate >= oneMonthAgo || eventDate >= today; // Only past month and upcoming events
           });
-
           setEvents(filteredEvents);
         }
       } catch (error) {
@@ -165,18 +162,21 @@ function AddVolunteerPoints() {
       const end = new Date(
         `1970-01-01T${field === "endTime" ? value : selectedMember.endTime}`
       );
-      // Calculate total time difference in milliseconds
       const hours = (end - start) / (1000 * 60 * 60);
-      // Get the selected event to determine points and hours
+
       const selectedEvent = maintenanceEvents.find(
         (event) => event.name === selectedMember.maintenanceEvent
       );
 
       if (selectedEvent) {
         const isOnWaterEvent = selectedEvent.event_type === "on_water";
-        const points = isOnWaterEvent ? 20 : (hours * (20 / 3)).toFixed(2);
-        // 20 points for 3 hours for off-water
-        const hoursToSet = isOnWaterEvent ? 3 : hours; // Set hours to 0 for on-water events
+        const hasSelectedActivity = !!selectedMember.selectedActivity;
+
+        let points =
+          hasSelectedActivity && isOnWaterEvent
+            ? 20
+            : (hours * (20 / 3)).toFixed(2);
+        let hoursToSet = hasSelectedActivity && isOnWaterEvent ? 3 : hours;
 
         setSelectedMember((prevState) => ({
           ...prevState,
@@ -197,25 +197,35 @@ function AddVolunteerPoints() {
       );
       fetchActivitiesForEvent(selectedEvent.id);
 
-      // Reset activity, points, and hours when event changes
       setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
         selectedActivity: "", // Reset selected activity
         volunteerPoints:
           selectedEvent?.event_type === "on_water"
-            ? 20
+            ? 0
             : prevState.volunteerPoints,
         volunteerHours:
           selectedEvent?.event_type === "on_water"
-            ? 3
+            ? 0
             : prevState.volunteerHours,
       }));
     } else if (field === "selectedActivity") {
-      // Assuming the logic for activity selection is handled elsewhere
+      const selectedEvent = maintenanceEvents.find(
+        (event) => event.name === selectedMember.maintenanceEvent
+      );
+      const isOnWaterEvent = selectedEvent?.event_type === "on_water";
+      const hasSelectedActivity = !!value;
+
       setSelectedMember((prevState) => ({
         ...prevState,
         [field]: value,
+        volunteerPoints:
+          hasSelectedActivity && isOnWaterEvent
+            ? 20
+            : prevState.volunteerPoints,
+        volunteerHours:
+          hasSelectedActivity && isOnWaterEvent ? 3 : prevState.volunteerHours,
       }));
     } else {
       setSelectedMember((prevState) => ({
@@ -227,12 +237,19 @@ function AddVolunteerPoints() {
 
   const handleSave = async () => {
     if (selectedMember) {
+      // Ensure an event is selected
+      if (!selectedMember.maintenanceEvent) {
+        setModalMessage("Please select an event.");
+        setModalOpen(true);
+        return;
+      }
+
       // Check for valid hours and points
       if (
-        selectedMember.volunteerHours < 0 ||
-        selectedMember.volunteerPoints < 0
+        selectedMember.volunteerHours <= 0 ||
+        selectedMember.volunteerPoints <= 0
       ) {
-        setModalMessage("Volunteer hours and points must be non-negative.");
+        setModalMessage("Volunteer hours and points must be positive.");
         setModalOpen(true);
         return;
       }

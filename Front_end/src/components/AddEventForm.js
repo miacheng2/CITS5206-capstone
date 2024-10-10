@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles/AddEventForm.css";
 
-
 function AddEventForm() {
   const [currentUser, setCurrentUser] = useState(null);
   const [teams, setTeams] = useState([]);
   const navigate = useNavigate();
+  const [modalMessage, setModalMessage] = useState(""); // Modal message state
+  const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
 
   const [formData, setFormData] = useState({
     eventName: "",
@@ -129,18 +130,23 @@ function AddEventForm() {
       .filter((activity) => activity !== ""); // Remove empty activities
 
     if (!currentUser) {
-      alert("Unable to submit, current user not found.");
+      setModalMessage("Unable to submit, current user not found.");
+      setModalOpen(true);
       return;
     }
 
     if (sanitizedEventName === "") {
-      alert("Event name cannot be empty or just spaces.");
+      setModalMessage("Event name cannot be empty or just spaces.");
+      setModalOpen(true);
       return;
     }
 
     // Ensure that activities are added for on-water events
     if (formData.eventType === "on_water" && sanitizedActivities.length === 0) {
-      alert("Please add at least one activity for an on-water event.");
+      setModalMessage(
+        "Please add at least one activity for an on-water event."
+      );
+      setModalOpen(true);
       return;
     }
 
@@ -182,7 +188,8 @@ function AddEventForm() {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
 
-      alert("Event added successfully!");
+      setModalMessage("Event added successfully!");
+      setModalOpen(true);
       setFormData({
         eventName: "",
         date: "",
@@ -191,12 +198,32 @@ function AddEventForm() {
         activities: [],
       });
     } catch (error) {
-      alert("Failed to add event. Error: " + error.message);
+      setModalMessage("Failed to add event. Error: " + error.message);
+      setModalOpen(true);
     }
   }
 
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
+
   return (
     <div className="form-container">
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
       <div className="form-card">
         <div className="form-header">
           <h2>Event Form</h2>

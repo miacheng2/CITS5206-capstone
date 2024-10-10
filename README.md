@@ -183,3 +183,28 @@ CITS5206-capstone/
 ├── package.json                   # Project metadata and dependencies
 └── README.md                      # Project README file
 ```
+
+## Deploying the App on Windows 11
+
+### Prerequisites
+- WSL version 1.1.3.0 or later
+- Docker Desktop for Windows installed
+
+### Steps
+1. **Build the docker Containers**
+
+    ```bash
+    docker-compose build
+    ```
+
+2. **Start the Containers**
+
+    ```bash
+    docker-compose up
+    ```
+
+3. **Access the Services**
+
+   Django Backend: Open a browser and navigate to [http://localhost:8000](http://localhost:8000)
+   
+   React Frontend: Open [http://localhost:3000](http://localhost:3000)
