@@ -117,10 +117,7 @@ const TeamMemberList = () => {
         }
     };
 
-    const handleEditClick = (member) => {
-        setEditingMember(member);
-        setIsModalOpen(true);
-    };
+    
 
     const handleEditSubmit = async () => {
         const { australian_sailing_number } = editingMember;
@@ -154,29 +151,20 @@ const TeamMemberList = () => {
         }));
     };
 
-    const handleDeleteClick = async (numberId) => {
-        try {
-            const response = await fetch(`http://localhost:8000/api/detailed-team-members/${numberId}/`, {
-                method: 'DELETE',
-            });
-
-            if (response.ok) {
-                alert('Member deleted successfully!');
-                fetchTeamMembers();
-            } else {
-                alert('Failed to delete member.');
-            }
-        } catch (error) {
-            console.error('Error deleting member:', error);
-        }
-    };
-
     const generateTableHeaders = (data) => {
+        const headerMap = {
+            australian_sailing_number: "Australian Sailing Number",
+            first_name: "First Name",
+            last_name: "Last Name",
+            email: "Email",
+            mobile: "Mobile",
+            membership_category: "Membership Category",
+            will_volunteer_or_pay_levy: "Volunteer or Pay Levy",
+            teams: "Teams"
+        };
+        
         if (data.length > 0) {
-            return Object.keys(data[0]).map(key => {
-                const header = key.replace(/([A-Z])/g, ' $1').trim();
-                return header.charAt(0).toUpperCase() + header.slice(1);
-            });
+            return Object.keys(data[0]).map(key => headerMap[key] || key);
         }
         return [];
     };

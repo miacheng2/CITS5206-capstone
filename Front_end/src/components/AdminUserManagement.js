@@ -338,7 +338,7 @@ const AdminUserManagement = () => {
 
         fetchAllEvents();
     }, []);
-
+    
     const handleNewUserSubmit = async (e) => {
         e.preventDefault();
         try {
