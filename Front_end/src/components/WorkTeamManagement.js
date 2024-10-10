@@ -929,7 +929,7 @@ const WorkTeamManagement = () => {
                                             onClick={() => handleRemoveMember(selectedMember)} // Pass the selected member's ID or name
 
                                         >
-                                            Delete Team Member
+                                            Remove Team Member
                                         </button>
                                         <button onClick={ClosePopup}>Close</button>
                                     </>
