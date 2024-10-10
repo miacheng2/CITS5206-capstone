@@ -224,12 +224,19 @@ function AddVolunteerPoints() {
 
   const handleSave = async () => {
     if (selectedMember) {
+      // Ensure an event is selected
+      if (!selectedMember.maintenanceEvent) {
+        setModalMessage("Please select an event.");
+        setModalOpen(true);
+        return;
+      }
+
       // Check for valid hours and points
       if (
-        selectedMember.volunteerHours < 0 ||
-        selectedMember.volunteerPoints < 0
+        selectedMember.volunteerHours <= 0 ||
+        selectedMember.volunteerPoints <= 0
       ) {
-        setModalMessage("Volunteer hours and points must be non-negative.");
+        setModalMessage("Volunteer hours and points must be positive.");
         setModalOpen(true);
         return;
       }
