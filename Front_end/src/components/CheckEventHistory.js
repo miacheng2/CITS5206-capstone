@@ -165,7 +165,11 @@ function CheckEventHistory() {
 
       // Redirect to the page to display the history
       navigate(`/event-volunteer-history/${eventId}`, {
-        state: { history: response.data, eventName: eventName },
+        state: {
+          history: response.data,
+          eventName: eventName,
+          eventId: eventId,
+        },
       });
     } catch (error) {
       if (error.response && error.response.status === 403) {
