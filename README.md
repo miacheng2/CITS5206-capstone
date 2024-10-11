@@ -208,3 +208,9 @@ CITS5206-capstone/
    Django Backend: Open a browser and navigate to [http://localhost:8000](http://localhost:8000)
    
    React Frontend: Open [http://localhost:3000](http://localhost:3000)
+
+4. **Stop the Services**
+
+    ```bash
+    docker-compose down
+    ```
