@@ -197,19 +197,19 @@ CITS5206-capstone/
     docker-compose build
     ```
 
-2. **Start the Containers**
+2. **Start the Containers runs in Detached Mode**
 
     ```bash
-    docker-compose up
+    docker-compose up -d
     ```
 
-3. **Access the Services**
+3. **Access the Service**
 
    Django Backend: Open a browser and navigate to [http://localhost:8000](http://localhost:8000)
    
    React Frontend: Open [http://localhost:3000](http://localhost:3000)
 
-4. **Stop the Services**
+4. **Stop the Service**
 
     ```bash
     docker-compose down
