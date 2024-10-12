@@ -197,7 +197,7 @@ CITS5206-capstone/
     docker-compose build
     ```
 
-2. **Start the Containers runs in Detached Mode**
+2. **Start the Containers in Detached Mode**
 
     ```bash
     docker-compose up -d
