@@ -33,7 +33,6 @@ function CheckEventHistory() {
             Authorization: `Bearer ${token}`,
           },
         });
-
         setUser(usersData.data);
 
         const eventData = await api.get("events/", {

@@ -525,6 +525,24 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Create a new event."""
+        # Get current user
+        current_user = request.user
+
+        # Check if the user is an admin
+        if not current_user.is_staff:
+            # Check if the user is the team leader of the selected team
+            team_id = request.data.get('team')
+            try:
+                team = Team.objects.get(id=team_id)
+                if team.team_leader != current_user:
+                    return Response(
+                        {"error": "Permission denied. Only admins or the team leader of the selected team can create events."},
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
+            except Team.DoesNotExist:
+                return Response({"error": "Invalid team selected."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Proceed with event creation if user is authorized
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -538,6 +556,16 @@ class EventViewSet(viewsets.ModelViewSet):
         except Event.DoesNotExist:
             return Response({"error": "Event not found."}, status=status.HTTP_404_NOT_FOUND)
 
+        # Get the current user
+        current_user = request.user
+
+        # Check if the user is an admin or team leader of the event's team
+        if not current_user.is_staff and event.team.team_leader != current_user:
+            return Response(
+                {"error": "Permission denied. Only admins or the team leader can delete this event."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         # Check if there are any volunteer points linked to this event
         linked_volunteer_points = VolunteerPoints.objects.filter(event=event).exists()
 
@@ -550,6 +578,7 @@ class EventViewSet(viewsets.ModelViewSet):
         # If no linked volunteer points, proceed to delete the event
         event.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
     
 # create, get, update, delete one member's point
 class VolunteerPointsViewSet(viewsets.ModelViewSet):
@@ -610,8 +639,7 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     def event_volunteer_history(self, request, event_id=None):
         """Retrieve volunteer points linked to a specific event."""
         event = Event.objects.get(id=event_id)
-        team_leader = event.team.team_leader  # Assuming there's a team_leader field in Team
-        
+        team_leader = event.team.team_leader
         # Check if the user is an admin or team leader of the team
         if not request.user.is_staff and request.user != team_leader:
             return Response({"detail": "You do not have permission to view this event's history."}, status=status.HTTP_403_FORBIDDEN)
