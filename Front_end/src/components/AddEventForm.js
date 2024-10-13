@@ -184,8 +184,12 @@ function AddEventForm() {
         body: JSON.stringify(formattedData),
       });
 
+      const responseData = await response.json(); // Parse JSON from response
+
       if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
+        // Display the error message returned from the backend
+        const errorMessage = responseData.error || "Failed to add event.";
+        throw new Error(errorMessage);
       }
 
       setModalMessage("Event added successfully!");
@@ -198,7 +202,7 @@ function AddEventForm() {
         activities: [],
       });
     } catch (error) {
-      setModalMessage("Failed to add event. Error: " + error.message);
+      setModalMessage(error.message);
       setModalOpen(true);
     }
   }
