@@ -94,7 +94,6 @@ function CheckEventHistory() {
       );
 
       if (response.data.length > 0) {
-        console.log(response.data);
         // If volunteer history is linked, update the modal to only show the Close button
         setModalMessage(
           "Can't delete as there is volunteer history linked to this event."
@@ -109,8 +108,14 @@ function CheckEventHistory() {
       setSelectedEventId(eventId);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Error checking volunteer history!", error);
-      alert("Failed to check volunteer history. Please try again later.");
+      if (error.response && error.response.status === 403) {
+        setModalMessage("You don't have permission to delete the event.");
+        setShowConfirmButtons(false);
+        setIsModalOpen(true);
+      } else {
+        console.error("Error checking volunteer history!", error);
+        alert("Failed to check volunteer history. Please try again later.");
+      }
     }
   };
 
@@ -130,7 +135,8 @@ function CheckEventHistory() {
       setEvents((prevEvents) =>
         prevEvents.filter((event) => event.id !== selectedEventId)
       );
-      console.log("Event deleted:", selectedEventId);
+      setModalMessage("Event deleted:", selectedEventId);
+      setShowConfirmButtons(false);
     } catch (error) {
       console.error("There was an error deleting the event!", error);
       alert("Failed to delete event. Please try again later.");
