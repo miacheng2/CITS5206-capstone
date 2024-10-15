@@ -387,62 +387,48 @@ const AdminUserManagement = () => {
                         )}
 
                     </header>
-                    <div className={styles.clockSection}>
-                        <p>{timeOfDay}</p>
-                        <h3>Current Time</h3>
-                        <p>{currentTime}</p>
 
-                    </div>
-                    {/* Weather Section */}
-                    {/* Profile and stats sections remain unchanged */}
-                    <div className={styles.weatherSection}>
-                        <h3>Today's Weather</h3>
-                        {locationError ? (
-                            <p>{locationError}</p>
-                        ) : weather.temp ? (
-                            <div className={styles.weatherInfo}>
-                                <img
-                                    src={`http://openweathermap.org/img/wn/${weather.icon}@2x.png`}
-                                    alt={weather.description}
-                                    className={styles.weatherIcon}
+                     {/* Profile Update Form */}
+                     <div className={styles.feature}>
+                        <h2>Edit Your Profile</h2>
+                        <form onSubmit={handleProfileSubmit} className={styles.form}>
+                            <input
+                                name="username"
+                                type="text"
+                                placeholder="Username"
+                                value={user.username}
+                                onChange={(e) => setUser({ ...user, username: e.target.value })}
+                                required
+                            />
+                            <input
+                                name="email"
+                                type="email"
+                                placeholder="Email"
+                                value={user.email}
+                                onChange={(e) => setUser({ ...user, email: e.target.value })}
+                                required
+                            />
+                            {/* Custom File Input for Avatar */}
+                            <div className={styles.fileInputContainer}>
+                                <input
+                                    id="avatar"
+                                    name="avatar"
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setUser({ ...user, avatar: e.target.files[0] })}
+                                    className={styles.hiddenFileInput}
                                 />
-                                <p>{Math.round(weather.temp)}°C</p>
-                                <p>{weather.description}</p>
+                                <label htmlFor="avatar" className={styles.customFileButton}>
+                                    Choose Your Avatar
+                                </label>
                             </div>
-                        ) : (
-                            <p>Loading weather...</p>
-                        )}
-
+                            <button type="submit" className={styles.createButton}>Update Profile</button>
+                        </form>
+                        {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
+                        {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
                     </div>
-
-                    <section className={styles.eventSection}>
-                        <h3>All Events</h3>
-                        {events.length > 0 ? (
-                            <ul className={styles.eventList}>
-                                {events
-                                    .filter((event) => {
-                                        const eventDate = new Date(event.date);
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        return eventDate >= today; // Only include today's and future events
-                                    })
-                                    .map((event) => (
-                                        <li key={event.id} className={styles.eventItem}>
-                                            {event.name} - {new Date(event.date).toLocaleDateString()}
-                                        </li>
-                                    ))}
-                            </ul>
-                        ) : (
-                            <p>No events available</p>
-                        )}
-                    </section>
-                    {/* Calendar Section */}
-                    <section className={styles.calendarSection}>
-                        <div className={styles.calendarItem}>
-                            <h3>Calendar</h3>
-                            <Calendar className={styles.reactCalendar} />
-                        </div>
-                    </section>
+                    
+                  
 
 
                     {/* Stats Section */}
@@ -508,24 +494,9 @@ const AdminUserManagement = () => {
                 <div className={styles.mainContent}>
                     {/* Search and Admin List */}
 
+                    
                     <div className={styles.feature}>
-                        <h3>Coming Day Weather Forecast</h3>
-                        <ul className={styles.forecastList}>
-                            {forecast.map((day, index) => (
-                                <li key={index}>
-                                    <p><strong>{day.day}:</strong></p>
-                                    <img
-                                        src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`}
-                                        alt={day.description}
-                                        className={styles.weatherIcon}
-                                    />
-                                    <p>{day.temp}°C - {day.description}</p>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                    <div className={styles.feature}>
-                        <h3>FIND THE CURRENT USER</h3>
+                        <h3>FIND A USER</h3>
                         <input
                             type="text"
                             placeholder="Search Admins or Team Leaders"
@@ -577,45 +548,7 @@ const AdminUserManagement = () => {
 
                     </div>
 
-                    {/* Profile Update Form */}
-                    <div className={styles.feature}>
-                        <h2>Edit Your Profile</h2>
-                        <form onSubmit={handleProfileSubmit} className={styles.form}>
-                            <input
-                                name="username"
-                                type="text"
-                                placeholder="Username"
-                                value={user.username}
-                                onChange={(e) => setUser({ ...user, username: e.target.value })}
-                                required
-                            />
-                            <input
-                                name="email"
-                                type="email"
-                                placeholder="Email"
-                                value={user.email}
-                                onChange={(e) => setUser({ ...user, email: e.target.value })}
-                                required
-                            />
-                            {/* Custom File Input for Avatar */}
-                            <div className={styles.fileInputContainer}>
-                                <input
-                                    id="avatar"
-                                    name="avatar"
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => setUser({ ...user, avatar: e.target.files[0] })}
-                                    className={styles.hiddenFileInput}
-                                />
-                                <label htmlFor="avatar" className={styles.customFileButton}>
-                                    Choose Your Avatar
-                                </label>
-                            </div>
-                            <button type="submit" className={styles.createButton}>Update Profile</button>
-                        </form>
-                        {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
-                        {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
-                    </div>
+                   
 
                     {/* Create New Admin or Team Leader */}
                     <div className={styles.feature}>
@@ -661,6 +594,79 @@ const AdminUserManagement = () => {
                     </div>
                 </div>
             </div>
+
+            {/* <div className={styles.clockSection}>
+                        <p>{timeOfDay}</p>
+                        <h3>Current Time</h3>
+                        <p>{currentTime}</p>
+
+                    </div> */}
+                    {/* Weather Section */}
+                    {/* Profile and stats sections remain unchanged */}
+                    {/* <div className={styles.weatherSection}>
+                        <h3>Today's Weather</h3>
+                        {locationError ? (
+                            <p>{locationError}</p>
+                        ) : weather.temp ? (
+                            <div className={styles.weatherInfo}>
+                                <img
+                                    src={`http://openweathermap.org/img/wn/${weather.icon}@2x.png`}
+                                    alt={weather.description}
+                                    className={styles.weatherIcon}
+                                />
+                                <p>{Math.round(weather.temp)}°C</p>
+                                <p>{weather.description}</p>
+                            </div>
+                        ) : (
+                            <p>Loading weather...</p>
+                        )}
+
+                    </div>
+                    <div className={styles.feature}>
+                        <h3>Coming Day Weather Forecast</h3>
+                        <ul className={styles.forecastList}>
+                            {forecast.map((day, index) => (
+                                <li key={index}>
+                                    <p><strong>{day.day}:</strong></p>
+                                    <img
+                                        src={`http://openweathermap.org/img/wn/${day.icon}@2x.png`}
+                                        alt={day.description}
+                                        className={styles.weatherIcon}
+                                    />
+                                    <p>{day.temp}°C - {day.description}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div> */}
+
+                    {/* <section className={styles.eventSection}>
+                        <h3>All Events</h3>
+                        {events.length > 0 ? (
+                            <ul className={styles.eventList}>
+                                {events
+                                    .filter((event) => {
+                                        const eventDate = new Date(event.date);
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        return eventDate >= today; // Only include today's and future events
+                                    })
+                                    .map((event) => (
+                                        <li key={event.id} className={styles.eventItem}>
+                                            {event.name} - {new Date(event.date).toLocaleDateString()}
+                                        </li>
+                                    ))}
+                            </ul>
+                        ) : (
+                            <p>No events available</p>
+                        )}
+                    </section> */}
+                    {/* Calendar Section */}
+                    {/* <section className={styles.calendarSection}>
+                        <div className={styles.calendarItem}>
+                            <h3>Calendar</h3>
+                            <Calendar className={styles.reactCalendar} />
+                        </div>
+                    </section> */}
         </div>
 
     );

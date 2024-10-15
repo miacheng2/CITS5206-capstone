@@ -718,28 +718,39 @@ def import_csv(request):
         updated_records = 0
         unchanged_records = 0
         validation_errors = []
+        empty_column_warnings = []  # Store warnings for rows with empty columns
 
         try:
-            with open(file_path, newline='', encoding='utf-8') as csvfile:
-                reader = csv.DictReader(csvfile)  # Use DictReader to map column names dynamically
+            with open(file_path, newline='', encoding='utf-8-sig') as csvfile:  # 'utf-8-sig' removes BOM
+                reader = csv.DictReader(csvfile)
 
+                # Normalize CSV headers by stripping spaces and converting to lowercase
+                csv_headers = [header.strip().lower() for header in reader.fieldnames]
+                print("CSV Headers (normalized):", csv_headers)  # Debugging output
+
+                # Define normalized required columns
                 required_columns = [
-                    'AustralianSailing number',
-                    'Firstname',
-                    'Last name',
-                    'Mobile',
-                    'Payment status',
-                    'Will you be volunteering or pay the volunteer levy?',
-                    'Which volunteer team do you wish to join?',
-                    'Email address'
+                    'australiansailing number',
+                    'firstname',
+                    'last name',
+                    'mobile',
+                    'payment status',
+                    'will you be volunteering or pay the volunteer levy?',
+                    'which volunteer team do you wish to join?',
+                    'email address'
                 ]
 
-                # Check if the CSV has all required columns
-                missing_columns = [col for col in required_columns if col not in reader.fieldnames]
+                # Check if all required columns are present by normalizing both required and CSV headers
+                missing_columns = [col for col in required_columns if col not in csv_headers]
                 if missing_columns:
                     return JsonResponse({'status': 'error', 'message': f'Invalid CSV format. Missing required columns: {", ".join(missing_columns)}'}, status=400)
 
                 for row_number, row in enumerate(reader, start=2):  # Start at row 2 (header is row 1)
+                    # Check for empty columns in this row
+                    empty_fields = [col for col in required_columns if not row.get(col, '').strip()]
+                    if empty_fields:
+                        empty_column_warnings.append(f"Row {row_number}: Missing data in columns: {', '.join(empty_fields)}")
+
                     # Map CSV fields to variables based on their actual column names
                     asn = row.get('AustralianSailing number', '').strip()
                     first_name = row.get('Firstname', '').strip()
@@ -750,10 +761,10 @@ def import_csv(request):
                     will_volunteer_or_pay_levy = row.get('Will you be volunteering or pay the volunteer levy?', '').strip()
                     team_names = row.get('Which volunteer team do you wish to join?', '').split(',')
 
-                    # Validate email format
-                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                    # Validate email format if provided
+                    if email and not re.match(r"[^@]+@[^@]+\.[^@]+", email):
                         validation_errors.append(f"Row {row_number}: Invalid email '{email}'.")
-                        continue  # Skip this row
+                        continue  # Skip this row if email is invalid
 
                     # Process and create or update the team member
                     teammember, created = TeamMember.objects.get_or_create(
@@ -790,7 +801,7 @@ def import_csv(request):
                         else:
                             unchanged_records += 1
 
-                    # Add teams
+                    # Add teams only if team names are provided
                     for team_name in team_names:
                         team_name = team_name.strip()
                         if team_name:
@@ -802,7 +813,8 @@ def import_csv(request):
                 'new_records': new_records,
                 'updated_records': updated_records,
                 'unchanged_records': unchanged_records,
-                'validation_errors': validation_errors
+                'validation_errors': validation_errors,
+                'empty_column_warnings': empty_column_warnings  # Include warnings about empty columns
             })
 
         except csv.Error as e:
@@ -814,7 +826,6 @@ def import_csv(request):
                 os.remove(file_path)
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
-
 
 
 @api_view(['GET'])
