@@ -468,11 +468,21 @@ class EventViewSetTests(APITestCase):
         # Create an activity for testing
         self.activity = Activity.objects.create(name='Test Activity')
 
+        # Create a team for event
+        self.team_data = {
+            'name' : 'Test team',
+            'creation_date' : '2024-10-01',
+            'last_modified_date': '2024-10-01',
+            'team_leader': self.user,
+        }
+        self.team = Team.objects.create(**self.team_data)
+
         # Create an event for testing
         self.event_data = {
             'name': 'Test Event',
             'event_type': 'off_water',
             'date': '2024-10-01',
+            'team':self.team,
             'created_by': self.user, 
         }
         self.event = Event.objects.create(**self.event_data)

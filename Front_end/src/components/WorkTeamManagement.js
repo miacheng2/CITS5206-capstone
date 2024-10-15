@@ -4,7 +4,7 @@ import styles from './styles/WorkTeamManagement.module.css';
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
-    const popupRef = useRef(null); 
+    const popupRef = useRef(null);
     const [shouldScrollMembers, setShouldScrollMembers] = useState(false); // Track when to scroll the members list
     const [teams, setTeams] = useState([]);
     const [selectedTeams, setSelectedTeams] = useState([]);
@@ -33,7 +33,15 @@ const WorkTeamManagement = () => {
         Members: [],
     });
 
-   
+    const [modalMessage, setModalMessage] = useState(""); // Modal message state
+    const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
+
+    const handleCloseModal = () => {
+        setModalOpen(false);
+    };
+
+
+
     const fetchWithAuth = async (url, options = {}) => {
         const token = localStorage.getItem('token'); // Retrieve the token from localStorage
 
@@ -155,14 +163,16 @@ const WorkTeamManagement = () => {
 
     const handleExportToCSV = () => {
         if (selectedTeams.length === 0) {
-            alert('Please select at least one team to export.');
+            setModalMessage("Please select at least one team to export.");
+            setModalOpen(true);
             return;
         }
 
         const allMembersData = selectedTeams.flatMap(team => team.members);
 
         if (allMembersData.length === 0) {
-            alert('No members available for the selected teams.');
+            setModalMessage("No members available for the selected teams.");
+            setModalOpen(true);
             return;
         }
 
@@ -241,7 +251,7 @@ const WorkTeamManagement = () => {
         // Viewing logic without selecting the team
         console.log("Viewing team:", team);
         setSelectedTeam(team);
-        
+
         // Set the popup to open for viewing
         localStorage.setItem('selectedTeamId', team.id);
         localStorage.setItem('isPopupOpen', 'true');
@@ -331,11 +341,11 @@ const WorkTeamManagement = () => {
                 }),
             });
 
-            if (response.ok&&popupRef.current) {
+            if (response.ok && popupRef.current) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
                 setMemberSelected(false);  // Ensure the member selection state is reset
-                
+
 
                 // Save the add member state and search query to localStorage
                 localStorage.setItem('isAddingMember', 'true');
@@ -347,7 +357,8 @@ const WorkTeamManagement = () => {
                 window.location.reload();
             } else {
                 const errorData = await response.json();
-                alert(`Failed to add member: ${JSON.stringify(errorData)}`);
+                setModalMessage(`Failed to add member: ${JSON.stringify(errorData)}`);
+                setModalOpen(true);
                 setLoading(false);
             }
         } catch (error) {
@@ -378,7 +389,7 @@ const WorkTeamManagement = () => {
             setShouldScrollMembers(false);  // Reset flag after scrolling
         }
     }, [shouldScrollMembers]);
-    
+
 
 
     const handleAddTeam = () => {
@@ -391,7 +402,8 @@ const WorkTeamManagement = () => {
 
     const handleRemoveSelectedTeams = async () => {
         if (selectedTeams.length === 0) {
-            alert('Please select at least one team to delete.');
+            setModalMessage('Please select at least one team to delete.');
+            setModalOpen(true);
             return;
         }
 
@@ -415,17 +427,20 @@ const WorkTeamManagement = () => {
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert(`Failed to delete team: ${JSON.stringify(errorData)}`);
+                    setModalMessage(`Failed to delete team: ${JSON.stringify(errorData)}`);
+                    setModalOpen(true);
                     return; // If any deletion fails, stop further deletion and return
                 }
             }
 
-            alert('Selected teams have been successfully deleted!');
+            setModalMessage('Selected teams have been successfully deleted!');
+            setModalOpen(true);
             setTeams(prevTeams => prevTeams.filter(team => !selectedTeams.some(selected => selected.id === team.id)));
             setSelectedTeams([]); // Clear the list of selected teams
         } catch (error) {
             console.error('Error occurred while deleting teams:', error);
-            alert('An error occurred while deleting the teams.');
+            setModalMessage('An error occurred while deleting the teams.');
+            setModalOpen(true);
         }
     };
 
@@ -458,7 +473,8 @@ const WorkTeamManagement = () => {
         const trimmedTeamName = newTeam.TeamName.trim(); // Remove whitespace
 
         if (!trimmedTeamName || trimmedTeamName === "Default Team Name") {
-            alert("Please enter a team name.");
+            setModalMessage("Please enter a team name.");
+            setModalOpen(true);
             return;
         }
 
@@ -487,7 +503,8 @@ const WorkTeamManagement = () => {
 
                 if (response.ok) {
                     const updatedTeam = await response.json();
-                    alert('Team updated successfully!');
+                    setModalMessage('Team updated successfully!');
+                    setModalOpen(true);
                     setTeams(prevTeams =>
                         prevTeams.map(team => (team.id === updatedTeam.id ? updatedTeam : team))
                     );
@@ -496,11 +513,13 @@ const WorkTeamManagement = () => {
 
                 } else {
                     const errorData = await response.json();
-                    alert(`Failed to update team: ${JSON.stringify(errorData)}`);
+                    setModalMessage(`Failed to update team: ${JSON.stringify(errorData)}`);
+                    setModalOpen(true);
                 }
             } catch (error) {
                 console.error('Error updating team:', error);
-                alert('An error occurred while updating the team.');
+                setModalMessage('An error occurred while updating the team.');
+                setModalOpen(true);
             }
         } else {
             // Create a new team
@@ -516,7 +535,8 @@ const WorkTeamManagement = () => {
 
                 if (response.ok) {
                     const newTeamData = await response.json();
-                    alert('Team created successfully!');
+                    setModalMessage('Team created successfully!');
+                    setModalOpen(true);
                     setTeams([...teams, newTeamData]);
                     setNewTeam({
                         TeamName: '',
@@ -528,11 +548,13 @@ const WorkTeamManagement = () => {
                     window.location.reload();
                 } else {
                     const errorData = await response.json();
-                    alert(`Failed to create team: ${JSON.stringify(errorData)}`);
+                    setModalMessage(`Failed to create team: ${JSON.stringify(errorData)}`);
+                    setModalOpen(true);
                 }
             } catch (error) {
                 console.error('Error creating team:', error);
-                alert('An error occurred while creating the team.');
+                setModalMessage('An error occurred while creating the team.');
+                setModalOpen(true);
             }
         }
     };
@@ -544,9 +566,11 @@ const WorkTeamManagement = () => {
 
 
         if (selectedMembers.length === 0) {
-            alert('Please select at least one member to remove.');
+            setModalMessage('Please select at least one member to remove.');
+            setModalOpen(true);
             return;
         }
+
 
         const confirmRemove = window.confirm(`Are you sure you want to remove the selected ${selectedMembers.length} member(s)?`);
         if (!confirmRemove) return;
@@ -570,17 +594,20 @@ const WorkTeamManagement = () => {
             if (response.ok) {
                 const updatedTeam = await response.json();
                 setSelectedTeam(prevTeam => ({ ...prevTeam, ...updatedTeam }));
-                alert('Members removed successfully!');
+                setModalMessage('Members removed successfully!');
+                setModalOpen(true);
                 setSelectedMember(null);
 
                 window.location.reload();  // Optional: Reload the page to reflect the changes
             } else {
                 const errorData = await response.json();
-                alert(`Failed to remove members: ${JSON.stringify(errorData)}`);
+                setModalMessage(`Failed to remove members: ${JSON.stringify(errorData)}`);
+                setModalOpen(true);
             }
         } catch (error) {
             console.error('Error removing members:', error);
-            alert('An error occurred while removing the members.');
+            setModalMessage('An error occurred while removing the members.');
+            setModalOpen(true);
         }
     };
 
@@ -615,6 +642,21 @@ const WorkTeamManagement = () => {
             </div>
         )}
             <div id="main-content" style={{ display: loading ? 'none' : 'block' }}>
+                {/* Modal */}
+                {isModalOpen && (
+                    <div className="modal-overlay" onClick={handleCloseModal}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            {/* Image at the top */}
+                            <span className="modal-close" onClick={handleCloseModal}>
+                                &times;
+                            </span>
+                            <p className="success-message">{modalMessage}</p>
+                            <button className="modal-button" onClick={handleCloseModal}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className={styles.container}>
                     <h1>NYC Work Team Management</h1>
                     <div className={styles.feature}>
@@ -711,53 +753,53 @@ const WorkTeamManagement = () => {
                             <h3>Members:</h3>
                             <div className={styles.scrollableMembers} ref={popupRef}>
 
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Selection</th>
-                                        <th>numberId</th>
-                                        <th>firstName</th>
-                                        <th>lastName</th>
-                                        <th>Email</th>
-                                        <th>mobile</th>
-                                        <th>membershipCategory</th>
-                                        <th>volunteerOrPay</th>
-                                        {/*                                         <th>Actions</th>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Selection</th>
+                                            <th>numberId</th>
+                                            <th>firstName</th>
+                                            <th>lastName</th>
+                                            <th>Email</th>
+                                            <th>mobile</th>
+                                            <th>membershipCategory</th>
+                                            <th>volunteerOrPay</th>
+                                            {/*                                         <th>Actions</th>
  */}                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedTeam.members && selectedTeam.members.length > 0 ? (
-                                        selectedTeam.members.map((member, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    <input
-                                                        type="checkbox"
-                                                        name="selectedMember"
-                                                        value={member.australian_sailing_number}
-                                                        checked={selectedMembers.includes(member.australian_sailing_number)}
-                                                        onChange={(e) => handleMemberSelection(e, member.australian_sailing_number)}
-                                                    />
-                                                </td>
-                                                <td>{member.australian_sailing_number}</td>
-                                                <td>{member.first_name}</td>
-                                                <td>{member.last_name}</td>
-                                                <td>{member.email}</td>
-                                                <td>{member.mobile}</td>
-                                                <td>{member.membership_category}</td>
-                                                <td>{member.will_volunteer_or_pay_levy}</td>
-                                                {/* <td>
+                                    </thead>
+                                    <tbody>
+                                        {selectedTeam.members && selectedTeam.members.length > 0 ? (
+                                            selectedTeam.members.map((member, index) => (
+                                                <tr key={index}>
+                                                    <td>
+                                                        <input
+                                                            type="checkbox"
+                                                            name="selectedMember"
+                                                            value={member.australian_sailing_number}
+                                                            checked={selectedMembers.includes(member.australian_sailing_number)}
+                                                            onChange={(e) => handleMemberSelection(e, member.australian_sailing_number)}
+                                                        />
+                                                    </td>
+                                                    <td>{member.australian_sailing_number}</td>
+                                                    <td>{member.first_name}</td>
+                                                    <td>{member.last_name}</td>
+                                                    <td>{member.email}</td>
+                                                    <td>{member.mobile}</td>
+                                                    <td>{member.membership_category}</td>
+                                                    <td>{member.will_volunteer_or_pay_levy}</td>
+                                                    {/* <td>
                                                     <button onClick={() => handleEditClick(member)}>Edit</button>
 
                                                 </td> */}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan="7">No members available</td>
                                             </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan="7">No members available</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                        )}
+                                    </tbody>
+                                </table>
                             </div>
 
                             {/* {isModalOpen && (

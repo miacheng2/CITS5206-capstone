@@ -192,14 +192,14 @@ function EventVolunteerHistory() {
   return (
     <div>
       <header className="event-section">
-        <div className="overlay">
+
           <div className="text-container">
-            <h2>
+            <h1>
               {eventName
                 ? `Volunteer History for ${eventName}`
                 : "Volunteer History"}
-            </h2>
-          </div>
+            </h1>
+
         </div>
       </header>
       <table className="event-table">

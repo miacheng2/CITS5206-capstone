@@ -1,34 +1,27 @@
 /* Styles for the event section */
 .event-section {
-    background-image: url("nycimg8.jpg");
+  background-color: #fcf9f9;
     background-size: cover;
     background-position: center;
-    height: 300px;
+    height: 150px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
   }
   
-  .overlay {
-    background-color: rgba(0, 0, 0, 0.5);
-    height: 260px;
-    width: 100%;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    top: 0;
-    left: 0;
-  }
+
   
   .text-container {
     z-index: 1;
-    color: white;
+    
     text-align: center;
+    margin-top: 10px;
   }
   
-  .text-container h2 {
+  .text-container h1 {
     font-size: 36px;
+    color: rgb(6, 6, 6);
     font-weight: bold;
     justify-content: center;
     align-items: center;

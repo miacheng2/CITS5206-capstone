@@ -130,6 +130,10 @@ cd Front_end
 npm install
 npm start
 
+# Step 7: In the myproject directory, run the unit tests by
+python manage.py test
+
+
 ```
 ## Architecture of the application
 
