@@ -529,7 +529,7 @@ class EventViewSet(viewsets.ModelViewSet):
         current_user = request.user
 
         # Check if the user is an admin
-        if not current_user.is_staff:
+        if current_user.user_type != 'admin':
             # Check if the user is the team leader of the selected team
             team_id = request.data.get('team')
             try:
@@ -560,7 +560,7 @@ class EventViewSet(viewsets.ModelViewSet):
         current_user = request.user
 
         # Check if the user is an admin or team leader of the event's team
-        if not current_user.is_staff and event.team.team_leader != current_user:
+        if not current_user.user_type != 'admin' and event.team.team_leader != current_user:
             return Response(
                 {"error": "Permission denied. Only admins or the team leader can delete this event."},
                 status=status.HTTP_403_FORBIDDEN,
@@ -640,8 +640,9 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
         """Retrieve volunteer points linked to a specific event."""
         event = Event.objects.get(id=event_id)
         team_leader = event.team.team_leader
-        # Check if the user is an admin or team leader of the team
-        if not request.user.is_staff and request.user != team_leader:
+        # Check if the user is an admin or team leader of the team current_user
+        print(request.user.user_type)
+        if request.user.user_type != 'admin' and request.user != team_leader:
             return Response({"detail": "You do not have permission to view this event's history."}, status=status.HTTP_403_FORBIDDEN)
         
         # If authorized, return the volunteer history
