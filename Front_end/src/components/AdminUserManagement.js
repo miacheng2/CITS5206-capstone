@@ -36,7 +36,7 @@ const AdminUserManagement = () => {
     const navigate = useNavigate(); // For navigation
     const hasAlerted = useRef(false); // Prevent multiple alerts
     const [loading, setLoading] = useState(false);
-    
+
     useEffect(() => {
         const checkPermissions = async () => {
             try {
@@ -79,11 +79,11 @@ const AdminUserManagement = () => {
         const seconds = date.getSeconds();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const timeOfDay = getTimeOfDay(hours);
-    
-        hours = hours % 12 || 12; 
+
+        hours = hours % 12 || 12;
         const strMinutes = minutes < 10 ? '0' + minutes : minutes;
         const strSeconds = seconds < 10 ? '0' + seconds : seconds;
-    
+
         return {
             formattedTime: `${hours}:${strMinutes}:${strSeconds} ${ampm}`,
             timeOfDay: timeOfDay
@@ -286,7 +286,7 @@ const AdminUserManagement = () => {
         }
     };
 
-    
+
 
     const handleProfileSubmit = async (event) => {
         event.preventDefault();
@@ -338,7 +338,7 @@ const AdminUserManagement = () => {
 
         fetchAllEvents();
     }, []);
-    
+
     const handleNewUserSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -388,8 +388,8 @@ const AdminUserManagement = () => {
 
                     </header>
 
-                     {/* Profile Update Form */}
-                     <div className={styles.feature}>
+                    {/* Profile Update Form */}
+                    <div className={styles.feature}>
                         <h2>Edit Your Profile</h2>
                         <form onSubmit={handleProfileSubmit} className={styles.form}>
                             <input
@@ -427,8 +427,8 @@ const AdminUserManagement = () => {
                         {successMessage && <p className={styles.successMessage}>{successMessage}</p>}
                         {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
                     </div>
-                    
-                  
+
+
 
 
                     {/* Stats Section */}
@@ -494,7 +494,7 @@ const AdminUserManagement = () => {
                 <div className={styles.mainContent}>
                     {/* Search and Admin List */}
 
-                    
+
                     <div className={styles.feature}>
                         <h3>FIND A USER</h3>
                         <input
@@ -548,7 +548,7 @@ const AdminUserManagement = () => {
 
                     </div>
 
-                   
+
 
                     {/* Create New Admin or Team Leader */}
                     <div className={styles.feature}>
@@ -601,9 +601,9 @@ const AdminUserManagement = () => {
                         <p>{currentTime}</p>
 
                     </div> */}
-                    {/* Weather Section */}
-                    {/* Profile and stats sections remain unchanged */}
-                    {/* <div className={styles.weatherSection}>
+            {/* Weather Section */}
+            {/* Profile and stats sections remain unchanged */}
+            {/* <div className={styles.weatherSection}>
                         <h3>Today's Weather</h3>
                         {locationError ? (
                             <p>{locationError}</p>
@@ -639,7 +639,7 @@ const AdminUserManagement = () => {
                         </ul>
                     </div> */}
 
-                    {/* <section className={styles.eventSection}>
+            {/* <section className={styles.eventSection}>
                         <h3>All Events</h3>
                         {events.length > 0 ? (
                             <ul className={styles.eventList}>
@@ -660,8 +660,8 @@ const AdminUserManagement = () => {
                             <p>No events available</p>
                         )}
                     </section> */}
-                    {/* Calendar Section */}
-                    {/* <section className={styles.calendarSection}>
+            {/* Calendar Section */}
+            {/* <section className={styles.calendarSection}>
                         <div className={styles.calendarItem}>
                             <h3>Calendar</h3>
                             <Calendar className={styles.reactCalendar} />
@@ -671,6 +671,5 @@ const AdminUserManagement = () => {
 
     );
 };
-
 
 export default AdminUserManagement;
