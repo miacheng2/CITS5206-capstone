@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./stylesVolunteerHistory.css";
+import "./styles/stylesVolunteerHistory.css";
 import { Link, useNavigate } from "react-router-dom";
 
 function VolunteerHistory() {

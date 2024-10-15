@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-import './stylesRewardCheckin.css';
+import './styles/stylesRewardCheckin.css';
 
 function RewardCheckin() {
   const [members, setMembers] = useState([]); // To store members data

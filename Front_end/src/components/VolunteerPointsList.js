@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles.css'; 
+import './styles/styles.css'; 
 
 function VolunteerPointsList() {
     const navigate = useNavigate();

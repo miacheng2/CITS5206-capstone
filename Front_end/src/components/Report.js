@@ -13,7 +13,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
-import "./report.css";
+import "./styles/report.css";
 
 // Register the necessary elements with Chart.js
 ChartJS.register(

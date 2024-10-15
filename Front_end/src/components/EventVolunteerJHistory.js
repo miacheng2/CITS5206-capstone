@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import ConfirmationModal from "./ConfirmationModal";
-import "./EventDetailsModal.css";
+import "./styles/EventDetailsModal.css";
 
 function EventVolunteerHistory() {
   const location = useLocation();
