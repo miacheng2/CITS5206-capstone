@@ -364,6 +364,10 @@ const AdminUserManagement = () => {
             setCreateErrorMessage('Failed to create user. Please try again.');
         }
     };
+    const filteredUsers = [...admins, ...teamLeaders].filter(
+        user => user.username.includes(searchQuery)
+    );
+    
 
     return (
         <div className={styles.container}>
@@ -493,62 +497,47 @@ const AdminUserManagement = () => {
                 {/* Main Content */}
                 <div className={styles.mainContent}>
                     {/* Search and Admin List */}
-
-
                     <div className={styles.feature}>
-                        <h3>FIND A USER</h3>
-                        <input
-                            type="text"
-                            placeholder="Search Admins or Team Leaders"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className={styles.searchInput}
-                        />
+        <h3>FIND A USER</h3>
+        <input
+            type="text"
+            placeholder="Search by username"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className={styles.searchInput}
+        />
 
-                        {searchQuery && (
-                            <div className={styles.adminList}>
-                                {filteredAdmins.length > 0 || teamLeaders.length > 0 ? (
-                                    <ul>
-                                        {filteredAdmins.map(admin => (
-                                            <li key={admin.id} className={`${styles.adminItem} ${styles[admin.role]}`}>
-                                                <div className={styles.userDetails}>
-                                                    <div>
-                                                        <p><strong>Username:</strong> {admin.username}</p>
-                                                        <p><strong>Email:</strong> {admin.email}</p>
-                                                        <p><strong>Role:</strong> {admin.user_type}</p>
-                                                    </div>
-                                                    {/* Pass 'admin' as the user type */}
-                                                    <button onClick={() => handleDeleteUser(admin.id, 'admin')} className={styles.deleteButton}>
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                        {teamLeaders.map(leader => (
-                                            <li key={leader.id} className={`${styles.adminItem} ${styles[leader.role]}`}>
-                                                <div className={styles.userDetails}>
-                                                    <div>
-                                                        <p><strong>Username:</strong> {leader.username}</p>
-                                                        <p><strong>Email:</strong> {leader.email}</p>
-                                                        <p><strong>Role:</strong> {leader.user_type}</p>
-                                                    </div>
-                                                    {/* Pass 'team_leader' as the user type */}
-                                                    <button onClick={() => handleDeleteUser(leader.id, 'team_leader')} className={styles.deleteButton}>
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                ) : (
-                                    <p>No admins or team leaders found</p>
-                                )}
+        {searchQuery && filteredUsers.length > 0 && (
+            <div className={styles.adminList}>
+                <ul>
+                    {filteredUsers.map(user => (
+                        <li key={user.id} className={styles.adminItem}>
+                            <div className={styles.userDetails}>
+                                <div>
+                                    <p><strong>Username:</strong> {user.username}</p>
+                                    <p><strong>Email:</strong> {user.email}</p>
+                                    <p><strong>Role:</strong> {user.user_type}</p>
+                                </div>
+                                <button onClick={() => handleDeleteUser(user.id, user.user_type)} className={styles.deleteButton}>
+                                    Delete
+                                </button>
                             </div>
-                        )}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
 
-                    </div>
+        {/* Optional: Display a message if no users are found */}
+        {searchQuery && filteredUsers.length === 0 && (
+            <p>No users found</p>
+        )}
+    </div>
 
+                    
+                    
 
+                   
 
                     {/* Create New Admin or Team Leader */}
                     <div className={styles.feature}>
