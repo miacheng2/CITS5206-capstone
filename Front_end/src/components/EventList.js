@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AddEventForm from "./AddEventForm";
 import Modal from "./Modal";
 import './styles/AddEventForm.css';
-import "./event.css";
+import "./styles/event.css";
 
 function EventList() {
   const navigate = useNavigate();

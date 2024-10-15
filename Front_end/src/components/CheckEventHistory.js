@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import ConfirmationModal from "./ConfirmationModal";
-import "./EventDetailsModal.css";
+import "./styles/EventDetailsModal.css";
 
 function CheckEventHistory() {
   const [user, setUser] = useState([]);

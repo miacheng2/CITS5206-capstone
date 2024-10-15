@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ConfirmationModal from "./ConfirmationModal";
-import "./EventDetailsModal.css";
+import "./styles/EventDetailsModal.css";
 
 function MemberVolunteerHistory() {
   const { uid } = useParams(); // Get the uid from the URL

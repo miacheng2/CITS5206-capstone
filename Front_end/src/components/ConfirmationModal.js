@@ -1,6 +1,6 @@
 // src/components/ConfirmationModal.js
 import React from "react";
-import "./EventDetailsModal.css";
+import "./styles/EventDetailsModal.css";
 
 const ConfirmationModal = ({
   isOpen,
