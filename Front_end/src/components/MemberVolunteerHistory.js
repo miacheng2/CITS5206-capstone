@@ -162,11 +162,9 @@ function MemberVolunteerHistory() {
   return (
     <div>
       <header className="event-section">
-        <div className="overlay">
           <div className="text-container">
-            <h2>Report History</h2>
+            <h1>Report History</h1>
           </div>
-        </div>
       </header>
 
       <div className="filter-controls">

@@ -197,11 +197,9 @@ function CheckEventHistory() {
   return (
     <div>
       <header className="event-section">
-        <div className="overlay">
           <div className="text-container">
-            <h2>Event History</h2>
+            <h1>Event History</h1>
           </div>
-        </div>
       </header>
 
       <div className="filter-controls">

@@ -56,11 +56,11 @@ function EventList() {
     <div>
       {/* Header section */}
       <header className="event-section">
-        <div className="overlay">
+
           <div className="text-container">
-            <h2>Events</h2>
+            <h1>Events</h1>
           </div>
-        </div>
+
       </header>
 
       {/* Cards Section */}

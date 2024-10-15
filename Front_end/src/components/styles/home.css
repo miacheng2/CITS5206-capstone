@@ -67,6 +67,13 @@
   padding: 20px;
   border-radius: 8px;
 }
+.text-container h2 {
+  font-size: 36px;
+  color: white;
+  font-weight: bold;
+  justify-content: center;
+  align-items: center;
+}
 
 .fade-in {
   animation: fadeInText 1.5s ease;
