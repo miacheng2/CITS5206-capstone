@@ -175,7 +175,9 @@ function AddVolunteerPoints() {
         let points =
           hasSelectedActivity && isOnWaterEvent
             ? 20
-            : (hours * (20 / 3)).toFixed(2);
+            : !isOnWaterEvent
+            ? (hours * (20 / 3)).toFixed(2)
+            : 0;
         let hoursToSet = hasSelectedActivity && isOnWaterEvent ? 3 : hours;
 
         setSelectedMember((prevState) => ({
