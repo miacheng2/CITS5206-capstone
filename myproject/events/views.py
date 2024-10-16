@@ -560,7 +560,7 @@ class EventViewSet(viewsets.ModelViewSet):
         current_user = request.user
 
         # Check if the user is an admin or team leader of the event's team
-        if not current_user.user_type != 'admin' and event.team.team_leader != current_user:
+        if current_user.user_type != 'admin' and event.team.team_leader != current_user:
             return Response(
                 {"error": "Permission denied. Only admins or the team leader can delete this event."},
                 status=status.HTTP_403_FORBIDDEN,
