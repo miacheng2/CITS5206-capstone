@@ -444,6 +444,7 @@ const WorkTeamManagement = () => {
             setModalOpen(true);
         }
     };
+    
 
 
 
@@ -1113,14 +1114,17 @@ const WorkTeamManagement = () => {
                                 </select>
                             </div>
 
-                            <div className={styles.popupButtons}>
-                                <button className={styles.saveButton} onClick={handleCreateTeam}>
-                                    Update
-                                </button>
-                                <button className={styles.cancelButton} onClick={handleClosePopup}>
-                                    Cancel
-                                </button>
-                            </div>
+                                                                    {/* Confirmation Modal */}
+                <ConfirmationModal
+                    isOpen={isModalOpen}
+                    message={modalMessage}
+                    onConfirm={handleRemoveMember}
+                    onCancel={handleCancel}
+                />
+
+
+
+
                         </div>
                     </div>
                 </div>
