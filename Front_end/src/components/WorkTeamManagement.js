@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './styles/WorkTeamManagement.module.css';
+import ConfirmationModal from "./ConfirmationModal";
 
 const WorkTeamManagement = () => {
     const [teamLeaders, setTeamLeaders] = useState([]);
@@ -405,10 +406,10 @@ const WorkTeamManagement = () => {
             setModalMessage('Please select at least one team to delete.');
             setModalOpen(true);
             return;
+        }else {
+            setModalMessage(`Are you sure you want to remove the selected ${selectedMembers.length} member(s)?`);
         }
-
-        const confirmDelete = window.confirm(`Are you sure you want to delete the selected ${selectedTeams.length} team(s)?`);
-        if (!confirmDelete) return;
+        setModalOpen(true); // Open the confirmation modal.;
 
         try {
             const token = localStorage.getItem('token');  // Get the token from localStorage
@@ -569,11 +570,12 @@ const WorkTeamManagement = () => {
             setModalMessage('Please select at least one member to remove.');
             setModalOpen(true);
             return;
+        }else {
+            setModalMessage(`Are you sure you want to remove the selected ${selectedMembers.length} member(s)?`);
         }
+        setModalOpen(true); // Open the confirmation modal.
 
 
-        const confirmRemove = window.confirm(`Are you sure you want to remove the selected ${selectedMembers.length} member(s)?`);
-        if (!confirmRemove) return;
 
         try {
             const token = localStorage.getItem('token');  // Get token from localStorage
