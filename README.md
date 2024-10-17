@@ -47,9 +47,8 @@ The Nedland Yacht Club (NYC) Volunteer Management System is designed to streamli
 
 ### Team Management
 
-- Manage team memberships and edit team details.
-- Administrators can view the list of team members and their details. 
-- Export detailed information about team members in CSV format.
+- Synchronize member data between the system and the RevSport member application via CSV files.
+- iew and export member and work team information updated within the system.
 
 ### Activity Management
 
