@@ -46,6 +46,15 @@ function VolunteerHistory() {
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [showYearwiseLineGraph, setShowYearwiseLineGraph] = useState(false);
   const [showPieCharts, setShowPieCharts] = useState(false);
+  const [modalMessage, setModalMessage] = useState(""); // Modal message state
+  const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
+
+// Function to close the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    navigate("/Home");
+  };
+
 
   const [topPerformers, setTopPerformers] = useState({});
   const handleMemberClick = (uid) => {
@@ -133,6 +142,7 @@ function VolunteerHistory() {
     [maintenanceTeams]
   );
   
+  
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -144,13 +154,9 @@ function VolunteerHistory() {
           navigate("/login");
           return;
         }
-        if (userRole !== "admin") {
-          if (!hasAlerted.current) {
-            alert("Access denied: This section is for admin users only.");
-            hasAlerted.current = true; // Ensure alert is only shown once
-          }
-          console.error("Unauthorized: Admin role required.");
-          navigate("/login");
+        if (userRole !== "admin" ) {
+          setModalMessage("Access denied: This section is for admin users only.");
+          setModalOpen(true);
           return;
         }
 
@@ -445,6 +451,23 @@ function VolunteerHistory() {
   const uniqueYears = [...new Set(members.map((member) => member.year))];
 
   return (
+    <div className="form-container">
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+    {!isModalOpen && (
     <div className="volunteer-history-container">
       {/* Team Buttons */}
       <div className="team-buttons">
@@ -682,7 +705,11 @@ function VolunteerHistory() {
         )}
       </div>
     </div>
+    )}
+    </div>
+  
   );
 }
+
 
 export default VolunteerHistory;
