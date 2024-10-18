@@ -36,6 +36,15 @@ const AdminUserManagement = () => {
     const navigate = useNavigate(); // For navigation
     const hasAlerted = useRef(false); // Prevent multiple alerts
     const [loading, setLoading] = useState(false);
+    const [modalMessage, setModalMessage] = useState(""); // Modal message state
+    const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
+
+// Function to close the modal
+    const handleCloseModal = () => {
+        setModalOpen(false);
+        navigate("/Home");
+    };
+
 
     useEffect(() => {
         const checkPermissions = async () => {
@@ -51,15 +60,11 @@ const AdminUserManagement = () => {
                 }
 
                 // Check if the user is not an admin
-                if (userRole !== 'admin') {
-                    if (!hasAlerted.current) {
-                        alert('Access denied: This section is for admin users only.');
-                        hasAlerted.current = true; // Ensure the alert is shown only once
-                    }
-                    console.error('Unauthorized: Admin role required.');
-                    navigate("/login");
+                if (userRole !== "admin" ) {
+                    setModalMessage("Access denied: This section is for admin users only.");
+                    setModalOpen(true);
                     return;
-                }
+                  }
 
                 fetchAdminList();
                 fetchTeamLeaderList();
@@ -370,6 +375,23 @@ const AdminUserManagement = () => {
     
 
     return (
+    <div className="form-container">
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+    {!isModalOpen && (
         <div className={styles.container}>
             <div className={styles.blob}></div>  {/* Ensure this blob div is added */}
 
@@ -581,8 +603,11 @@ const AdminUserManagement = () => {
                         {createSuccessMessage && <p className={styles.successMessage}>{createSuccessMessage}</p>}
                         {createErrorMessage && <p className={styles.errorMessage}>{createErrorMessage}</p>}
                     </div>
+                    
                 </div>
+                
             </div>
+            
 
             {/* <div className={styles.clockSection}>
                         <p>{timeOfDay}</p>
@@ -656,9 +681,14 @@ const AdminUserManagement = () => {
                             <Calendar className={styles.reactCalendar} />
                         </div>
                     </section> */}
+                    
         </div>
+        )}
+        </div>
+    
 
     );
+
 };
 
 export default AdminUserManagement;
