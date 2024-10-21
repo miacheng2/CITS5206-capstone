@@ -40,7 +40,6 @@ const TeamMemberList = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Fetched team members:', data);
                 setTeamMembers(data);
             } else {
                 console.error('Failed to fetch team members:', response.status, response.statusText);
@@ -209,7 +208,6 @@ const TeamMemberList = () => {
             } else {
                 const errorData = await response.json();
                 alert(`Failed to add new member: ${JSON.stringify(errorData)}`);
-                console.log('Error details:', errorData);
             }
         } catch (error) {
             console.error('Error adding new member:', error);

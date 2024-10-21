@@ -76,7 +76,6 @@ const WorkTeamManagement = () => {
         if (response.ok) {
           const data = await response.json();
           setTeamMembers(data);
-          console.log("Fetched team members:", data);
         } else {
           const errorData = await response.json();
           console.error("Error fetching team members:", errorData);
@@ -95,7 +94,6 @@ const WorkTeamManagement = () => {
           "http://localhost:8000/api/teams-with-members/"
         );
         const data = await response.json();
-        console.log("Fetched team data:", data);
 
         if (Array.isArray(data)) {
           setTeams(data);
@@ -238,10 +236,8 @@ const WorkTeamManagement = () => {
       setSelectedTeams(
         selectedTeams.filter((selected) => selected.id !== team.id)
       );
-      console.log("Removing team from selected:", team.id);
     } else {
       setSelectedTeams([...selectedTeams, team]);
-      console.log("Selecting team:", team.id);
     }
   };
 
@@ -252,7 +248,6 @@ const WorkTeamManagement = () => {
     }
 
     // Viewing logic without selecting the team
-    console.log("Viewing team:", team);
     setSelectedTeam(team);
 
     // Set the popup to open for viewing

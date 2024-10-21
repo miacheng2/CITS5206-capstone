@@ -281,7 +281,6 @@ function AddVolunteerPoints() {
         activity: selectedActivity ? selectedActivity.id : null, // Use activity ID or null
         created_by: selectedAdmin.user_id,
       };
-      console.log(data);
 
       try {
         const token = localStorage.getItem("token");

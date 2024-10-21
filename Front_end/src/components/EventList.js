@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddEventForm from "./AddEventForm";
 import Modal from "./Modal";
-import './styles/AddEventForm.css';
+import "./styles/AddEventForm.css";
 import "./styles/event.css";
 
 function EventList() {
@@ -14,15 +14,15 @@ function EventList() {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('No token found');
+          throw new Error("No token found");
         }
 
-        const response = await fetch('http://localhost:8000/api/events/', {
+        const response = await fetch("http://localhost:8000/api/events/", {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -30,20 +30,23 @@ function EventList() {
           const data = await response.json();
           setEvents(data);
         } else {
-          console.error('Failed to fetch events:', response.status, response.statusText);
+          console.error(
+            "Failed to fetch events:",
+            response.status,
+            response.statusText
+          );
           if (response.status === 401) {
-            window.location.href = '/login';
+            window.location.href = "/login";
           }
         }
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
       }
     };
 
     fetchEvents();
   }, [navigate]);
 
-  console.log("get events:", events);
   // Toggle modals
   const toggleAddEventModal = () => setShowAddEventModal(!showAddEventModal);
 
@@ -56,11 +59,9 @@ function EventList() {
     <div>
       {/* Header section */}
       <header className="event-section">
-
-          <div className="text-container">
-            <h1>Events</h1>
-          </div>
-
+        <div className="text-container">
+          <h1>Events</h1>
+        </div>
       </header>
 
       {/* Cards Section */}

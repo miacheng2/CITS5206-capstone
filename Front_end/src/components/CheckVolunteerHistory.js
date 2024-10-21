@@ -15,28 +15,30 @@ function VolunteerHistory() {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const token = localStorage.getItem('token'); // Get the token from localStorage
+        const token = localStorage.getItem("token"); // Get the token from localStorage
         if (!token) {
-          console.error('No token found, redirecting to login.');
-          navigate('/login'); // Redirect to login page
+          console.error("No token found, redirecting to login.");
+          navigate("/login"); // Redirect to login page
           return; // Exit the function
         }
 
-        const response = await fetch("http://localhost:8000/api/members-points-all/", {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Add the Authorization header
-          },
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/members-points-all/",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the Authorization header
+            },
+          }
+        );
         const data = await response.json();
-        console.log("Fetched members data:", data);
         setMembers(data);
       } catch (error) {
         console.error("Error fetching data:", error);
         if (error.response && error.response.status === 401) {
-          console.error('Unauthorized: Redirecting to login.');
-          navigate('/login'); // Redirect to login if unauthorized
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login"); // Redirect to login if unauthorized
         } else {
-          alert('Failed to fetch members. Please try again later.');
+          alert("Failed to fetch members. Please try again later.");
         }
       }
     };
@@ -48,16 +50,16 @@ function VolunteerHistory() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const token = localStorage.getItem('token'); // Get the token from localStorage
+        const token = localStorage.getItem("token"); // Get the token from localStorage
         if (!token) {
-          console.error('No token found, redirecting to login.');
-          navigate('/login'); // Redirect to login page
+          console.error("No token found, redirecting to login.");
+          navigate("/login"); // Redirect to login page
           return; // Exit the function
         }
 
         const response = await fetch("http://localhost:8000/api/teams/", {
           headers: {
-            'Authorization': `Bearer ${token}`, // Add the Authorization header
+            Authorization: `Bearer ${token}`, // Add the Authorization header
           },
         });
         const data = await response.json();
@@ -65,17 +67,16 @@ function VolunteerHistory() {
       } catch (error) {
         console.error("Error fetching teams:", error);
         if (error.response && error.response.status === 401) {
-          console.error('Unauthorized: Redirecting to login.');
-          navigate('/login'); // Redirect to login if unauthorized
+          console.error("Unauthorized: Redirecting to login.");
+          navigate("/login"); // Redirect to login if unauthorized
         } else {
-          alert('Failed to fetch teams. Please try again later.');
+          alert("Failed to fetch teams. Please try again later.");
         }
       }
     };
 
     fetchTeams();
   }, [navigate]);
-
 
   useEffect(() => {
     const uniqueMembers = new Set();
