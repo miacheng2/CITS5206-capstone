@@ -46,6 +46,14 @@ function VolunteerHistory() {
   const [showTopPerformers, setShowTopPerformers] = useState(false);
   const [showYearwiseLineGraph, setShowYearwiseLineGraph] = useState(false);
   const [showPieCharts, setShowPieCharts] = useState(false);
+  const [modalMessage, setModalMessage] = useState(""); // Modal message state
+  const [isModalOpen, setModalOpen] = useState(false); // Modal visibility state
+
+  // Function to close the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    navigate("/Home");
+  };
 
   const [topPerformers, setTopPerformers] = useState({});
   const handleMemberClick = (uid) => {
@@ -144,12 +152,10 @@ function VolunteerHistory() {
           return;
         }
         if (userRole !== "admin") {
-          if (!hasAlerted.current) {
-            alert("Access denied: This section is for admin users only.");
-            hasAlerted.current = true; // Ensure alert is only shown once
-          }
-          console.error("Unauthorized: Admin role required.");
-          navigate("/login");
+          setModalMessage(
+            "Access denied: This section is for admin users only."
+          );
+          setModalOpen(true);
           return;
         }
 
@@ -444,242 +450,271 @@ function VolunteerHistory() {
   const uniqueYears = [...new Set(members.map((member) => member.year))];
 
   return (
-    <div className="volunteer-history-container">
-      {/* Team Buttons */}
-      <div className="team-buttons">
-        {maintenanceTeams.map((team) => (
-          <button
-            key={team.id}
-            onClick={() => handleTeamFilter(team.id)}
-            className={
-              selectedTeamId === team.id ? "team-btn selected" : "team-btn"
-            }
-          >
-            {team.name}
-          </button>
-        ))}
-        <button
-          onClick={() => handleTeamFilter("")}
-          className={selectedTeamId === "" ? "team-btn selected" : "team-btn"}
-        >
-          All Teams
-        </button>
-      </div>
-      {/* Filter section */}
-      <div className="filter-dropdowns-container">
-        <div className="filter-group">
-          <label htmlFor="category-filter" className="filter-label">
-            Category:
-          </label>
-          <select
-            id="category-filter"
-            className="filter-select"
-            value={selectedCategory}
-            onChange={(e) => handleCategoryFilter(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            {uniqueCategories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="year-filter" className="filter-label">
-            Year:
-          </label>
-          <select
-            id="year-filter"
-            className="filter-select"
-            value={selectedYear}
-            onChange={(e) => handleYearFilter(e.target.value)}
-          >
-            <option value="">All Years</option>
-            {uniqueYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="filter-group">
-          <label htmlFor="points-filter" className="filter-label">
-            Points:
-          </label>
-          <select
-            id="points-filter"
-            className="filter-select"
-            value={selectedTotalPoints}
-            onChange={(e) => handleTotalPointsFilter(e.target.value)}
-          >
-            <option value="">All Points</option>
-            <option value=">=200">Points &gt; = 200</option>
-            <option value="<200">Points &lt; 200</option>
-          </select>
-        </div>
-
-        <div className="search-group">
-          <input
-            type="text"
-            placeholder="Search by ID or Name"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-        </div>
-      </div>
-      {/* Volunteer History Table */}
-      <table className="volunteer-history-table">
-        <thead>
-          <tr>
-            <th>
-              <input
-                type="checkbox"
-                checked={selectAll}
-                onChange={handleSelectAll}
-              />
-            </th>
-            <th>Member ID</th>
-            <th>Name</th>
-            <th>Member Category</th>
-            <th>Financial Year</th>
-            <th>Total Volunteering Hours</th>
-            <th>Total Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredMembers.map((member) => (
-            <tr key={member.id}>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={selectedMembers.has(member.id)}
-                  onChange={() => handleMemberSelect(member.id)}
-                />
-              </td>
-              <td>{member.uid}</td>
-              <td
-                className="clickable-name" // Add a class for styling clickable names
-                onClick={() => handleMemberClick(member.uid)}
-              >
-                {member.name}
-              </td>
-              <td>{member.membership_category}</td>
-              <td>{member.year}</td>
-              <td>{member.total_hours}</td>
-              <td>{member.total_points}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Download Button */}
-      <button className="download-btn" onClick={downloadCSV}>
-        Download CSV
-      </button>
-
-      {/* Toggle buttons for graphs and top performers */}
-      <div className="toggle-buttons">
-        <button
-          onClick={() => setShowTeamPerformanceGraph(!showTeamPerformanceGraph)}
-        >
-          {showTeamPerformanceGraph
-            ? "Hide Team Performance Graph"
-            : "Show Team Performance Graph"}
-        </button>
-
-        <button
-          onClick={() => setShowYearwiseLineGraph(!showYearwiseLineGraph)}
-        >
-          {showYearwiseLineGraph
-            ? "Hide Year-wise Line Graph"
-            : "Show Year-wise Line Graph"}
-        </button>
-
-        <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
-          {showTopPerformers ? "Hide Top Performers" : "Show Top Performers"}
-        </button>
-
-        <button onClick={togglePieCharts}>
-          {showPieCharts
-            ? "Hide Team Members Stats"
-            : "Show Team Members Stats"}
-        </button>
-      </div>
-
-      {/* Section for top performers by team in table format */}
-
-      {showTopPerformers && (
-        <div className="grouped-volunteers-section">
-          <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
-          {Object.keys(topPerformers).map((teamId) => (
-            <div key={teamId}>
-              <h3 style={{ color: "#333" }}>
-                {
-                  maintenanceTeams.find((team) => team.id === parseInt(teamId))
-                    ?.name
-                }
-              </h3>
-              <table className="volunteer-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Total Hours</th>
-                    <th>Total Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {topPerformers[teamId]?.map((volunteer) => (
-                    <tr key={volunteer.id}>
-                      <td>{volunteer.uid}</td>
-                      <td>{volunteer.name}</td>
-                      <td>{volunteer.total_hours}</td>
-                      <td>{volunteer.total_points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+    <div className="form-container">
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
         </div>
       )}
-
-      {/* Section for graphs */}
-
-      <div className="chart-section">
-        {showTeamPerformanceGraph && (
-          <div className="chart-container">
-            <Bar data={teamPerformanceData} options={teamPerformanceOptions} />
-          </div>
-        )}
-        {/* Line chart for year-wise comparison */}
-        {showYearwiseLineGraph && (
-          <div className="chart-container">
-            <Line data={lineChartData} options={lineChartOptions} />
-          </div>
-        )}
-        {showPieCharts && (
-          <div className="pie-charts-container">
+      {!isModalOpen && (
+        <div className="volunteer-history-container">
+          {/* Team Buttons */}
+          <div className="team-buttons">
             {maintenanceTeams.map((team) => (
-              <div
+              <button
                 key={team.id}
-                style={{
-                  marginBottom: "20px",
-                  width: "25%",
-                  display: "inline-block",
-                }}
+                onClick={() => handleTeamFilter(team.id)}
+                className={
+                  selectedTeamId === team.id ? "team-btn selected" : "team-btn"
+                }
               >
-                <h2 style={{ color: "black" }}>{team.name}</h2>
-                <Pie data={groupPieData(team)} />
-              </div>
+                {team.name}
+              </button>
             ))}
+            <button
+              onClick={() => handleTeamFilter("")}
+              className={
+                selectedTeamId === "" ? "team-btn selected" : "team-btn"
+              }
+            >
+              All Teams
+            </button>
           </div>
-        )}
-      </div>
+          {/* Filter section */}
+          <div className="filter-dropdowns-container">
+            <div className="filter-group">
+              <label htmlFor="category-filter" className="filter-label">
+                Category:
+              </label>
+              <select
+                id="category-filter"
+                className="filter-select"
+                value={selectedCategory}
+                onChange={(e) => handleCategoryFilter(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="year-filter" className="filter-label">
+                Year:
+              </label>
+              <select
+                id="year-filter"
+                className="filter-select"
+                value={selectedYear}
+                onChange={(e) => handleYearFilter(e.target.value)}
+              >
+                <option value="">All Years</option>
+                {uniqueYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label htmlFor="points-filter" className="filter-label">
+                Points:
+              </label>
+              <select
+                id="points-filter"
+                className="filter-select"
+                value={selectedTotalPoints}
+                onChange={(e) => handleTotalPointsFilter(e.target.value)}
+              >
+                <option value="">All Points</option>
+                <option value=">=200">Points &gt; = 200</option>
+                <option value="<200">Points &lt; 200</option>
+              </select>
+            </div>
+
+            <div className="search-group">
+              <input
+                type="text"
+                placeholder="Search by ID or Name"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+          {/* Volunteer History Table */}
+          <table className="volunteer-history-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    checked={selectAll}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+                <th>Member ID</th>
+                <th>Name</th>
+                <th>Member Category</th>
+                <th>Financial Year</th>
+                <th>Total Volunteering Hours</th>
+                <th>Total Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMembers.map((member) => (
+                <tr key={member.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedMembers.has(member.id)}
+                      onChange={() => handleMemberSelect(member.id)}
+                    />
+                  </td>
+                  <td>{member.uid}</td>
+                  <td
+                    className="clickable-name" // Add a class for styling clickable names
+                    onClick={() => handleMemberClick(member.uid)}
+                  >
+                    {member.name}
+                  </td>
+                  <td>{member.membership_category}</td>
+                  <td>{member.year}</td>
+                  <td>{member.total_hours}</td>
+                  <td>{member.total_points}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Download Button */}
+          <button className="download-btn" onClick={downloadCSV}>
+            Download CSV
+          </button>
+
+          {/* Toggle buttons for graphs and top performers */}
+          <div className="toggle-buttons">
+            <button
+              onClick={() =>
+                setShowTeamPerformanceGraph(!showTeamPerformanceGraph)
+              }
+            >
+              {showTeamPerformanceGraph
+                ? "Hide Team Performance Graph"
+                : "Show Team Performance Graph"}
+            </button>
+
+            <button
+              onClick={() => setShowYearwiseLineGraph(!showYearwiseLineGraph)}
+            >
+              {showYearwiseLineGraph
+                ? "Hide Year-wise Line Graph"
+                : "Show Year-wise Line Graph"}
+            </button>
+
+            <button onClick={() => setShowTopPerformers(!showTopPerformers)}>
+              {showTopPerformers
+                ? "Hide Top Performers"
+                : "Show Top Performers"}
+            </button>
+
+            <button onClick={togglePieCharts}>
+              {showPieCharts
+                ? "Hide Team Members Stats"
+                : "Show Team Members Stats"}
+            </button>
+          </div>
+
+          {/* Section for top performers by team in table format */}
+
+          {showTopPerformers && (
+            <div className="grouped-volunteers-section">
+              <h2 style={{ color: "#333" }}>Top Volunteers by Team</h2>
+              {Object.keys(topPerformers).map((teamId) => (
+                <div key={teamId}>
+                  <h3 style={{ color: "#333" }}>
+                    {
+                      maintenanceTeams.find(
+                        (team) => team.id === parseInt(teamId)
+                      )?.name
+                    }
+                  </h3>
+                  <table className="volunteer-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Total Hours</th>
+                        <th>Total Points</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topPerformers[teamId]?.map((volunteer) => (
+                        <tr key={volunteer.id}>
+                          <td>{volunteer.uid}</td>
+                          <td>{volunteer.name}</td>
+                          <td>{volunteer.total_hours}</td>
+                          <td>{volunteer.total_points}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Section for graphs */}
+
+          <div className="chart-section">
+            {showTeamPerformanceGraph && (
+              <div className="chart-container">
+                <Bar
+                  data={teamPerformanceData}
+                  options={teamPerformanceOptions}
+                />
+              </div>
+            )}
+            {/* Line chart for year-wise comparison */}
+            {showYearwiseLineGraph && (
+              <div className="chart-container">
+                <Line data={lineChartData} options={lineChartOptions} />
+              </div>
+            )}
+            {showPieCharts && (
+              <div className="pie-charts-container">
+                {maintenanceTeams.map((team) => (
+                  <div
+                    key={team.id}
+                    style={{
+                      marginBottom: "20px",
+                      width: "25%",
+                      display: "inline-block",
+                    }}
+                  >
+                    <h2 style={{ color: "black" }}>{team.name}</h2>
+                    <Pie data={groupPieData(team)} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

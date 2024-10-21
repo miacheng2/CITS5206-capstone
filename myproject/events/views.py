@@ -388,7 +388,7 @@ def remove_members(request, team_id):
         return Response({'detail': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 @api_view(['GET'])
 def get_team_leaders(request):
-    team_leaders = User.objects.filter(user_type='team_leader')  # select team_leader 
+    team_leaders = User.objects.filter(user_type__in=['admin', 'team_leader'])
     serializer = UserSerializer(team_leaders, many=True)
     return Response(serializer.data)
 class PromoteLeaderView(APIView):

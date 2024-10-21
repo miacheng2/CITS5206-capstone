@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import styles from './styles/TeamMemberList.module.css';
 
-
 const TeamMemberList = () => {
     const [teamMembers, setTeamMembers] = useState([]);
     const [selectedMembers, setSelectedMembers] = useState({});
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMember, setEditingMember] = useState(null);
     const [fileInput, setFileInput] = useState(null);
+    
     const [newMember, setNewMember] = useState({
         australian_sailing_number: '',
         first_name: '',
@@ -19,6 +18,14 @@ const TeamMemberList = () => {
         will_volunteer_or_pay_levy: '',
         teams: '',
     });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [modalMessage, setModalMessage] = useState(""); // Modal message state
+
+  // Function to close the modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
 
     useEffect(() => {
         fetchTeamMembers();
@@ -83,10 +90,11 @@ const TeamMemberList = () => {
     const handleFileUpload = async (file) => {
         // Check if the user is an admin
         const userRole = localStorage.getItem('user_role');
-        if (userRole !== 'admin') {
-            alert('Access denied: Only admin users can import CSV files.');
-            return;  // Exit the function early if the user is not an admin
-        }
+        if (userRole !== "admin") {
+            setModalMessage("Access denied: This function is for admin users only.");
+            setIsModalOpen(true); // Open denial modal immediately
+            return; // Stop rendering anything else
+          }
 
         const formData = new FormData();
         formData.append('file', file);
@@ -289,6 +297,23 @@ const TeamMemberList = () => {
     };
 
     return (
+        <div className="form-container">
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            {/* Image at the top */}
+            <span className="modal-close" onClick={handleCloseModal}>
+              &times;
+            </span>
+            <p className="success-message">{modalMessage}</p>
+            <button className="modal-button" onClick={handleCloseModal}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+    {!isModalOpen && (
         <div className={styles.container}>
             <h1>NYC Member Management</h1>
             <div className={styles.feature}>
@@ -402,6 +427,8 @@ const TeamMemberList = () => {
                     </div>
                 </div>
             )}
+        </div>
+        )}
         </div>
     );
 };
