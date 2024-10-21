@@ -434,12 +434,16 @@ function AddVolunteerPoints() {
                   value={
                     selectedMember?.australian_sailing_number ===
                     member.australian_sailing_number
-                      ? selectedMember.maintenanceEvent
+                      ? selectedMember.maintenanceEvent || "" // Ensure value is an empty string if not defined
                       : ""
                   }
-                  onChange={(e) =>
-                    handleInputChange("maintenanceEvent", e.target.value)
-                  }
+                  onChange={(e) => {
+                    const selectedEvent = e.target.value;
+                    if (selectedEvent) {
+                      // Call handleInputChange only if an event is selected
+                      handleInputChange("maintenanceEvent", selectedEvent);
+                    }
+                  }}
                   disabled={
                     selectedMember?.australian_sailing_number !==
                     member.australian_sailing_number
