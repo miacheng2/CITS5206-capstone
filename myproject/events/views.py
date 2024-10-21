@@ -638,12 +638,16 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='event-history/(?P<event_id>[^/.]+)')
     def event_volunteer_history(self, request, event_id=None):
         """Retrieve volunteer points linked to a specific event."""
-        event = Event.objects.get(id=event_id)
-        team_leader = event.team.team_leader
+        if(Event.objects.get(id=event_id).team):
+            event = Event.objects.get(id=event_id)
+            team_leader = event.team.team_leader
+            is_team_leader = request.user != team_leader
+        else:
+            is_team_leader = True
         # Check if the user is an admin or team leader of the team current_user
-        if request.user.user_type != 'admin' and request.user != team_leader:
+        if request.user.user_type != 'admin' and not is_team_leader:
             return Response({"detail": "You do not have permission to view this event's history."}, status=status.HTTP_403_FORBIDDEN)
-        
+    
         # If authorized, return the volunteer history
         points = VolunteerPoints.objects.filter(event_id=event_id).select_related('member', 'activity')
         history = [
