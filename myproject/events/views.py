@@ -641,7 +641,6 @@ class VolunteerPointsViewSet(viewsets.ModelViewSet):
         event = Event.objects.get(id=event_id)
         team_leader = event.team.team_leader
         # Check if the user is an admin or team leader of the team current_user
-        print(request.user.user_type)
         if request.user.user_type != 'admin' and request.user != team_leader:
             return Response({"detail": "You do not have permission to view this event's history."}, status=status.HTTP_403_FORBIDDEN)
         
