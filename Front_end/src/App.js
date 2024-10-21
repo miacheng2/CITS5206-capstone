@@ -10,10 +10,7 @@ import TeamMemberList from "./components/TeamMemberList";
 import WorkTeamManagement from "./components/WorkTeamManagement";
 import AdminUserManagement from "./components/AdminUserManagement";
 import EventList from "./components/EventList";
-import VolunteerPointsList from "./components/VolunteerPointsList";
 import AddVolunteerPoints from "./components/AddVolunteerPoints";
-import CheckVolunteerHistory from "./components/CheckVolunteerHistory";
-import RewardCheckin from "./components/RewardCheckin";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Navbar from "./components/Navbar";
@@ -103,10 +100,7 @@ function App() {
             />
 
             <Route path="/add-points" element={<AddVolunteerPoints />} />
-            <Route path="/check-history" element={<CheckVolunteerHistory />} />
             <Route path="/events" element={<EventList />} />
-            <Route path="/reward-checkin" element={<RewardCheckin />} />
-            <Route path="/volunteer-points" element={<VolunteerPointsList />} />
             <Route path="/reports" element={<Report />} />
             <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/logout" element={<Navigate replace to="/login" />} />

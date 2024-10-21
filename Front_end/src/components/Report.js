@@ -100,7 +100,7 @@ function VolunteerHistory() {
   const calculateTopPerformers = useCallback(
     (data) => {
       const performersByTeam = {};
-  
+
       maintenanceTeams.forEach((team) => {
         // Filter members by team and aggregate their hours and points
         const aggregatedMembers = data
@@ -118,21 +118,20 @@ function VolunteerHistory() {
             }
             return acc;
           }, {});
-  
+
         // Convert the aggregated members object to an array
         const teamPerformers = Object.values(aggregatedMembers)
           .sort((a, b) => b.total_hours - a.total_hours) // Sort by total hours
           .slice(0, 3); // Get top 3 performers
-  
+
         performersByTeam[team.id] = teamPerformers;
       });
-  
-      console.log("Calculated Top Performers by Team:", performersByTeam);
+
       setTopPerformers(performersByTeam);
     },
     [maintenanceTeams]
   );
-  
+
   useEffect(() => {
     const fetchMembers = async () => {
       try {
