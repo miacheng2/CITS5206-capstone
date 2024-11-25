@@ -4,7 +4,7 @@
 
 | UWA ID   | Student name    | Github user name | work allocated
 |----------|-----------------|------------------|-----------------------------------------------------------------
-| 23927347 | Nanxi Rao       |  flappyfishhh    |Back-end of Member Management,Work Team Management,User Management
+| 2******7 | Nancy Rao       |  flappyfishhh    |Back-end of Member Management,Work Team Management,User Management
 | 23740033 | Zhengyuan Zhang | Ivy(Zhengyuan)   |Both back-end and front-end of Event,Volunteer Point Management,Reporting
 | 24061397 | Xia Cheng       |   miacheng2      |Front-end of Member Management,Work Team Management,User Management
 | 23813666 | Brandon Ge      |    brand         |Back-end of Member Management,Work Team Management,User Management
